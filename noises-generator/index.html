@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Générateur de Noise Procédural Pro</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e1e1e 0%, #2d2d2d 100%);
+            color: #e0e0e0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: #252525;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            padding: 30px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #00d4ff;
+            margin-bottom: 30px;
+            font-size: 2em;
+            text-shadow: 0 0 20px rgba(0,212,255,0.3);
+        }
+
+        .main-layout {
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            gap: 30px;
+        }
+
+        .controls {
+            background: #1a1a1a;
+            padding: 20px;
+            border-radius: 8px;
+            height: fit-content;
+        }
+
+        .preview-area {
+            background: #1a1a1a;
+            padding: 20px;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        canvas {
+            max-width: 100%;
+            border: 2px solid #444;
+            border-radius: 4px;
+            image-rendering: pixelated;
+        }
+
+        .section {
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #333;
+        }
+
+        .section:last-child {
+            border-bottom: none;
+        }
+
+        .section-title {
+            color: #00d4ff;
+            font-size: 1.1em;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .preset-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .preset-btn {
+            background: linear-gradient(135deg, #2a2a2a 0%, #1f1f1f 100%);
+            border: 1px solid #444;
+            color: #e0e0e0;
+            padding: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s;
+        }
+
+        .preset-btn:hover {
+            background: linear-gradient(135deg, #00d4ff 0%, #0088cc 100%);
+            border-color: #00d4ff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,212,255,0.3);
+        }
+
+        .control-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #aaa;
+            font-size: 0.9em;
+        }
+
+        .slider-container {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        input[type="range"] {
+            flex: 1;
+            height: 6px;
+            border-radius: 3px;
+            background: #333;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #00d4ff;
+            cursor: pointer;
+            box-shadow: 0 0 8px rgba(0,212,255,0.5);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #00d4ff;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 0 8px rgba(0,212,255,0.5);
+        }
+
+        input[type="number"] {
+            width: 70px;
+            background: #2a2a2a;
+            border: 1px solid #444;
+            color: #e0e0e0;
+            padding: 6px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            user-select: text;
+            -webkit-user-select: text;
+            -moz-user-select: text;
+        }
+
+        .value-display {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .value {
+            color: #00d4ff;
+            font-weight: 600;
+        }
+
+        .export-section {
+            background: #1f1f1f;
+            padding: 15px;
+            border-radius: 6px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #e0e0e0;
+            cursor: pointer;
+        }
+
+        input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: #00d4ff;
+        }
+
+        select {
+            width: 100%;
+            background: #2a2a2a;
+            border: 1px solid #444;
+            color: #e0e0e0;
+            padding: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.95em;
+            margin-bottom: 15px;
+        }
+
+        button {
+            width: 100%;
+            background: linear-gradient(135deg, #00d4ff 0%, #0088cc 100%);
+            border: none;
+            color: white;
+            padding: 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s;
+            margin-bottom: 10px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,212,255,0.4);
+        }
+
+        .random-btn {
+            background: linear-gradient(135deg, #ff6b00 0%, #cc5500 100%);
+        }
+
+        .random-btn:hover {
+            box-shadow: 0 6px 20px rgba(255,107,0,0.4);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌊 Générateur de Noise Procédural Pro</h1>
+
+        <div class="main-layout">
+            <div class="controls">
+                <div class="section">
+                    <div class="section-title">Presets</div>
+                    <div class="preset-grid">
+                        <button class="preset-btn" onclick="applyPreset('grudge')">Grudge</button>
+                        <button class="preset-btn" onclick="applyPreset('water')">Eau</button>
+                        <button class="preset-btn" onclick="applyPreset('rain')">Pluie</button>
+                        <button class="preset-btn" onclick="applyPreset('smooth')">Ronds Smooth</button>
+                        <button class="preset-btn" onclick="applyPreset('marble')">Marbre</button>
+                        <button class="preset-btn" onclick="applyPreset('clouds')">Nuages</button>
+                        <button class="preset-btn" onclick="applyPreset('lightning')">Lightning</button>
+                        <button class="preset-btn" onclick="applyPreset('lava')">Lave</button>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">Scale</div>
+
+                    <div class="control-group">
+                        <label>Master Scale (Tous les axes)</label>
+                        <div class="slider-container">
+                            <input type="range" id="masterScale" min="0.1" max="10" step="0.1" value="1" oninput="syncMasterScale(true)">
+                            <input type="number" id="masterScaleNum" min="0.1" max="10" step="0.1" value="1" oninput="syncMasterScale(false)">
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label>Scale X</label>
+                        <div class="slider-container">
+                            <input type="range" id="scaleX" min="0.1" max="100" step="0.1" value="10" oninput="syncSlider('scaleX', true)">
+                            <input type="number" id="scaleXNum" min="0.1" max="100" step="0.1" value="10" oninput="syncSlider('scaleX', false)">
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label>Scale Y (Brightness)</label>
+                        <div class="slider-container">
+                            <input type="range" id="scaleY" min="0.1" max="10" step="0.1" value="1.0" oninput="syncSlider('scaleY', true)">
+                            <input type="number" id="scaleYNum" min="0.1" max="10" step="0.1" value="1.0" oninput="syncSlider('scaleY', false)">
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label>Scale Z</label>
+                        <div class="slider-container">
+                            <input type="range" id="scaleZ" min="0.1" max="100" step="0.1" value="10" oninput="syncSlider('scaleZ', true)">
+                            <input type="number" id="scaleZNum" min="0.1" max="100" step="0.1" value="10" oninput="syncSlider('scaleZ', false)">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">Paramètres de Bruit</div>
+
+                    <div class="control-group">
+                        <label>Octaves</label>
+                        <div class="slider-container">
+                            <input type="range" id="octaves" min="1" max="20" value="4" oninput="syncSlider('octaves', true)">
+                            <input type="number" id="octavesNum" min="1" max="20" value="4" oninput="syncSlider('octaves', false)">
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label>Persistance</label>
+                        <div class="slider-container">
+                            <input type="range" id="persistence" min="0" max="1" step="0.01" value="0.5" oninput="syncSlider('persistence', true)">
+                            <input type="number" id="persistenceNum" min="0" max="1" step="0.01" value="0.5" oninput="syncSlider('persistence', false)">
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label>Lacunarité</label>
+                        <div class="slider-container">
+                            <input type="range" id="lacunarity" min="1" max="10" step="0.1" value="2.0" oninput="syncSlider('lacunarity', true)">
+                            <input type="number" id="lacunarityNum" min="1" max="10" step="0.1" value="2.0" oninput="syncSlider('lacunarity', false)">
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label>Contraste</label>
+                        <div class="slider-container">
+                            <input type="range" id="contrast" min="0.1" max="5" step="0.1" value="1.0" oninput="syncSlider('contrast', true)">
+                            <input type="number" id="contrastNum" min="0.1" max="5" step="0.1" value="1.0" oninput="syncSlider('contrast', false)">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">Distorsion</div>
+
+                    <div class="control-group">
+                        <label>Warp Strength</label>
+                        <div class="slider-container">
+                            <input type="range" id="warp" min="0" max="100" step="0.1" value="0" oninput="syncSlider('warp', true)">
+                            <input type="number" id="warpNum" min="0" max="100" step="0.1" value="0" oninput="syncSlider('warp', false)">
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label>Turbulence</label>
+                        <div class="slider-container">
+                            <input type="range" id="turbulence" min="0" max="100" value="0" oninput="syncSlider('turbulence', true)">
+                            <input type="number" id="turbulenceNum" min="0" max="100" value="0" oninput="syncSlider('turbulence', false)">
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label>Distortion Scale</label>
+                        <div class="slider-container">
+                            <input type="range" id="distScale" min="0.1" max="100" step="0.1" value="50" oninput="syncSlider('distScale', true)">
+                            <input type="number" id="distScaleNum" min="0.1" max="100" step="0.1" value="50" oninput="syncSlider('distScale', false)">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">Seed</div>
+                    <button class="random-btn" onclick="randomizeSeed()">🎲 Random Seed</button>
+                    <div class="control-group">
+                        <label>Seed Value</label>
+                        <input type="number" id="seed" value="12345" min="0" max="999999" oninput="updateNoise()" style="width: 100%;">
+                    </div>
+                </div>
+
+                <div class="section export-section">
+                    <div class="section-title">Export</div>
+
+                    <label>Résolution</label>
+                    <select id="resolution">
+                        <option value="512">512x512</option>
+                        <option value="1024">1K (1024x1024)</option>
+                        <option value="2048">2K (2048x2048)</option>
+                        <option value="4096">4K (4096x4096)</option>
+                    </select>
+
+                    <div class="checkbox-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="exportNormal" checked>
+                            Normal Map
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="exportRoughness">
+                            Roughness
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="exportMetalness">
+                            Metalness
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="exportDisplacement">
+                            Displacement
+                        </label>
+                    </div>
+
+                    <button onclick="exportTextures()">📥 Télécharger Textures</button>
+                </div>
+            </div>
+
+            <div class="preview-area">
+                <div class="section-title" style="margin-bottom: 15px;">Prévisualisation (512x512)</div>
+                <canvas id="noiseCanvas" width="512" height="512"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Perlin Noise with circle mapping for TRUE seamless tiling
+        class PerlinNoise {
+            constructor(seed = 12345) {
+                this.seed = seed;
+                this.permutation = this.generatePermutation(seed);
+            }
+
+            generatePermutation(seed) {
+                const p = [];
+                for (let i = 0; i < 256; i++) {
+                    p[i] = i;
+                }
+
+                for (let i = 255; i > 0; i--) {
+                    const random = this.seededRandom(seed + i);
+                    const j = Math.floor(random * (i + 1));
+                    [p[i], p[j]] = [p[j], p[i]];
+                }
+
+                for (let i = 0; i < 256; i++) {
+                    p[256 + i] = p[i];
+                }
+
+                return p;
+            }
+
+            seededRandom(seed) {
+                const x = Math.sin(seed) * 10000;
+                return x - Math.floor(x);
+            }
+
+            fade(t) {
+                return t * t * t * (t * (t * 6 - 15) + 10);
+            }
+
+            lerp(t, a, b) {
+                return a + t * (b - a);
+            }
+
+            grad(hash, x, y) {
+                const h = hash & 15;
+                const u = h < 8 ? x : y;
+                const v = h < 4 ? y : h === 12 || h === 14 ? x : 0;
+                return ((h & 1) === 0 ? u : -u) + ((h & 2) === 0 ? v : -v);
+            }
+
+            noise(x, y) {
+                const X = Math.floor(x) & 255;
+                const Y = Math.floor(y) & 255;
+
+                x -= Math.floor(x);
+                y -= Math.floor(y);
+
+                const u = this.fade(x);
+                const v = this.fade(y);
+
+                const p = this.permutation;
+                const a = p[X] + Y;
+                const aa = p[a];
+                const ab = p[a + 1];
+                const b = p[X + 1] + Y;
+                const ba = p[b];
+                const bb = p[b + 1];
+
+                return this.lerp(v,
+                    this.lerp(u, this.grad(p[aa], x, y), this.grad(p[ba], x - 1, y)),
+                    this.lerp(u, this.grad(p[ab], x, y - 1), this.grad(p[bb], x - 1, y - 1))
+                );
+            }
+        }
+
+        let perlinNoise = new PerlinNoise(12345);
+
+        const presets = {
+            grudge: {
+                masterScale: 1, scaleX: 100, scaleY: 1.8, scaleZ: 100, octaves: 8, persistence: 0.65, 
+                lacunarity: 2.3, contrast: 2.5, warp: 0, turbulence: 45, distScale: 80
+            },
+            water: {
+                masterScale: 1, scaleX: 35, scaleY: 1.0, scaleZ: 25, octaves: 6, persistence: 0.45, 
+                lacunarity: 2.1, contrast: 1.2, warp: 0, turbulence: 15, distScale: 60
+            },
+            rain: {
+                masterScale: 1, scaleX: 100, scaleY: 0.7, scaleZ: 100, octaves: 12, persistence: 0.75, 
+                lacunarity: 3.5, contrast: 3.2, warp: 0, turbulence: 80, distScale: 100
+            },
+            smooth: {
+                masterScale: 1, scaleX: 8, scaleY: 1.3, scaleZ: 8, octaves: 2, persistence: 0.3, 
+                lacunarity: 1.5, contrast: 0.8, warp: 0, turbulence: 0, distScale: 20
+            },
+            marble: {
+                masterScale: 1, scaleX: 45, scaleY: 1.5, scaleZ: 20, octaves: 7, persistence: 0.55, 
+                lacunarity: 2.8, contrast: 2.0, warp: 0, turbulence: 25, distScale: 40
+            },
+            clouds: {
+                masterScale: 1, scaleX: 60, scaleY: 1.1, scaleZ: 60, octaves: 5, persistence: 0.5, 
+                lacunarity: 2.0, contrast: 1.3, warp: 0, turbulence: 10, distScale: 90
+            },
+            lightning: {
+                masterScale: 1, scaleX: 100, scaleY: 2.5, scaleZ: 5, octaves: 10, persistence: 0.7, 
+                lacunarity: 4.0, contrast: 4.5, warp: 0, turbulence: 60, distScale: 100
+            },
+            lava: {
+                masterScale: 1, scaleX: 70, scaleY: 1.6, scaleZ: 70, octaves: 9, persistence: 0.6, 
+                lacunarity: 2.5, contrast: 2.2, warp: 0, turbulence: 35, distScale: 100
+            }
+        };
+
+        function syncSlider(name, fromSlider) {
+            const slider = document.getElementById(name);
+            const input = document.getElementById(name + 'Num');
+
+            if (fromSlider) {
+                input.value = slider.value;
+            } else {
+                slider.value = input.value;
+            }
+
+            updateNoise();
+        }
+
+        function syncMasterScale(fromSlider) {
+            const slider = document.getElementById('masterScale');
+            const input = document.getElementById('masterScaleNum');
+
+            if (fromSlider) {
+                input.value = slider.value;
+            } else {
+                slider.value = input.value;
+            }
+
+            updateNoise();
+        }
+
+        function applyPreset(presetName) {
+            const preset = presets[presetName];
+            if (!preset) return;
+
+            const fields = ['masterScale', 'scaleX', 'scaleY', 'scaleZ', 'octaves', 'persistence', 
+                          'lacunarity', 'contrast', 'warp', 'turbulence', 'distScale'];
+
+            fields.forEach(field => {
+                const slider = document.getElementById(field);
+                const input = document.getElementById(field + 'Num');
+                if (slider && input && preset[field] !== undefined) {
+                    slider.value = preset[field];
+                    input.value = preset[field];
+                }
+            });
+
+            updateNoise();
+        }
+
+        function randomizeSeed() {
+            const randomSeed = Math.floor(Math.random() * 999999);
+            document.getElementById('seed').value = randomSeed;
+            updateNoise();
+        }
+
+        function generateNoise(width, height) {
+            const masterScale = parseFloat(document.getElementById('masterScale').value);
+            const scaleX = parseFloat(document.getElementById('scaleX').value) * masterScale;
+            const scaleY = parseFloat(document.getElementById('scaleY').value);
+            const scaleZ = parseFloat(document.getElementById('scaleZ').value) * masterScale;
+            const octaves = parseInt(document.getElementById('octaves').value);
+            const persistence = parseFloat(document.getElementById('persistence').value);
+            const lacunarity = parseFloat(document.getElementById('lacunarity').value);
+            const contrast = parseFloat(document.getElementById('contrast').value);
+            const warp = parseFloat(document.getElementById('warp').value);
+            const turbulence = parseFloat(document.getElementById('turbulence').value);
+            const distScale = parseFloat(document.getElementById('distScale').value);
+            const seed = parseInt(document.getElementById('seed').value);
+
+            perlinNoise = new PerlinNoise(seed);
+
+            const imageData = new ImageData(width, height);
+            const data = imageData.data;
+
+            const TWO_PI = Math.PI * 2;
+
+            for (let y = 0; y < height; y++) {
+                for (let x = 0; x < width; x++) {
+                    // Normalize coordinates to 0-1
+                    let s = x / width;
+                    let t = y / height;
+
+                    // Apply warp with seamless wrapping
+                    if (warp > 0) {
+                        const ws = s * TWO_PI;
+                        const wt = t * TWO_PI;
+
+                        const warpNX = Math.cos(ws) / distScale;
+                        const warpNY = Math.sin(ws) / distScale;
+                        const warpNZ = Math.cos(wt) / distScale;
+                        const warpNW = Math.sin(wt) / distScale;
+
+                        const warpX = perlinNoise.noise(warpNX * 100, warpNZ * 100) * warp / width;
+                        const warpY = perlinNoise.noise(warpNY * 100 + 5.2, warpNW * 100 + 1.3) * warp / height;
+
+                        s = (s + warpX) % 1;
+                        t = (t + warpY) % 1;
+                        if (s < 0) s += 1;
+                        if (t < 0) t += 1;
+                    }
+
+                    // Map normalized coordinates to circle (torus in 4D space)
+                    const angle_s = s * TWO_PI;
+                    const angle_t = t * TWO_PI;
+
+                    const radius = 1.0;
+                    const nx = radius * Math.cos(angle_s) / TWO_PI;
+                    const ny = radius * Math.sin(angle_s) / TWO_PI;
+                    const nz = radius * Math.cos(angle_t) / TWO_PI;
+                    const nw = radius * Math.sin(angle_t) / TWO_PI;
+
+                    // Calculate noise with octaves
+                    let value = 0;
+                    let amplitude = 1;
+                    let frequency = 1;
+                    let maxValue = 0;
+
+                    for (let i = 0; i < octaves; i++) {
+                        // Sample noise in mapped space
+                        const fx = nx * scaleX * frequency;
+                        const fy = nz * scaleZ * frequency;
+                        const fz = ny * scaleX * frequency;
+                        const fw = nw * scaleZ * frequency;
+
+                        // Average two noise samples for better tiling
+                        let noiseValue = (perlinNoise.noise(fx, fy) + perlinNoise.noise(fz, fw)) * 0.5;
+
+                        // Apply turbulence
+                        if (turbulence > 0 && i > 0) {
+                            const turbAmount = turbulence / 100;
+                            noiseValue = Math.abs(noiseValue) * turbAmount + noiseValue * (1 - turbAmount);
+                        }
+
+                        value += noiseValue * amplitude;
+                        maxValue += amplitude;
+
+                        amplitude *= persistence;
+                        frequency *= lacunarity;
+                    }
+
+                    value = value / maxValue;
+
+                    // Apply Y scale (brightness adjustment)
+                    value = value * scaleY;
+
+                    // Apply contrast
+                    value = ((value - 0.5) * contrast) + 0.5;
+
+                    // Clamp
+                    value = Math.max(0, Math.min(1, value));
+                    const gray = Math.floor(value * 255);
+
+                    const idx = (y * width + x) * 4;
+                    data[idx] = gray;
+                    data[idx + 1] = gray;
+                    data[idx + 2] = gray;
+                    data[idx + 3] = 255;
+                }
+            }
+
+            return imageData;
+        }
+
+        function updateNoise() {
+            const canvas = document.getElementById('noiseCanvas');
+            const ctx = canvas.getContext('2d');
+            const imageData = generateNoise(512, 512);
+            ctx.putImageData(imageData, 0, 0);
+        }
+
+        function generateNormalMap(imageData) {
+            const width = imageData.width;
+            const height = imageData.height;
+            const normalData = new ImageData(width, height);
+            const strength = 3;
+
+            for (let y = 0; y < height; y++) {
+                for (let x = 0; x < width; x++) {
+                    const xp = (x + 1) % width;
+                    const yp = (y + 1) % height;
+
+                    const idx = (y * width + x) * 4;
+                    const idxX = (y * width + xp) * 4;
+                    const idxY = (yp * width + x) * 4;
+
+                    const current = imageData.data[idx] / 255;
+                    const right = imageData.data[idxX] / 255;
+                    const down = imageData.data[idxY] / 255;
+
+                    const dx = (current - right) * strength;
+                    const dy = (current - down) * strength;
+
+                    const nx = dx * 0.5 + 0.5;
+                    const ny = dy * 0.5 + 0.5;
+                    const nz = 1;
+
+                    normalData.data[idx] = Math.floor(nx * 255);
+                    normalData.data[idx + 1] = Math.floor(ny * 255);
+                    normalData.data[idx + 2] = Math.floor(nz * 255);
+                    normalData.data[idx + 3] = 255;
+                }
+            }
+
+            return normalData;
+        }
+
+        function generateRoughnessMap(imageData) {
+            const width = imageData.width;
+            const height = imageData.height;
+            const roughnessData = new ImageData(width, height);
+
+            for (let y = 0; y < height; y++) {
+                for (let x = 0; x < width; x++) {
+                    const idx = (y * width + x) * 4;
+                    const baseValue = imageData.data[idx] / 255;
+
+                    const roughness = 1.0 - (baseValue * 0.7 + 0.15);
+                    const gray = Math.floor(Math.max(0, Math.min(1, roughness)) * 255);
+
+                    roughnessData.data[idx] = gray;
+                    roughnessData.data[idx + 1] = gray;
+                    roughnessData.data[idx + 2] = gray;
+                    roughnessData.data[idx + 3] = 255;
+                }
+            }
+
+            return roughnessData;
+        }
+
+        function generateMetalnessMap(imageData) {
+            const width = imageData.width;
+            const height = imageData.height;
+            const metalnessData = new ImageData(width, height);
+
+            for (let y = 0; y < height; y++) {
+                for (let x = 0; x < width; x++) {
+                    const idx = (y * width + x) * 4;
+                    const baseValue = imageData.data[idx] / 255;
+
+                    const metalness = Math.pow(baseValue, 2.2);
+                    const gray = Math.floor(metalness * 255);
+
+                    metalnessData.data[idx] = gray;
+                    metalnessData.data[idx + 1] = gray;
+                    metalnessData.data[idx + 2] = gray;
+                    metalnessData.data[idx + 3] = 255;
+                }
+            }
+
+            return metalnessData;
+        }
+
+        function exportTextures() {
+            const resolution = parseInt(document.getElementById('resolution').value);
+            const exportNormal = document.getElementById('exportNormal').checked;
+            const exportRoughness = document.getElementById('exportRoughness').checked;
+            const exportMetalness = document.getElementById('exportMetalness').checked;
+            const exportDisplacement = document.getElementById('exportDisplacement').checked;
+
+            const canvas = document.createElement('canvas');
+            canvas.width = resolution;
+            canvas.height = resolution;
+            const ctx = canvas.getContext('2d');
+
+            const baseImageData = generateNoise(resolution, resolution);
+
+            if (exportDisplacement) {
+                ctx.putImageData(baseImageData, 0, 0);
+                downloadCanvas(canvas, `noise_displacement_${resolution}x${resolution}.png`);
+            }
+
+            if (exportNormal) {
+                const normalData = generateNormalMap(baseImageData);
+                ctx.putImageData(normalData, 0, 0);
+                downloadCanvas(canvas, `noise_normal_${resolution}x${resolution}.png`);
+            }
+
+            if (exportRoughness) {
+                const roughnessData = generateRoughnessMap(baseImageData);
+                ctx.putImageData(roughnessData, 0, 0);
+                downloadCanvas(canvas, `noise_roughness_${resolution}x${resolution}.png`);
+            }
+
+            if (exportMetalness) {
+                const metalnessData = generateMetalnessMap(baseImageData);
+                ctx.putImageData(metalnessData, 0, 0);
+                downloadCanvas(canvas, `noise_metalness_${resolution}x${resolution}.png`);
+            }
+        }
+
+        function downloadCanvas(canvas, filename) {
+            canvas.toBlob(function(blob) {
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.download = filename;
+                link.href = url;
+                link.click();
+                URL.revokeObjectURL(url);
+            });
+        }
+
+        // Initialize
+        updateNoise();
+    </script>
+</body>
+</html>
