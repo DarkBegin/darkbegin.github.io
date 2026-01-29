@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Éditeur d'Images - Filtres Multiples</title>
+    <title>Éditeur d'Images - Filtres avec Previews</title>
     <style>
         * {
             margin: 0;
@@ -19,7 +19,7 @@
         }
 
         .container {
-            max-width: 1400px;
+            max-width: 1600px;
             margin: 0 auto;
             background: white;
             border-radius: 20px;
@@ -34,94 +34,75 @@
             font-size: 2.5em;
         }
 
-        .upload-section {
-            text-align: center;
-            margin-bottom: 30px;
+        .main-area {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 30px;
+            align-items: start;
+        }
+
+        /* Zone centrale */
+        .canvas-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .canvas-container {
+            width: 100%;
+            min-height: 600px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #canvas {
+            max-width: 100%;
+            max-height: 600px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .upload-overlay {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            color: #999;
+        }
+
+        .upload-overlay svg {
+            width: 80px;
+            height: 80px;
+            opacity: 0.3;
         }
 
         .upload-btn {
             background: #667eea;
             color: white;
-            padding: 15px 30px;
+            padding: 15px 40px;
             border: none;
-            border-radius: 10px;
+            border-radius: 50px;
             font-size: 16px;
             cursor: pointer;
             transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
         }
 
         .upload-btn:hover {
             background: #764ba2;
             transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
         }
 
         #fileInput {
             display: none;
-        }
-
-        .editor-area {
-            display: grid;
-            grid-template-columns: 250px 1fr;
-            gap: 30px;
-            margin-top: 30px;
-        }
-
-        .filters-panel {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 15px;
-            max-height: 800px;
-            overflow-y: auto;
-        }
-
-        .filter-category {
-            margin-bottom: 25px;
-        }
-
-        .filter-category h3 {
-            color: #667eea;
-            margin-bottom: 15px;
-            font-size: 1.1em;
-            border-bottom: 2px solid #667eea;
-            padding-bottom: 5px;
-        }
-
-        .filter-btn {
-            width: 100%;
-            padding: 12px;
-            margin: 5px 0;
-            border: 2px solid #ddd;
-            background: white;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-size: 14px;
-            text-align: left;
-        }
-
-        .filter-btn:hover {
-            background: #667eea;
-            color: white;
-            border-color: #667eea;
-            transform: translateX(5px);
-        }
-
-        .canvas-container {
-            text-align: center;
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 15px;
-            min-height: 400px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        #canvas {
-            max-width: 100%;
-            max-height: 700px;
-            border-radius: 10px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
 
         .controls {
@@ -129,16 +110,16 @@
             justify-content: center;
             gap: 15px;
             margin-top: 20px;
-            flex-wrap: wrap;
         }
 
         .control-btn {
-            padding: 12px 25px;
+            padding: 12px 30px;
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 15px;
             transition: all 0.3s;
+            font-weight: 500;
         }
 
         .reset-btn {
@@ -148,6 +129,7 @@
 
         .reset-btn:hover {
             background: #c0392b;
+            transform: translateY(-2px);
         }
 
         .download-btn {
@@ -157,11 +139,90 @@
 
         .download-btn:hover {
             background: #229954;
+            transform: translateY(-2px);
         }
 
-        .placeholder {
-            color: #999;
-            font-size: 18px;
+        /* Panel de filtres à droite */
+        .filters-panel {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 15px;
+            max-height: 800px;
+            overflow-y: auto;
+        }
+
+        .filters-panel h2 {
+            font-size: 1.3em;
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .filter-category {
+            margin-bottom: 30px;
+        }
+
+        .filter-category h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1em;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 8px;
+        }
+
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .filter-item {
+            cursor: pointer;
+            border: 3px solid transparent;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .filter-item:hover {
+            border-color: #667eea;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .filter-preview {
+            width: 100%;
+            aspect-ratio: 1;
+            overflow: hidden;
+            background: #ddd;
+            position: relative;
+        }
+
+        .filter-preview canvas {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .filter-preview .no-image {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #e0e0e0 0%, #f5f5f5 100%);
+            font-size: 40px;
+        }
+
+        .filter-name {
+            padding: 8px;
+            text-align: center;
+            font-size: 12px;
+            font-weight: 600;
+            color: #333;
+            background: white;
         }
 
         /* Scrollbar personnalisée */
@@ -178,88 +239,47 @@
             background: #667eea;
             border-radius: 10px;
         }
+
+        .loading {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        @media (max-width: 1200px) {
+            .main-area {
+                grid-template-columns: 1fr;
+            }
+            
+            .filter-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .filter-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>🎨 Éditeur d'Images avec Filtres</h1>
         
-        <div class="upload-section">
-            <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
-                📁 Charger une image
-            </button>
-            <input type="file" id="fileInput" accept="image/*">
-        </div>
-
-        <div class="editor-area">
-            <div class="filters-panel">
-                <div class="filter-category">
-                    <h3>🎭 Basiques</h3>
-                    <button class="filter-btn" onclick="applyFilter('grayscale')">Noir et Blanc</button>
-                    <button class="filter-btn" onclick="applyFilter('sepia')">Sépia</button>
-                    <button class="filter-btn" onclick="applyFilter('invert')">Négatif</button>
-                    <button class="filter-btn" onclick="applyFilter('brightness')">Luminosité++</button>
-                    <button class="filter-btn" onclick="applyFilter('darkness')">Obscurité</button>
-                    <button class="filter-btn" onclick="applyFilter('contrast')">Contraste++</button>
-                </div>
-
-                <div class="filter-category">
-                    <h3>🎮 Rétro Gaming</h3>
-                    <button class="filter-btn" onclick="applyFilter('gameboy')">Game Boy</button>
-                    <button class="filter-btn" onclick="applyFilter('gameboyGreen')">Game Boy Green</button>
-                    <button class="filter-btn" onclick="applyFilter('nes')">NES 8-bit</button>
-                    <button class="filter-btn" onclick="applyFilter('cga')">CGA PC</button>
-                    <button class="filter-btn" onclick="applyFilter('pixelate')">Pixellisé</button>
-                </div>
-
-                <div class="filter-category">
-                    <h3>🌈 Vaporwave & Synthwave</h3>
-                    <button class="filter-btn" onclick="applyFilter('vaporwave')">Vaporwave</button>
-                    <button class="filter-btn" onclick="applyFilter('synthwave')">Synthwave</button>
-                    <button class="filter-btn" onclick="applyFilter('cyberpunk')">Cyberpunk</button>
-                    <button class="filter-btn" onclick="applyFilter('miami')">Miami Vice</button>
-                    <button class="filter-btn" onclick="applyFilter('neon')">Néon</button>
-                </div>
-
-                <div class="filter-category">
-                    <h3>🌸 Vintage & Pastel</h3>
-                    <button class="filter-btn" onclick="applyFilter('vintage')">Vintage</button>
-                    <button class="filter-btn" onclick="applyFilter('polaroid')">Polaroid</button>
-                    <button class="filter-btn" onclick="applyFilter('pastel')">Pastel</button>
-                    <button class="filter-btn" onclick="applyFilter('warm')">Chaleureux</button>
-                    <button class="filter-btn" onclick="applyFilter('cold')">Froid</button>
-                </div>
-
-                <div class="filter-category">
-                    <h3>🎨 Artistique</h3>
-                    <button class="filter-btn" onclick="applyFilter('posterize')">Poster</button>
-                    <button class="filter-btn" onclick="applyFilter('solarize')">Solarisation</button>
-                    <button class="filter-btn" onclick="applyFilter('edge')">Détection Contours</button>
-                    <button class="filter-btn" onclick="applyFilter('emboss')">Relief</button>
-                    <button class="filter-btn" onclick="applyFilter('blur')">Flou</button>
-                </div>
-
-                <div class="filter-category">
-                    <h3>🎬 Cinéma</h3>
-                    <button class="filter-btn" onclick="applyFilter('cinema')">Cinéma</button>
-                    <button class="filter-btn" onclick="applyFilter('noir')">Film Noir</button>
-                    <button class="filter-btn" onclick="applyFilter('technicolor')">Technicolor</button>
-                    <button class="filter-btn" onclick="applyFilter('bleach')">Bleach Bypass</button>
-                </div>
-
-                <div class="filter-category">
-                    <h3>🌟 Channels RGB</h3>
-                    <button class="filter-btn" onclick="applyFilter('redChannel')">Canal Rouge</button>
-                    <button class="filter-btn" onclick="applyFilter('greenChannel')">Canal Vert</button>
-                    <button class="filter-btn" onclick="applyFilter('blueChannel')">Canal Bleu</button>
-                    <button class="filter-btn" onclick="applyFilter('rgbShift')">Glitch RGB</button>
-                </div>
-            </div>
-
-            <div>
+        <div class="main-area">
+            <!-- Zone canvas centrale -->
+            <div class="canvas-section">
                 <div class="canvas-container">
-                    <canvas id="canvas"></canvas>
-                    <div class="placeholder" id="placeholder">Chargez une image pour commencer</div>
+                    <canvas id="canvas" style="display: none;"></canvas>
+                    <div class="upload-overlay" id="uploadOverlay">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/>
+                        </svg>
+                        <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
+                            📁 Charger une image
+                        </button>
+                        <p style="font-size: 14px;">Chargez une image pour voir les previews</p>
+                    </div>
                 </div>
                 
                 <div class="controls">
@@ -267,16 +287,178 @@
                     <button class="control-btn download-btn" onclick="downloadImage()">💾 Télécharger</button>
                 </div>
             </div>
+
+            <!-- Panel de filtres à droite -->
+            <div class="filters-panel">
+                <h2>Filtres disponibles</h2>
+                
+                <div class="filter-category">
+                    <h3>🎭 Basiques</h3>
+                    <div class="filter-grid" id="basicFilters"></div>
+                </div>
+
+                <div class="filter-category">
+                    <h3>🎮 Rétro Gaming</h3>
+                    <div class="filter-grid" id="gamingFilters"></div>
+                </div>
+
+                <div class="filter-category">
+                    <h3>🌈 Vaporwave & Synthwave</h3>
+                    <div class="filter-grid" id="vaporFilters"></div>
+                </div>
+
+                <div class="filter-category">
+                    <h3>🌸 Vintage & Pastel</h3>
+                    <div class="filter-grid" id="vintageFilters"></div>
+                </div>
+
+                <div class="filter-category">
+                    <h3>🎨 Artistique</h3>
+                    <div class="filter-grid" id="artisticFilters"></div>
+                </div>
+
+                <div class="filter-category">
+                    <h3>🎬 Cinéma</h3>
+                    <div class="filter-grid" id="cinemaFilters"></div>
+                </div>
+
+                <div class="filter-category">
+                    <h3>🌟 Channels RGB</h3>
+                    <div class="filter-grid" id="rgbFilters"></div>
+                </div>
+            </div>
         </div>
+
+        <input type="file" id="fileInput" accept="image/*">
     </div>
 
     <script>
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
         const fileInput = document.getElementById('fileInput');
-        const placeholder = document.getElementById('placeholder');
+        const uploadOverlay = document.getElementById('uploadOverlay');
         let originalImageData = null;
         let currentImage = null;
+
+        // Configuration des filtres par catégorie
+        const filterCategories = {
+            basicFilters: [
+                { name: 'Noir et Blanc', filter: 'grayscale' },
+                { name: 'Sépia', filter: 'sepia' },
+                { name: 'Négatif', filter: 'invert' },
+                { name: 'Luminosité++', filter: 'brightness' },
+                { name: 'Obscurité', filter: 'darkness' },
+                { name: 'Contraste++', filter: 'contrast' }
+            ],
+            gamingFilters: [
+                { name: 'Game Boy', filter: 'gameboy' },
+                { name: 'Game Boy Green', filter: 'gameboyGreen' },
+                { name: 'NES 8-bit', filter: 'nes' },
+                { name: 'CGA PC', filter: 'cga' },
+                { name: 'Pixellisé', filter: 'pixelate' }
+            ],
+            vaporFilters: [
+                { name: 'Vaporwave', filter: 'vaporwave' },
+                { name: 'Synthwave', filter: 'synthwave' },
+                { name: 'Cyberpunk', filter: 'cyberpunk' },
+                { name: 'Miami Vice', filter: 'miami' },
+                { name: 'Néon', filter: 'neon' }
+            ],
+            vintageFilters: [
+                { name: 'Vintage', filter: 'vintage' },
+                { name: 'Polaroid', filter: 'polaroid' },
+                { name: 'Pastel', filter: 'pastel' },
+                { name: 'Chaleureux', filter: 'warm' },
+                { name: 'Froid', filter: 'cold' }
+            ],
+            artisticFilters: [
+                { name: 'Poster', filter: 'posterize' },
+                { name: 'Solarisation', filter: 'solarize' },
+                { name: 'Contours', filter: 'edge' },
+                { name: 'Relief', filter: 'emboss' },
+                { name: 'Flou', filter: 'blur' }
+            ],
+            cinemaFilters: [
+                { name: 'Cinéma', filter: 'cinema' },
+                { name: 'Film Noir', filter: 'noir' },
+                { name: 'Technicolor', filter: 'technicolor' },
+                { name: 'Bleach Bypass', filter: 'bleach' }
+            ],
+            rgbFilters: [
+                { name: 'Canal Rouge', filter: 'redChannel' },
+                { name: 'Canal Vert', filter: 'greenChannel' },
+                { name: 'Canal Bleu', filter: 'blueChannel' },
+                { name: 'Glitch RGB', filter: 'rgbShift' }
+            ]
+        };
+
+        // Créer les miniatures de preview
+        function createFilterPreviews() {
+            for (const [containerId, filters] of Object.entries(filterCategories)) {
+                const container = document.getElementById(containerId);
+                filters.forEach(filterInfo => {
+                    const filterItem = document.createElement('div');
+                    filterItem.className = 'filter-item';
+                    filterItem.onclick = () => applyFilter(filterInfo.filter);
+
+                    const preview = document.createElement('div');
+                    preview.className = 'filter-preview';
+                    preview.innerHTML = '<div class="no-image">🎨</div>';
+
+                    const previewCanvas = document.createElement('canvas');
+                    previewCanvas.style.display = 'none';
+                    preview.appendChild(previewCanvas);
+
+                    const name = document.createElement('div');
+                    name.className = 'filter-name';
+                    name.textContent = filterInfo.name;
+
+                    filterItem.appendChild(preview);
+                    filterItem.appendChild(name);
+                    container.appendChild(filterItem);
+
+                    // Stocker la référence au canvas de preview
+                    filterInfo.previewCanvas = previewCanvas;
+                    filterInfo.previewContainer = preview;
+                });
+            }
+        }
+
+        // Générer les previews des filtres
+        function generatePreviews() {
+            if (!currentImage) return;
+
+            const previewSize = 150;
+            
+            for (const filters of Object.values(filterCategories)) {
+                filters.forEach(filterInfo => {
+                    const previewCanvas = filterInfo.previewCanvas;
+                    const container = filterInfo.previewContainer;
+                    
+                    // Configurer la taille du canvas de preview
+                    const aspectRatio = currentImage.width / currentImage.height;
+                    if (aspectRatio > 1) {
+                        previewCanvas.width = previewSize;
+                        previewCanvas.height = previewSize / aspectRatio;
+                    } else {
+                        previewCanvas.height = previewSize;
+                        previewCanvas.width = previewSize * aspectRatio;
+                    }
+
+                    const previewCtx = previewCanvas.getContext('2d');
+                    previewCtx.drawImage(currentImage, 0, 0, previewCanvas.width, previewCanvas.height);
+
+                    // Appliquer le filtre sur le preview
+                    const imageData = previewCtx.getImageData(0, 0, previewCanvas.width, previewCanvas.height);
+                    applyFilterToImageData(imageData, filterInfo.filter, previewCanvas);
+                    previewCtx.putImageData(imageData, 0, 0);
+
+                    // Afficher le canvas de preview
+                    container.querySelector('.no-image').style.display = 'none';
+                    previewCanvas.style.display = 'block';
+                });
+            }
+        }
 
         // Charger l'image
         fileInput.addEventListener('change', function(e) {
@@ -291,8 +473,12 @@
                         canvas.height = img.height;
                         ctx.drawImage(img, 0, 0);
                         originalImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                        placeholder.style.display = 'none';
+                        
+                        uploadOverlay.style.display = 'none';
                         canvas.style.display = 'block';
+
+                        // Générer les previews
+                        generatePreviews();
                     };
                     img.src = event.target.result;
                 };
@@ -309,19 +495,27 @@
 
         // Télécharger l'image
         function downloadImage() {
+            if (!currentImage) return;
             const link = document.createElement('a');
             link.download = 'image_editee.png';
             link.href = canvas.toDataURL();
             link.click();
         }
 
-        // Appliquer les filtres
+        // Appliquer un filtre
         function applyFilter(filterName) {
             if (!originalImageData) return;
             
             resetImage();
             const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            applyFilterToImageData(imageData, filterName, canvas);
+            ctx.putImageData(imageData, 0, 0);
+        }
+
+        // Fonction centrale pour appliquer les filtres
+        function applyFilterToImageData(imageData, filterName, targetCanvas) {
             const data = imageData.data;
+            const tempCtx = targetCanvas.getContext('2d');
 
             switch(filterName) {
                 case 'grayscale':
@@ -355,7 +549,7 @@
                     cga(data);
                     break;
                 case 'pixelate':
-                    pixelate();
+                    pixelateData(imageData, targetCanvas);
                     return;
                 case 'vaporwave':
                     vaporwave(data);
@@ -394,13 +588,13 @@
                     solarize(data);
                     break;
                 case 'edge':
-                    edge();
+                    edgeData(imageData, targetCanvas);
                     return;
                 case 'emboss':
-                    emboss();
+                    embossData(imageData, targetCanvas);
                     return;
                 case 'blur':
-                    blur();
+                    blurData(imageData, targetCanvas);
                     return;
                 case 'cinema':
                     cinema(data);
@@ -424,11 +618,9 @@
                     blueChannel(data);
                     break;
                 case 'rgbShift':
-                    rgbShift();
+                    rgbShiftData(imageData, targetCanvas);
                     return;
             }
-
-            ctx.putImageData(imageData, 0, 0);
         }
 
         // ===== FILTRES BASIQUES =====
@@ -552,14 +744,19 @@
             }
         }
 
-        function pixelate() {
-            const size = 10;
-            const w = canvas.width;
-            const h = canvas.height;
+        function pixelateData(imageData, targetCanvas) {
+            const size = targetCanvas === canvas ? 10 : 5;
+            const w = targetCanvas.width;
+            const h = targetCanvas.height;
+            const tempCtx = targetCanvas.getContext('2d');
             
-            ctx.imageSmoothingEnabled = false;
-            ctx.drawImage(canvas, 0, 0, w / size, h / size);
-            ctx.drawImage(canvas, 0, 0, w / size, h / size, 0, 0, w, h);
+            tempCtx.imageSmoothingEnabled = false;
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = w / size;
+            tempCanvas.height = h / size;
+            const tempContext = tempCanvas.getContext('2d');
+            tempContext.drawImage(targetCanvas, 0, 0, w, h, 0, 0, w / size, h / size);
+            tempCtx.drawImage(tempCanvas, 0, 0, w / size, h / size, 0, 0, w, h);
         }
 
         // ===== VAPORWAVE & SYNTHWAVE =====
@@ -671,15 +868,15 @@
             }
         }
 
-        function edge() {
-            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        function edgeData(imageData, targetCanvas) {
             const data = imageData.data;
-            const w = canvas.width;
+            const w = targetCanvas.width;
+            const h = targetCanvas.height;
             
             const kernel = [-1, -1, -1, -1, 8, -1, -1, -1, -1];
             const output = new Uint8ClampedArray(data);
             
-            for (let y = 1; y < canvas.height - 1; y++) {
+            for (let y = 1; y < h - 1; y++) {
                 for (let x = 1; x < w - 1; x++) {
                     let r = 0, g = 0, b = 0;
                     for (let ky = -1; ky <= 1; ky++) {
@@ -701,18 +898,17 @@
             for (let i = 0; i < data.length; i++) {
                 data[i] = output[i];
             }
-            ctx.putImageData(imageData, 0, 0);
         }
 
-        function emboss() {
-            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        function embossData(imageData, targetCanvas) {
             const data = imageData.data;
-            const w = canvas.width;
+            const w = targetCanvas.width;
+            const h = targetCanvas.height;
             
             const kernel = [-2, -1, 0, -1, 1, 1, 0, 1, 2];
             const output = new Uint8ClampedArray(data);
             
-            for (let y = 1; y < canvas.height - 1; y++) {
+            for (let y = 1; y < h - 1; y++) {
                 for (let x = 1; x < w - 1; x++) {
                     let r = 0, g = 0, b = 0;
                     for (let ky = -1; ky <= 1; ky++) {
@@ -734,16 +930,15 @@
             for (let i = 0; i < data.length; i++) {
                 data[i] = output[i];
             }
-            ctx.putImageData(imageData, 0, 0);
         }
 
-        function blur() {
-            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        function blurData(imageData, targetCanvas) {
             const data = imageData.data;
-            const w = canvas.width;
+            const w = targetCanvas.width;
+            const h = targetCanvas.height;
             const output = new Uint8ClampedArray(data);
             
-            for (let y = 1; y < canvas.height - 1; y++) {
+            for (let y = 1; y < h - 1; y++) {
                 for (let x = 1; x < w - 1; x++) {
                     let r = 0, g = 0, b = 0, count = 0;
                     for (let ky = -1; ky <= 1; ky++) {
@@ -765,7 +960,6 @@
             for (let i = 0; i < data.length; i++) {
                 data[i] = output[i];
             }
-            ctx.putImageData(imageData, 0, 0);
         }
 
         // ===== CINÉMA =====
@@ -826,14 +1020,14 @@
             }
         }
 
-        function rgbShift() {
-            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        function rgbShiftData(imageData, targetCanvas) {
             const data = imageData.data;
-            const w = canvas.width;
-            const shift = 5;
+            const w = targetCanvas.width;
+            const h = targetCanvas.height;
+            const shift = targetCanvas === canvas ? 5 : 2;
             const output = new Uint8ClampedArray(data);
             
-            for (let y = 0; y < canvas.height; y++) {
+            for (let y = 0; y < h; y++) {
                 for (let x = 0; x < w; x++) {
                     const idx = (y * w + x) * 4;
                     const idxShift = (y * w + Math.min(w - 1, x + shift)) * 4;
@@ -846,8 +1040,10 @@
             for (let i = 0; i < data.length; i++) {
                 data[i] = output[i];
             }
-            ctx.putImageData(imageData, 0, 0);
         }
+
+        // Initialiser les previews au chargement
+        createFilterPreviews();
     </script>
 </body>
 </html>
