@@ -41,34 +41,88 @@
             align-items: start;
         }
 
-        /* Zone centrale */
+        /* Zone centrale - Viewer multi-images */
         .canvas-section {
             display: flex;
             flex-direction: column;
             align-items: center;
         }
 
-        .canvas-container {
+        .viewer-container {
             width: 100%;
             min-height: 600px;
             background: #f8f9fa;
             border-radius: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            padding: 20px;
             position: relative;
-            overflow: hidden;
         }
 
-        #mainCanvas {
-            max-width: 100%;
-            max-height: 600px;
-            border-radius: 10px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        .images-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            width: 100%;
+        }
+
+        .image-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+
+        .image-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+
+        .image-card canvas {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .image-card-footer {
+            padding: 12px;
+            background: #f8f9fa;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .image-number {
+            background: #667eea;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .remove-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            font-size: 18px;
+            line-height: 1;
+            transition: all 0.3s;
+        }
+
+        .remove-btn:hover {
+            background: #c0392b;
+            transform: scale(1.1);
         }
 
         .upload-overlay {
             position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -105,103 +159,6 @@
             display: none;
         }
 
-        /* Galerie d'images chargées */
-        .images-gallery {
-            width: 100%;
-            margin-top: 20px;
-            background: #f8f9fa;
-            border-radius: 15px;
-            padding: 15px;
-        }
-
-        .gallery-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-
-        .gallery-header h3 {
-            color: #333;
-            font-size: 1.1em;
-        }
-
-        .gallery-count {
-            background: #667eea;
-            color: white;
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 0.9em;
-        }
-
-        .gallery-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-            gap: 10px;
-        }
-
-        .gallery-item {
-            position: relative;
-            aspect-ratio: 1;
-            border-radius: 10px;
-            overflow: hidden;
-            cursor: pointer;
-            border: 3px solid transparent;
-            transition: all 0.3s;
-        }
-
-        .gallery-item:hover {
-            border-color: #667eea;
-            transform: translateY(-3px);
-        }
-
-        .gallery-item.active {
-            border-color: #764ba2;
-            box-shadow: 0 6px 20px rgba(118, 75, 162, 0.4);
-        }
-
-        .gallery-item img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .gallery-item .remove-btn {
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            background: rgba(231, 76, 60, 0.9);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 25px;
-            height: 25px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            line-height: 1;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-
-        .gallery-item:hover .remove-btn {
-            opacity: 1;
-        }
-
-        .gallery-item .image-number {
-            position: absolute;
-            bottom: 5px;
-            left: 5px;
-            background: rgba(0, 0, 0, 0.7);
-            color: white;
-            padding: 2px 8px;
-            border-radius: 10px;
-            font-size: 11px;
-            font-weight: bold;
-        }
-
         .controls {
             display: flex;
             justify-content: center;
@@ -233,16 +190,6 @@
             transform: translateY(-2px);
         }
 
-        .download-btn {
-            background: #27ae60;
-            color: white;
-        }
-
-        .download-btn:hover {
-            background: #229954;
-            transform: translateY(-2px);
-        }
-
         .download-all-btn {
             background: #3498db;
             color: white;
@@ -250,6 +197,16 @@
 
         .download-all-btn:hover {
             background: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        .clear-filter-btn {
+            background: #e67e22;
+            color: white;
+        }
+
+        .clear-filter-btn:hover {
+            background: #d35400;
             transform: translateY(-2px);
         }
 
@@ -309,6 +266,11 @@
             box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
         }
 
+        .filter-item.active {
+            border-color: #764ba2;
+            box-shadow: 0 6px 20px rgba(118, 75, 162, 0.5);
+        }
+
         .filter-preview {
             width: 100%;
             aspect-ratio: 1;
@@ -357,12 +319,6 @@
             border-radius: 10px;
         }
 
-        .loading {
-            opacity: 0.5;
-            pointer-events: none;
-        }
-
-        /* Info badge */
         .info-badge {
             background: #3498db;
             color: white;
@@ -371,6 +327,17 @@
             font-size: 0.85em;
             text-align: center;
             margin-bottom: 15px;
+        }
+
+        .current-filter-badge {
+            background: #27ae60;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 0.9em;
+            text-align: center;
+            margin-bottom: 15px;
+            font-weight: 600;
         }
 
         @media (max-width: 1200px) {
@@ -387,6 +354,10 @@
             .filter-grid {
                 grid-template-columns: repeat(3, 1fr);
             }
+            
+            .images-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
@@ -395,10 +366,10 @@
         <h1>🎨 Éditeur d'Images Multi-Filtres</h1>
         
         <div class="main-area">
-            <!-- Zone canvas centrale -->
+            <!-- Zone viewer centrale -->
             <div class="canvas-section">
-                <div class="canvas-container">
-                    <canvas id="mainCanvas" style="display: none;"></canvas>
+                <div class="viewer-container">
+                    <div class="images-grid" id="imagesGrid"></div>
                     <div class="upload-overlay" id="uploadOverlay">
                         <svg viewBox="0 0 24 24" fill="currentColor">
                             <path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/>
@@ -406,25 +377,16 @@
                         <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
                             📁 Charger vos images (max 8)
                         </button>
-                        <p style="font-size: 14px;">Sélectionnez jusqu'à 8 images à éditer ensemble</p>
+                        <p style="font-size: 14px;">Toutes les images s'affichent ensemble !</p>
                     </div>
-                </div>
-
-                <!-- Galerie d'images -->
-                <div class="images-gallery" id="imagesGallery" style="display: none;">
-                    <div class="gallery-header">
-                        <h3>Images chargées</h3>
-                        <span class="gallery-count" id="galleryCount">0/8</span>
-                    </div>
-                    <div class="gallery-grid" id="galleryGrid"></div>
                 </div>
                 
                 <div class="controls">
                     <button class="control-btn add-btn" onclick="document.getElementById('fileInput').click()">
                         ➕ Ajouter des images
                     </button>
-                    <button class="control-btn download-btn" onclick="downloadCurrentImage()" id="downloadSingleBtn" disabled>
-                        💾 Télécharger l'image actuelle
+                    <button class="control-btn clear-filter-btn" onclick="clearFilter()" id="clearFilterBtn" disabled>
+                        🔄 Effacer le filtre
                     </button>
                     <button class="control-btn download-all-btn" onclick="downloadAllAsZip()" id="downloadAllBtn" disabled>
                         📦 Télécharger tout (ZIP)
@@ -436,7 +398,10 @@
             <div class="filters-panel">
                 <h2>Filtres disponibles</h2>
                 <div class="info-badge">
-                    Les filtres s'appliquent à toutes les images
+                    Filtre appliqué sur toutes les images en temps réel
+                </div>
+                <div class="current-filter-badge" id="currentFilterBadge" style="display: none;">
+                    Filtre actif : <span id="currentFilterName">Aucun</span>
                 </div>
                 
                 <div class="filter-category">
@@ -473,6 +438,16 @@
                     <h3>🌟 Channels RGB</h3>
                     <div class="filter-grid" id="rgbFilters"></div>
                 </div>
+
+                <div class="filter-category">
+                    <h3>🍂 Saisons</h3>
+                    <div class="filter-grid" id="seasonFilters"></div>
+                </div>
+
+                <div class="filter-category">
+                    <h3>🤪 WTF & Expérimental</h3>
+                    <div class="filter-grid" id="wtfFilters"></div>
+                </div>
             </div>
         </div>
 
@@ -483,17 +458,15 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
     <script>
-        const mainCanvas = document.getElementById('mainCanvas');
-        const ctx = mainCanvas.getContext('2d');
         const fileInput = document.getElementById('fileInput');
         const uploadOverlay = document.getElementById('uploadOverlay');
-        const galleryGrid = document.getElementById('galleryGrid');
-        const imagesGallery = document.getElementById('imagesGallery');
-        const galleryCount = document.getElementById('galleryCount');
+        const imagesGrid = document.getElementById('imagesGrid');
+        const currentFilterBadge = document.getElementById('currentFilterBadge');
+        const currentFilterName = document.getElementById('currentFilterName');
         
-        let loadedImages = []; // Array pour stocker les images
-        let currentImageIndex = 0;
+        let loadedImages = [];
         let currentFilter = null;
+        let activeFilterElement = null;
 
         // Configuration des filtres par catégorie
         const filterCategories = {
@@ -544,6 +517,22 @@
                 { name: 'Canal Vert', filter: 'greenChannel' },
                 { name: 'Canal Bleu', filter: 'blueChannel' },
                 { name: 'Glitch RGB', filter: 'rgbShift' }
+            ],
+            seasonFilters: [
+                { name: 'Printemps', filter: 'spring' },
+                { name: 'Été', filter: 'summer' },
+                { name: 'Automne', filter: 'autumn' },
+                { name: 'Hiver', filter: 'winter' }
+            ],
+            wtfFilters: [
+                { name: 'Psychédélique', filter: 'psychedelic' },
+                { name: 'Infrarouge', filter: 'infrared' },
+                { name: 'X-Ray', filter: 'xray' },
+                { name: 'Thermique', filter: 'thermal' },
+                { name: 'Acide', filter: 'acid' },
+                { name: 'Matrix', filter: 'matrix' },
+                { name: 'Deep Fry', filter: 'deepfry' },
+                { name: 'Glitch Max', filter: 'glitchmax' }
             ]
         };
 
@@ -554,7 +543,7 @@
                 filters.forEach(filterInfo => {
                     const filterItem = document.createElement('div');
                     filterItem.className = 'filter-item';
-                    filterItem.onclick = () => applyFilterToAll(filterInfo.filter);
+                    filterItem.onclick = () => applyFilterToAll(filterInfo.filter, filterInfo.name, filterItem);
 
                     const preview = document.createElement('div');
                     preview.className = 'filter-preview';
@@ -574,6 +563,7 @@
 
                     filterInfo.previewCanvas = previewCanvas;
                     filterInfo.previewContainer = preview;
+                    filterInfo.element = filterItem;
                 });
             }
         }
@@ -595,35 +585,28 @@
                 reader.onload = function(event) {
                     const img = new Image();
                     img.onload = function() {
-                        // Créer un canvas pour l'image originale
-                        const imgCanvas = document.createElement('canvas');
-                        imgCanvas.width = img.width;
-                        imgCanvas.height = img.height;
-                        const imgCtx = imgCanvas.getContext('2d');
-                        imgCtx.drawImage(img, 0, 0);
-
-                        // Créer un canvas pour la version avec filtre
-                        const filteredCanvas = document.createElement('canvas');
-                        filteredCanvas.width = img.width;
-                        filteredCanvas.height = img.height;
+                        const canvas = document.createElement('canvas');
+                        canvas.width = img.width;
+                        canvas.height = img.height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0);
 
                         loadedImages.push({
                             original: img,
-                            originalCanvas: imgCanvas,
-                            filteredCanvas: filteredCanvas,
+                            canvas: canvas,
                             name: file.name
                         });
 
-                        updateGallery();
+                        updateViewer();
                         
-                        // Si c'est la première image, afficher et générer les previews
                         if (loadedImages.length === 1) {
-                            currentImageIndex = 0;
-                            displayCurrentImage();
-                            generatePreviews();
                             uploadOverlay.style.display = 'none';
-                            mainCanvas.style.display = 'block';
-                            imagesGallery.style.display = 'block';
+                            generatePreviews();
+                        }
+
+                        // Réappliquer le filtre actuel si présent
+                        if (currentFilter) {
+                            applyFilterToAll(currentFilter.filter, currentFilter.name, activeFilterElement, true);
                         }
 
                         updateButtons();
@@ -633,47 +616,38 @@
                 reader.readAsDataURL(file);
             });
 
-            // Reset input
             e.target.value = '';
         });
 
-        // Mettre à jour la galerie
-        function updateGallery() {
-            galleryGrid.innerHTML = '';
-            galleryCount.textContent = `${loadedImages.length}/8`;
+        // Mettre à jour le viewer avec toutes les images
+        function updateViewer() {
+            imagesGrid.innerHTML = '';
 
             loadedImages.forEach((imgData, index) => {
-                const item = document.createElement('div');
-                item.className = 'gallery-item' + (index === currentImageIndex ? ' active' : '');
-                item.onclick = () => switchToImage(index);
+                const card = document.createElement('div');
+                card.className = 'image-card';
 
-                const img = document.createElement('img');
-                img.src = imgData.original.src;
+                const canvas = imgData.canvas;
+                card.appendChild(canvas);
+
+                const footer = document.createElement('div');
+                footer.className = 'image-card-footer';
+
+                const number = document.createElement('span');
+                number.className = 'image-number';
+                number.textContent = `#${index + 1}`;
 
                 const removeBtn = document.createElement('button');
                 removeBtn.className = 'remove-btn';
                 removeBtn.textContent = '×';
-                removeBtn.onclick = (e) => {
-                    e.stopPropagation();
-                    removeImage(index);
-                };
+                removeBtn.onclick = () => removeImage(index);
 
-                const number = document.createElement('div');
-                number.className = 'image-number';
-                number.textContent = `#${index + 1}`;
+                footer.appendChild(number);
+                footer.appendChild(removeBtn);
+                card.appendChild(footer);
 
-                item.appendChild(img);
-                item.appendChild(removeBtn);
-                item.appendChild(number);
-                galleryGrid.appendChild(item);
+                imagesGrid.appendChild(card);
             });
-        }
-
-        // Changer d'image active
-        function switchToImage(index) {
-            currentImageIndex = index;
-            displayCurrentImage();
-            updateGallery();
         }
 
         // Supprimer une image
@@ -682,35 +656,15 @@
             
             if (loadedImages.length === 0) {
                 uploadOverlay.style.display = 'flex';
-                mainCanvas.style.display = 'none';
-                imagesGallery.style.display = 'none';
                 currentFilter = null;
+                activeFilterElement = null;
+                currentFilterBadge.style.display = 'none';
             } else {
-                if (currentImageIndex >= loadedImages.length) {
-                    currentImageIndex = loadedImages.length - 1;
-                }
-                displayCurrentImage();
                 generatePreviews();
             }
             
-            updateGallery();
+            updateViewer();
             updateButtons();
-        }
-
-        // Afficher l'image courante
-        function displayCurrentImage() {
-            if (loadedImages.length === 0) return;
-
-            const imgData = loadedImages[currentImageIndex];
-            mainCanvas.width = imgData.original.width;
-            mainCanvas.height = imgData.original.height;
-
-            // Afficher la version filtrée si un filtre est actif, sinon l'originale
-            if (currentFilter) {
-                ctx.drawImage(imgData.filteredCanvas, 0, 0);
-            } else {
-                ctx.drawImage(imgData.original, 0, 0);
-            }
         }
 
         // Générer les previews des filtres
@@ -718,7 +672,7 @@
             if (loadedImages.length === 0) return;
 
             const previewSize = 150;
-            const imgData = loadedImages[0]; // Utiliser la première image pour les previews
+            const imgData = loadedImages[0];
             
             for (const filters of Object.values(filterCategories)) {
                 filters.forEach(filterInfo => {
@@ -748,44 +702,56 @@
         }
 
         // Appliquer un filtre à toutes les images
-        function applyFilterToAll(filterName) {
+        function applyFilterToAll(filterName, displayName, element, skipStateUpdate = false) {
             if (loadedImages.length === 0) return;
 
-            currentFilter = filterName;
+            if (!skipStateUpdate) {
+                currentFilter = { filter: filterName, name: displayName };
+                
+                // Mettre à jour l'UI des filtres
+                if (activeFilterElement) {
+                    activeFilterElement.classList.remove('active');
+                }
+                activeFilterElement = element;
+                element.classList.add('active');
+
+                // Afficher le badge du filtre actif
+                currentFilterBadge.style.display = 'block';
+                currentFilterName.textContent = displayName;
+            }
 
             loadedImages.forEach(imgData => {
-                const canvas = imgData.filteredCanvas;
-                const ctx = canvas.getContext('2d');
-                
-                // Réinitialiser avec l'image originale
+                const ctx = imgData.canvas.getContext('2d');
                 ctx.drawImage(imgData.original, 0, 0);
                 
-                // Appliquer le filtre
-                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                applyFilterToImageData(imageData, filterName, canvas);
+                const imageData = ctx.getImageData(0, 0, imgData.canvas.width, imgData.canvas.height);
+                applyFilterToImageData(imageData, filterName, imgData.canvas);
                 ctx.putImageData(imageData, 0, 0);
             });
 
-            // Afficher l'image courante avec le filtre
-            displayCurrentImage();
+            updateButtons();
         }
 
-        // Télécharger l'image courante
-        function downloadCurrentImage() {
+        // Effacer le filtre
+        function clearFilter() {
             if (loadedImages.length === 0) return;
 
-            const imgData = loadedImages[currentImageIndex];
-            const link = document.createElement('a');
-            const filterSuffix = currentFilter ? `_${currentFilter}` : '';
-            link.download = imgData.name.replace(/\.[^/.]+$/, '') + filterSuffix + '.png';
+            currentFilter = null;
             
-            if (currentFilter) {
-                link.href = imgData.filteredCanvas.toDataURL();
-            } else {
-                link.href = imgData.originalCanvas.toDataURL();
+            if (activeFilterElement) {
+                activeFilterElement.classList.remove('active');
+                activeFilterElement = null;
             }
-            
-            link.click();
+
+            currentFilterBadge.style.display = 'none';
+
+            loadedImages.forEach(imgData => {
+                const ctx = imgData.canvas.getContext('2d');
+                ctx.clearRect(0, 0, imgData.canvas.width, imgData.canvas.height);
+                ctx.drawImage(imgData.original, 0, 0);
+            });
+
+            updateButtons();
         }
 
         // Télécharger toutes les images dans un ZIP
@@ -793,22 +759,18 @@
             if (loadedImages.length === 0) return;
 
             const zip = new JSZip();
-            const filterSuffix = currentFilter ? `_${currentFilter}` : '_original';
+            const filterSuffix = currentFilter ? `_${currentFilter.filter}` : '_original';
 
             for (let i = 0; i < loadedImages.length; i++) {
                 const imgData = loadedImages[i];
-                const canvas = currentFilter ? imgData.filteredCanvas : imgData.originalCanvas;
-                
-                // Convertir canvas en blob
                 const blob = await new Promise(resolve => {
-                    canvas.toBlob(resolve, 'image/png');
+                    imgData.canvas.toBlob(resolve, 'image/png');
                 });
 
                 const filename = imgData.name.replace(/\.[^/.]+$/, '') + filterSuffix + '.png';
                 zip.file(filename, blob);
             }
 
-            // Générer et télécharger le ZIP
             const content = await zip.generateAsync({ type: 'blob' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(content);
@@ -819,8 +781,9 @@
         // Mettre à jour l'état des boutons
         function updateButtons() {
             const hasImages = loadedImages.length > 0;
-            document.getElementById('downloadSingleBtn').disabled = !hasImages;
+            const hasFilter = currentFilter !== null;
             document.getElementById('downloadAllBtn').disabled = !hasImages;
+            document.getElementById('clearFilterBtn').disabled = !hasFilter;
         }
 
         // Fonction centrale pour appliquer les filtres
@@ -862,10 +825,24 @@
                 case 'greenChannel': greenChannel(data); break;
                 case 'blueChannel': blueChannel(data); break;
                 case 'rgbShift': rgbShiftData(imageData, targetCanvas); return;
+                // Saisons
+                case 'spring': spring(data); break;
+                case 'summer': summer(data); break;
+                case 'autumn': autumn(data); break;
+                case 'winter': winter(data); break;
+                // WTF
+                case 'psychedelic': psychedelic(data); break;
+                case 'infrared': infrared(data); break;
+                case 'xray': xray(data); break;
+                case 'thermal': thermal(data); break;
+                case 'acid': acid(data); break;
+                case 'matrix': matrix(data); break;
+                case 'deepfry': deepfry(data); break;
+                case 'glitchmax': glitchmax(data); break;
             }
         }
 
-        // ===== FILTRES =====
+        // ===== FILTRES BASIQUES =====
         function grayscale(data) {
             for (let i = 0; i < data.length; i += 4) {
                 const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
@@ -912,9 +889,7 @@
             for (let i = 0; i < data.length; i += 4) {
                 const gray = (data[i] + data[i + 1] + data[i + 2]) / 3;
                 const color = palette[Math.min(Math.floor(gray / 64), 3)];
-                data[i] = color[0];
-                data[i + 1] = color[1];
-                data[i + 2] = color[2];
+                data[i] = color[0]; data[i + 1] = color[1]; data[i + 2] = color[2];
             }
         }
 
@@ -922,9 +897,7 @@
             grayscale(data);
             for (let i = 0; i < data.length; i += 4) {
                 const gray = data[i];
-                data[i] = gray * 0.3;
-                data[i + 1] = gray * 0.8;
-                data[i + 2] = gray * 0.3;
+                data[i] = gray * 0.3; data[i + 1] = gray * 0.8; data[i + 2] = gray * 0.3;
             }
         }
 
@@ -945,20 +918,17 @@
                     const dist = Math.sqrt(Math.pow(data[i] - palette[j][0], 2) + Math.pow(data[i + 1] - palette[j][1], 2) + Math.pow(data[i + 2] - palette[j][2], 2));
                     if (dist < minDist) { minDist = dist; closest = j; }
                 }
-                data[i] = palette[closest][0];
-                data[i + 1] = palette[closest][1];
-                data[i + 2] = palette[closest][2];
+                data[i] = palette[closest][0]; data[i + 1] = palette[closest][1]; data[i + 2] = palette[closest][2];
             }
         }
 
         function pixelateData(imageData, targetCanvas) {
-            const size = targetCanvas === mainCanvas ? 10 : 5;
+            const size = 10;
             const w = targetCanvas.width, h = targetCanvas.height;
             const tempCtx = targetCanvas.getContext('2d');
             tempCtx.imageSmoothingEnabled = false;
             const tempCanvas = document.createElement('canvas');
-            tempCanvas.width = w / size;
-            tempCanvas.height = h / size;
+            tempCanvas.width = w / size; tempCanvas.height = h / size;
             const tempContext = tempCanvas.getContext('2d');
             tempContext.drawImage(targetCanvas, 0, 0, w, h, 0, 0, w / size, h / size);
             tempCtx.drawImage(tempCanvas, 0, 0, w / size, h / size, 0, 0, w, h);
@@ -1116,16 +1086,11 @@
                     for (let ky = -1; ky <= 1; ky++) {
                         for (let kx = -1; kx <= 1; kx++) {
                             const idx = ((y + ky) * w + (x + kx)) * 4;
-                            r += data[idx];
-                            g += data[idx + 1];
-                            b += data[idx + 2];
-                            count++;
+                            r += data[idx]; g += data[idx + 1]; b += data[idx + 2]; count++;
                         }
                     }
                     const idx = (y * w + x) * 4;
-                    output[idx] = r / count;
-                    output[idx + 1] = g / count;
-                    output[idx + 2] = b / count;
+                    output[idx] = r / count; output[idx + 1] = g / count; output[idx + 2] = b / count;
                 }
             }
             
@@ -1169,29 +1134,26 @@
 
         function redChannel(data) {
             for (let i = 0; i < data.length; i += 4) {
-                data[i + 1] = 0;
-                data[i + 2] = 0;
+                data[i + 1] = 0; data[i + 2] = 0;
             }
         }
 
         function greenChannel(data) {
             for (let i = 0; i < data.length; i += 4) {
-                data[i] = 0;
-                data[i + 2] = 0;
+                data[i] = 0; data[i + 2] = 0;
             }
         }
 
         function blueChannel(data) {
             for (let i = 0; i < data.length; i += 4) {
-                data[i] = 0;
-                data[i + 1] = 0;
+                data[i] = 0; data[i + 1] = 0;
             }
         }
 
         function rgbShiftData(imageData, targetCanvas) {
             const data = imageData.data;
             const w = targetCanvas.width, h = targetCanvas.height;
-            const shift = targetCanvas === mainCanvas ? 5 : 2;
+            const shift = 5;
             const output = new Uint8ClampedArray(data);
             
             for (let y = 0; y < h; y++) {
@@ -1205,6 +1167,126 @@
             }
             
             for (let i = 0; i < data.length; i++) data[i] = output[i];
+        }
+
+        // ===== FILTRES SAISONS =====
+        function spring(data) {
+            for (let i = 0; i < data.length; i += 4) {
+                data[i] = Math.min(255, data[i] * 1.05 + 15); // Un peu plus de rouge
+                data[i + 1] = Math.min(255, data[i + 1] * 1.2 + 30); // Beaucoup plus de vert
+                data[i + 2] = Math.min(255, data[i + 2] * 0.95 + 20); // Un peu de bleu
+            }
+        }
+
+        function summer(data) {
+            for (let i = 0; i < data.length; i += 4) {
+                data[i] = Math.min(255, data[i] * 1.3 + 40); // Beaucoup de rouge
+                data[i + 1] = Math.min(255, data[i + 1] * 1.2 + 30); // Plus de vert
+                data[i + 2] = Math.min(255, data[i + 2] * 0.9); // Moins de bleu
+            }
+            brightness(data, 20);
+        }
+
+        function autumn(data) {
+            for (let i = 0; i < data.length; i += 4) {
+                data[i] = Math.min(255, data[i] * 1.4 + 50); // Beaucoup de rouge
+                data[i + 1] = Math.min(255, data[i + 1] * 1.1 + 20); // Un peu de vert
+                data[i + 2] = Math.max(0, data[i + 2] * 0.6 - 30); // Très peu de bleu
+            }
+        }
+
+        function winter(data) {
+            for (let i = 0; i < data.length; i += 4) {
+                data[i] = Math.min(255, data[i] * 0.9 + 40); // Un peu de rouge
+                data[i + 1] = Math.min(255, data[i + 1] * 0.95 + 40); // Un peu de vert
+                data[i + 2] = Math.min(255, data[i + 2] * 1.3 + 60); // Beaucoup de bleu
+            }
+            brightness(data, 30);
+        }
+
+        // ===== FILTRES WTF =====
+        function psychedelic(data) {
+            for (let i = 0; i < data.length; i += 4) {
+                const offset = Math.sin(i * 0.01) * 128;
+                data[i] = Math.min(255, Math.max(0, (data[i] + offset) % 256));
+                data[i + 1] = Math.min(255, Math.max(0, (data[i + 1] + offset + 85) % 256));
+                data[i + 2] = Math.min(255, Math.max(0, (data[i + 2] + offset + 170) % 256));
+            }
+        }
+
+        function infrared(data) {
+            for (let i = 0; i < data.length; i += 4) {
+                const temp = data[i + 1]; // Swap green et red
+                data[i] = Math.min(255, temp * 1.5);
+                data[i + 1] = Math.max(0, data[i] * 0.3);
+                data[i + 2] = Math.max(0, data[i + 2] * 0.3);
+            }
+        }
+
+        function xray(data) {
+            invert(data);
+            grayscale(data);
+            contrast(data, 60);
+            brightness(data, 40);
+        }
+
+        function thermal(data) {
+            for (let i = 0; i < data.length; i += 4) {
+                const intensity = (data[i] + data[i + 1] + data[i + 2]) / 3;
+                if (intensity < 64) {
+                    data[i] = 0; data[i + 1] = 0; data[i + 2] = intensity * 4;
+                } else if (intensity < 128) {
+                    data[i] = 0; data[i + 1] = (intensity - 64) * 4; data[i + 2] = 255;
+                } else if (intensity < 192) {
+                    data[i] = (intensity - 128) * 4; data[i + 1] = 255; data[i + 2] = 255 - (intensity - 128) * 4;
+                } else {
+                    data[i] = 255; data[i + 1] = 255 - (intensity - 192) * 4; data[i + 2] = 0;
+                }
+            }
+        }
+
+        function acid(data) {
+            for (let i = 0; i < data.length; i += 4) {
+                data[i] = (data[i] + data[i + 2]) % 256;
+                data[i + 1] = (data[i + 1] + data[i]) % 256;
+                data[i + 2] = (data[i + 2] + data[i + 1]) % 256;
+            }
+            contrast(data, 80);
+        }
+
+        function matrix(data) {
+            for (let i = 0; i < data.length; i += 4) {
+                const green = (data[i] + data[i + 1] + data[i + 2]) / 3;
+                data[i] = 0;
+                data[i + 1] = Math.min(255, green * 1.5);
+                data[i + 2] = 0;
+            }
+            contrast(data, 50);
+            brightness(data, -30);
+        }
+
+        function deepfry(data) {
+            // Saturation extreme + contraste + posterize
+            for (let i = 0; i < data.length; i += 4) {
+                data[i] = Math.min(255, data[i] * 1.8);
+                data[i + 1] = Math.min(255, data[i + 1] * 1.5);
+                data[i + 2] = Math.min(255, data[i + 2] * 0.7);
+            }
+            contrast(data, 80);
+            posterize(data, 3);
+        }
+
+        function glitchmax(data) {
+            // Random pixel shifts et color corruption
+            for (let i = 0; i < data.length; i += 16) {
+                if (Math.random() > 0.7) {
+                    const shift = Math.floor(Math.random() * 100) * 4;
+                    const targetIdx = Math.min(data.length - 4, i + shift);
+                    [data[i], data[targetIdx]] = [data[targetIdx], data[i]];
+                    [data[i + 1], data[targetIdx + 1]] = [data[targetIdx + 1], data[i + 1]];
+                    [data[i + 2], data[targetIdx + 2]] = [data[targetIdx + 2], data[i + 2]];
+                }
+            }
         }
 
         // Initialiser
