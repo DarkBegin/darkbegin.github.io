@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Générateur de Noise Procédural Pro</title>
+    <title>Générateur de Noise Procédural Pro - Ultimate Edition</title>
     <style>
         * {
             margin: 0;
@@ -20,6 +20,7 @@
             background: linear-gradient(135deg, #1e1e1e 0%, #2d2d2d 100%);
             color: #e0e0e0;
             padding: 20px;
+            overflow-x: hidden;
         }
 
         .container {
@@ -49,7 +50,27 @@
             background: #1a1a1a;
             padding: 20px;
             border-radius: 8px;
-            height: fit-content;
+            max-height: 85vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .controls::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .controls::-webkit-scrollbar-track {
+            background: #0f0f0f;
+            border-radius: 4px;
+        }
+
+        .controls::-webkit-scrollbar-thumb {
+            background: #00d4ff;
+            border-radius: 4px;
+        }
+
+        .controls::-webkit-scrollbar-thumb:hover {
+            background: #00a8cc;
         }
 
         .preview-area {
@@ -59,6 +80,9 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            position: sticky;
+            top: 20px;
+            height: fit-content;
         }
 
         canvas {
@@ -111,6 +135,11 @@
 
         .control-group {
             margin-bottom: 15px;
+        }
+
+        .control-group.disabled {
+            opacity: 0.4;
+            pointer-events: none;
         }
 
         label {
@@ -169,16 +198,47 @@
             -moz-user-select: text;
         }
 
-        .value-display {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
+        input[type="file"] {
+            display: none;
         }
 
-        .value {
-            color: #00d4ff;
+        .file-upload-btn {
+            background: linear-gradient(135deg, #ff6b00 0%, #cc5500 100%);
+            border: none;
+            color: white;
+            padding: 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1em;
             font-weight: 600;
+            transition: all 0.3s;
+            margin-bottom: 10px;
+            width: 100%;
+        }
+
+        .file-upload-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255,107,0,0.4);
+        }
+
+        .clear-image-btn {
+            background: linear-gradient(135deg, #cc0000 0%, #990000 100%);
+            border: none;
+            color: white;
+            padding: 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s;
+            margin-bottom: 10px;
+            width: 100%;
+            display: none;
+        }
+
+        .clear-image-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(204,0,0,0.4);
         }
 
         .export-section {
@@ -247,11 +307,71 @@
         .random-btn:hover {
             box-shadow: 0 6px 20px rgba(255,107,0,0.4);
         }
+
+        .seamless-toggle {
+            background: #2a2a2a;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+
+        .toggle-label {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 50px;
+            height: 24px;
+            background: #444;
+            border-radius: 12px;
+            transition: background 0.3s;
+        }
+
+        .toggle-switch.active {
+            background: #00d4ff;
+        }
+
+        .toggle-knob {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s;
+        }
+
+        .toggle-switch.active .toggle-knob {
+            transform: translateX(26px);
+        }
+
+        .ultra-section {
+            background: linear-gradient(135deg, #2a1a3a 0%, #1a1a2a 100%);
+            border: 1px solid #663399;
+        }
+
+        .image-section {
+            background: linear-gradient(135deg, #1a3a2a 0%, #1a2a2a 100%);
+            border: 1px solid #339966;
+        }
+
+        .image-preview {
+            max-width: 100%;
+            max-height: 150px;
+            border-radius: 4px;
+            margin-top: 10px;
+            display: none;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🌊 Générateur de Noise Procédural Pro</h1>
+        <h1>🌊 Générateur de Noise Procédural Pro - Ultimate Edition</h1>
 
         <div class="main-layout">
             <div class="controls">
@@ -266,6 +386,111 @@
                         <button class="preset-btn" onclick="applyPreset('clouds')">Nuages</button>
                         <button class="preset-btn" onclick="applyPreset('lightning')">Lightning</button>
                         <button class="preset-btn" onclick="applyPreset('lava')">Lave</button>
+                        <button class="preset-btn" onclick="applyPreset('cell')">Cell</button>
+                        <button class="preset-btn" onclick="applyPreset('glitch')">Glitch</button>
+                        <button class="preset-btn" onclick="applyPreset('vortex')">Vortex</button>
+                        <button class="preset-btn" onclick="applyPreset('crystal')">Crystal</button>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">Mode de Génération</div>
+                    <div class="seamless-toggle">
+                        <div class="toggle-label" onclick="toggleSeamless()">
+                            <span>Seamless Mode</span>
+                            <div class="toggle-switch" id="seamlessToggle">
+                                <div class="toggle-knob"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <p style="font-size: 0.85em; color: #888; margin-top: -10px;">
+                        OFF: Perlin + Ultra FX | ON: Projection 4D
+                    </p>
+                </div>
+
+                <div class="section image-section">
+                    <div class="section-title">🖼️ Image to Noise</div>
+                    <input type="file" id="imageUpload" accept="image/*" onchange="loadImage(event)">
+                    <button class="file-upload-btn" onclick="document.getElementById('imageUpload').click()">
+                        📁 Charger une Image
+                    </button>
+                    <button class="clear-image-btn" id="clearImageBtn" onclick="clearImage()">
+                        ❌ Retirer l'Image
+                    </button>
+                    <img id="imagePreview" class="image-preview">
+                    <div class="control-group" id="imageBlendControl">
+                        <label>Image Blend</label>
+                        <div class="slider-container">
+                            <input type="range" id="imageBlend" min="0" max="100" value="0" oninput="syncSlider('imageBlend', true)">
+                            <input type="number" id="imageBlendNum" min="0" max="100" value="0" oninput="syncSlider('imageBlend', false)">
+                        </div>
+                    </div>
+                    <div class="control-group" id="decomposeControl">
+                        <label>Décomposition</label>
+                        <div class="slider-container">
+                            <input type="range" id="decompose" min="0" max="100" value="50" oninput="syncSlider('decompose', true)">
+                            <input type="number" id="decomposeNum" min="0" max="100" value="50" oninput="syncSlider('decompose', false)">
+                        </div>
+                    </div>
+                    <div class="control-group" id="pixelChaosControl">
+                        <label>Pixel Chaos</label>
+                        <div class="slider-container">
+                            <input type="range" id="pixelChaos" min="0" max="100" value="0" oninput="syncSlider('pixelChaos', true)">
+                            <input type="number" id="pixelChaosNum" min="0" max="100" value="0" oninput="syncSlider('pixelChaos', false)">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section ultra-section">
+                    <div class="section-title">⚡ Ultra FX (Mode Normal)</div>
+                    <div class="control-group">
+                        <label>Ridged Multiplier</label>
+                        <div class="slider-container">
+                            <input type="range" id="ridged" min="0" max="100" value="0" oninput="syncSlider('ridged', true)">
+                            <input type="number" id="ridgedNum" min="0" max="100" value="0" oninput="syncSlider('ridged', false)">
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label>Billowy Power</label>
+                        <div class="slider-container">
+                            <input type="range" id="billowy" min="0" max="100" value="0" oninput="syncSlider('billowy', true)">
+                            <input type="number" id="billowyNum" min="0" max="100" value="0" oninput="syncSlider('billowy', false)">
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label>Swirl Intensity</label>
+                        <div class="slider-container">
+                            <input type="range" id="swirl" min="0" max="100" value="0" oninput="syncSlider('swirl', true)">
+                            <input type="number" id="swirlNum" min="0" max="100" value="0" oninput="syncSlider('swirl', false)">
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label>Posterize Levels</label>
+                        <div class="slider-container">
+                            <input type="range" id="posterize" min="2" max="20" value="20" oninput="syncSlider('posterize', true)">
+                            <input type="number" id="posterizeNum" min="2" max="20" value="20" oninput="syncSlider('posterize', false)">
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label>Voronoi Mix</label>
+                        <div class="slider-container">
+                            <input type="range" id="voronoi" min="0" max="100" value="0" oninput="syncSlider('voronoi', true)">
+                            <input type="number" id="voronoiNum" min="0" max="100" value="0" oninput="syncSlider('voronoi', false)">
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label>Fractal Break</label>
+                        <div class="slider-container">
+                            <input type="range" id="fractalBreak" min="0" max="100" value="0" oninput="syncSlider('fractalBreak', true)">
+                            <input type="number" id="fractalBreakNum" min="0" max="100" value="0" oninput="syncSlider('fractalBreak', false)">
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label>Invert Amount</label>
+                        <div class="slider-container">
+                            <input type="range" id="invert" min="0" max="100" value="0" oninput="syncSlider('invert', true)">
+                            <input type="number" id="invertNum" min="0" max="100" value="0" oninput="syncSlider('invert', false)">
+                        </div>
                     </div>
                 </div>
 
@@ -273,7 +498,7 @@
                     <div class="section-title">Scale</div>
 
                     <div class="control-group">
-                        <label>Master Scale (Tous les axes)</label>
+                        <label>Master Scale</label>
                         <div class="slider-container">
                             <input type="range" id="masterScale" min="0.1" max="10" step="0.1" value="1" oninput="syncMasterScale(true)">
                             <input type="number" id="masterScaleNum" min="0.1" max="10" step="0.1" value="1" oninput="syncMasterScale(false)">
@@ -420,7 +645,10 @@
     </div>
 
     <script>
-        // Perlin Noise with circle mapping for TRUE seamless tiling
+        let seamlessMode = false;
+        let uploadedImage = null;
+        let uploadedImageData = null;
+
         class PerlinNoise {
             constructor(seed = 12345) {
                 this.seed = seed;
@@ -496,37 +724,162 @@
         const presets = {
             grudge: {
                 masterScale: 1, scaleX: 100, scaleY: 1.8, scaleZ: 100, octaves: 8, persistence: 0.65, 
-                lacunarity: 2.3, contrast: 2.5, warp: 0, turbulence: 45, distScale: 80
+                lacunarity: 2.3, contrast: 2.5, warp: 0, turbulence: 45, distScale: 80,
+                ridged: 0, billowy: 0, swirl: 0, posterize: 20, voronoi: 0, fractalBreak: 0, invert: 0
             },
             water: {
                 masterScale: 1, scaleX: 35, scaleY: 1.0, scaleZ: 25, octaves: 6, persistence: 0.45, 
-                lacunarity: 2.1, contrast: 1.2, warp: 0, turbulence: 15, distScale: 60
+                lacunarity: 2.1, contrast: 1.2, warp: 0, turbulence: 15, distScale: 60,
+                ridged: 0, billowy: 0, swirl: 0, posterize: 20, voronoi: 0, fractalBreak: 0, invert: 0
             },
             rain: {
                 masterScale: 1, scaleX: 100, scaleY: 0.7, scaleZ: 100, octaves: 12, persistence: 0.75, 
-                lacunarity: 3.5, contrast: 3.2, warp: 0, turbulence: 80, distScale: 100
+                lacunarity: 3.5, contrast: 3.2, warp: 0, turbulence: 80, distScale: 100,
+                ridged: 0, billowy: 0, swirl: 0, posterize: 20, voronoi: 0, fractalBreak: 0, invert: 0
             },
             smooth: {
                 masterScale: 1, scaleX: 8, scaleY: 1.3, scaleZ: 8, octaves: 2, persistence: 0.3, 
-                lacunarity: 1.5, contrast: 0.8, warp: 0, turbulence: 0, distScale: 20
+                lacunarity: 1.5, contrast: 0.8, warp: 0, turbulence: 0, distScale: 20,
+                ridged: 0, billowy: 0, swirl: 0, posterize: 20, voronoi: 0, fractalBreak: 0, invert: 0
             },
             marble: {
                 masterScale: 1, scaleX: 45, scaleY: 1.5, scaleZ: 20, octaves: 7, persistence: 0.55, 
-                lacunarity: 2.8, contrast: 2.0, warp: 0, turbulence: 25, distScale: 40
+                lacunarity: 2.8, contrast: 2.0, warp: 0, turbulence: 25, distScale: 40,
+                ridged: 0, billowy: 0, swirl: 0, posterize: 20, voronoi: 0, fractalBreak: 0, invert: 0
             },
             clouds: {
                 masterScale: 1, scaleX: 60, scaleY: 1.1, scaleZ: 60, octaves: 5, persistence: 0.5, 
-                lacunarity: 2.0, contrast: 1.3, warp: 0, turbulence: 10, distScale: 90
+                lacunarity: 2.0, contrast: 1.3, warp: 0, turbulence: 10, distScale: 90,
+                ridged: 0, billowy: 0, swirl: 0, posterize: 20, voronoi: 0, fractalBreak: 0, invert: 0
             },
             lightning: {
                 masterScale: 1, scaleX: 100, scaleY: 2.5, scaleZ: 5, octaves: 10, persistence: 0.7, 
-                lacunarity: 4.0, contrast: 4.5, warp: 0, turbulence: 60, distScale: 100
+                lacunarity: 4.0, contrast: 4.5, warp: 0, turbulence: 60, distScale: 100,
+                ridged: 0, billowy: 0, swirl: 0, posterize: 20, voronoi: 0, fractalBreak: 0, invert: 0
             },
             lava: {
                 masterScale: 1, scaleX: 70, scaleY: 1.6, scaleZ: 70, octaves: 9, persistence: 0.6, 
-                lacunarity: 2.5, contrast: 2.2, warp: 0, turbulence: 35, distScale: 100
+                lacunarity: 2.5, contrast: 2.2, warp: 0, turbulence: 35, distScale: 100,
+                ridged: 0, billowy: 0, swirl: 0, posterize: 20, voronoi: 0, fractalBreak: 0, invert: 0
+            },
+            cell: {
+                masterScale: 1, scaleX: 15, scaleY: 1.2, scaleZ: 15, octaves: 1, persistence: 0.5, 
+                lacunarity: 2.0, contrast: 1.8, warp: 0, turbulence: 0, distScale: 50,
+                ridged: 0, billowy: 0, swirl: 0, posterize: 20, voronoi: 0, fractalBreak: 0, invert: 0
+            },
+            glitch: {
+                masterScale: 1, scaleX: 50, scaleY: 2.0, scaleZ: 50, octaves: 8, persistence: 0.7, 
+                lacunarity: 3.2, contrast: 0.2, warp: 15, turbulence: 0, distScale: 25,
+                ridged: 60, billowy: 0, swirl: 0, posterize: 5, voronoi: 0, fractalBreak: 80, invert: 0
+            },
+            vortex: {
+                masterScale: 1, scaleX: 40, scaleY: 1.5, scaleZ: 40, octaves: 6, persistence: 0.55, 
+                lacunarity: 2.5, contrast: 2.0, warp: 25, turbulence: 0, distScale: 35,
+                ridged: 0, billowy: 0, swirl: 85, posterize: 20, voronoi: 0, fractalBreak: 0, invert: 0
+            },
+            crystal: {
+                masterScale: 1, scaleX: 30, scaleY: 1.8, scaleZ: 30, octaves: 5, persistence: 0.45, 
+                lacunarity: 2.2, contrast: 2.5, warp: 0, turbulence: 0, distScale: 50,
+                ridged: 0, billowy: 0, swirl: 0, posterize: 8, voronoi: 75, fractalBreak: 0, invert: 0
             }
         };
+
+        function updateImageControlsState() {
+            const hasImage = uploadedImageData !== null;
+            const controls = ['imageBlendControl', 'decomposeControl', 'pixelChaosControl'];
+
+            controls.forEach(controlId => {
+                const control = document.getElementById(controlId);
+                if (hasImage) {
+                    control.classList.remove('disabled');
+                } else {
+                    control.classList.add('disabled');
+                }
+            });
+
+            document.getElementById('clearImageBtn').style.display = hasImage ? 'block' : 'none';
+        }
+
+        function loadImage(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    uploadedImage = img;
+                    document.getElementById('imagePreview').src = e.target.result;
+                    document.getElementById('imagePreview').style.display = 'block';
+
+                    const canvas = document.createElement('canvas');
+                    canvas.width = 512;
+                    canvas.height = 512;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, 512, 512);
+                    uploadedImageData = ctx.getImageData(0, 0, 512, 512);
+
+                    updateImageControlsState();
+                    updateNoise();
+                }
+                img.src = e.target.result;
+            }
+            reader.readAsDataURL(file);
+        }
+
+        function clearImage() {
+            uploadedImage = null;
+            uploadedImageData = null;
+            document.getElementById('imagePreview').style.display = 'none';
+            document.getElementById('imagePreview').src = '';
+            document.getElementById('imageUpload').value = '';
+
+            document.getElementById('imageBlend').value = 0;
+            document.getElementById('imageBlendNum').value = 0;
+            document.getElementById('decompose').value = 50;
+            document.getElementById('decomposeNum').value = 50;
+            document.getElementById('pixelChaos').value = 0;
+            document.getElementById('pixelChaosNum').value = 0;
+
+            updateImageControlsState();
+            updateNoise();
+        }
+
+        function voronoiNoise(x, y, seed) {
+            const cellX = Math.floor(x);
+            const cellY = Math.floor(y);
+            let minDist = 999999;
+
+            for (let dy = -1; dy <= 1; dy++) {
+                for (let dx = -1; dx <= 1; dx++) {
+                    const neighborX = cellX + dx;
+                    const neighborY = cellY + dy;
+
+                    const hash = Math.sin(neighborX * 12.9898 + neighborY * 78.233 + seed) * 43758.5453;
+                    const pointX = neighborX + (hash - Math.floor(hash));
+                    const pointY = neighborY + ((hash * 1.13) - Math.floor(hash * 1.13));
+
+                    const distX = x - pointX;
+                    const distY = y - pointY;
+                    const dist = Math.sqrt(distX * distX + distY * distY);
+
+                    minDist = Math.min(minDist, dist);
+                }
+            }
+
+            return minDist;
+        }
+
+        function toggleSeamless() {
+            seamlessMode = !seamlessMode;
+            const toggle = document.getElementById('seamlessToggle');
+            if (seamlessMode) {
+                toggle.classList.add('active');
+            } else {
+                toggle.classList.remove('active');
+            }
+            updateNoise();
+        }
 
         function syncSlider(name, fromSlider) {
             const slider = document.getElementById(name);
@@ -559,7 +912,8 @@
             if (!preset) return;
 
             const fields = ['masterScale', 'scaleX', 'scaleY', 'scaleZ', 'octaves', 'persistence', 
-                          'lacunarity', 'contrast', 'warp', 'turbulence', 'distScale'];
+                          'lacunarity', 'contrast', 'warp', 'turbulence', 'distScale',
+                          'ridged', 'billowy', 'swirl', 'posterize', 'voronoi', 'fractalBreak', 'invert'];
 
             fields.forEach(field => {
                 const slider = document.getElementById(field);
@@ -579,6 +933,26 @@
             updateNoise();
         }
 
+        function noise4D(noise, x, y, width, height, scaleX, scaleZ, frequency) {
+            const s = x / width;
+            const t = y / height;
+
+            const angle_s = s * Math.PI * 2;
+            const angle_t = t * Math.PI * 2;
+
+            const nx = Math.cos(angle_s) / (Math.PI * 2);
+            const ny = Math.sin(angle_s) / (Math.PI * 2);
+            const nz = Math.cos(angle_t) / (Math.PI * 2);
+            const nw = Math.sin(angle_t) / (Math.PI * 2);
+
+            const fx = nx * scaleX * frequency;
+            const fy = nz * scaleZ * frequency;
+            const fz = ny * scaleX * frequency;
+            const fw = nw * scaleZ * frequency;
+
+            return (noise.noise(fx, fy) + noise.noise(fz, fw)) * 0.5;
+        }
+
         function generateNoise(width, height) {
             const masterScale = parseFloat(document.getElementById('masterScale').value);
             const scaleX = parseFloat(document.getElementById('scaleX').value) * masterScale;
@@ -593,65 +967,81 @@
             const distScale = parseFloat(document.getElementById('distScale').value);
             const seed = parseInt(document.getElementById('seed').value);
 
+            const ridged = parseFloat(document.getElementById('ridged').value) / 100;
+            const billowy = parseFloat(document.getElementById('billowy').value) / 100;
+            const swirl = parseFloat(document.getElementById('swirl').value) / 100;
+            const posterize = parseInt(document.getElementById('posterize').value);
+            const voronoi = parseFloat(document.getElementById('voronoi').value) / 100;
+            const fractalBreak = parseFloat(document.getElementById('fractalBreak').value) / 100;
+            const invert = parseFloat(document.getElementById('invert').value) / 100;
+
+            const imageBlend = parseFloat(document.getElementById('imageBlend').value) / 100;
+            const decompose = parseFloat(document.getElementById('decompose').value) / 100;
+            const pixelChaos = parseFloat(document.getElementById('pixelChaos').value) / 100;
+
             perlinNoise = new PerlinNoise(seed);
 
             const imageData = new ImageData(width, height);
             const data = imageData.data;
 
-            const TWO_PI = Math.PI * 2;
-
             for (let y = 0; y < height; y++) {
                 for (let x = 0; x < width; x++) {
-                    // Normalize coordinates to 0-1
-                    let s = x / width;
-                    let t = y / height;
+                    let px = x;
+                    let py = y;
 
-                    // Apply warp with seamless wrapping
-                    if (warp > 0) {
-                        const ws = s * TWO_PI;
-                        const wt = t * TWO_PI;
-
-                        const warpNX = Math.cos(ws) / distScale;
-                        const warpNY = Math.sin(ws) / distScale;
-                        const warpNZ = Math.cos(wt) / distScale;
-                        const warpNW = Math.sin(wt) / distScale;
-
-                        const warpX = perlinNoise.noise(warpNX * 100, warpNZ * 100) * warp / width;
-                        const warpY = perlinNoise.noise(warpNY * 100 + 5.2, warpNW * 100 + 1.3) * warp / height;
-
-                        s = (s + warpX) % 1;
-                        t = (t + warpY) % 1;
-                        if (s < 0) s += 1;
-                        if (t < 0) t += 1;
+                    if (swirl > 0 && !seamlessMode) {
+                        const centerX = width / 2;
+                        const centerY = height / 2;
+                        const dx = px - centerX;
+                        const dy = py - centerY;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+                        const angle = Math.atan2(dy, dx) + (dist / (width * 0.3)) * swirl * Math.PI * 2;
+                        px = centerX + Math.cos(angle) * dist;
+                        py = centerY + Math.sin(angle) * dist;
                     }
 
-                    // Map normalized coordinates to circle (torus in 4D space)
-                    const angle_s = s * TWO_PI;
-                    const angle_t = t * TWO_PI;
+                    if (warp > 0) {
+                        const warpX = perlinNoise.noise(px / distScale, py / distScale) * warp;
+                        const warpY = perlinNoise.noise((px + 1000) / distScale, (py + 1000) / distScale) * warp;
+                        px += warpX;
+                        py += warpY;
+                    }
 
-                    const radius = 1.0;
-                    const nx = radius * Math.cos(angle_s) / TWO_PI;
-                    const ny = radius * Math.sin(angle_s) / TWO_PI;
-                    const nz = radius * Math.cos(angle_t) / TWO_PI;
-                    const nw = radius * Math.sin(angle_t) / TWO_PI;
-
-                    // Calculate noise with octaves
                     let value = 0;
                     let amplitude = 1;
                     let frequency = 1;
                     let maxValue = 0;
 
                     for (let i = 0; i < octaves; i++) {
-                        // Sample noise in mapped space
-                        const fx = nx * scaleX * frequency;
-                        const fy = nz * scaleZ * frequency;
-                        const fz = ny * scaleX * frequency;
-                        const fw = nw * scaleZ * frequency;
+                        let noiseValue;
 
-                        // Average two noise samples for better tiling
-                        let noiseValue = (perlinNoise.noise(fx, fy) + perlinNoise.noise(fz, fw)) * 0.5;
+                        if (seamlessMode) {
+                            noiseValue = noise4D(perlinNoise, x, y, width, height, scaleX, scaleZ, frequency);
+                        } else {
+                            const sampleX = px / scaleX * frequency;
+                            const sampleY = py / scaleZ * frequency;
+                            noiseValue = perlinNoise.noise(sampleX, sampleY);
 
-                        // Apply turbulence
+                            if (voronoi > 0) {
+                                const voronoiValue = voronoiNoise(sampleX * 3, sampleY * 3, seed);
+                                noiseValue = noiseValue * (1 - voronoi) + (1 - voronoiValue) * voronoi;
+                            }
+
+                            if (ridged > 0) {
+                                noiseValue = Math.abs(noiseValue);
+                                noiseValue = 1 - noiseValue;
+                                noiseValue = noiseValue * (1 - ridged) + Math.pow(noiseValue, 2) * ridged;
+                            }
+
+                            if (billowy > 0) {
+                                noiseValue = Math.abs(noiseValue) * billowy + noiseValue * (1 - billowy);
+                            }
+
+                            if (fractalBreak > 0 && i > octaves * 0.5) {
+                                amplitude *= (1 - fractalBreak * 0.5);
+                            }
+                        }
+
                         if (turbulence > 0 && i > 0) {
                             const turbAmount = turbulence / 100;
                             noiseValue = Math.abs(noiseValue) * turbAmount + noiseValue * (1 - turbAmount);
@@ -665,14 +1055,38 @@
                     }
 
                     value = value / maxValue;
-
-                    // Apply Y scale (brightness adjustment)
                     value = value * scaleY;
-
-                    // Apply contrast
                     value = ((value - 0.5) * contrast) + 0.5;
 
-                    // Clamp
+                    if (posterize < 20 && !seamlessMode) {
+                        value = Math.round(value * posterize) / posterize;
+                    }
+
+                    if (invert > 0) {
+                        value = value * (1 - invert) + (1 - value) * invert;
+                    }
+
+                    if (uploadedImageData && imageBlend > 0) {
+                        const imgIdx = (y * width + x) * 4;
+                        const imgValue = uploadedImageData.data[imgIdx] / 255;
+
+                        if (decompose > 0) {
+                            const noiseOffset = (value - 0.5) * decompose * 2;
+                            value = imgValue + noiseOffset;
+                        } else {
+                            value = value * (1 - imageBlend) + imgValue * imageBlend;
+                        }
+
+                        if (pixelChaos > 0) {
+                            const chaosX = Math.floor(x + (value - 0.5) * pixelChaos * 50);
+                            const chaosY = Math.floor(y + (value - 0.5) * pixelChaos * 50);
+                            const cX = Math.max(0, Math.min(width - 1, chaosX));
+                            const cY = Math.max(0, Math.min(height - 1, chaosY));
+                            const chaosIdx = (cY * width + cX) * 4;
+                            value = uploadedImageData.data[chaosIdx] / 255;
+                        }
+                    }
+
                     value = Math.max(0, Math.min(1, value));
                     const gray = Math.floor(value * 255);
 
@@ -698,36 +1112,65 @@
             const width = imageData.width;
             const height = imageData.height;
             const normalData = new ImageData(width, height);
-            const strength = 3;
+            const strength = 5.0;
 
             for (let y = 0; y < height; y++) {
                 for (let x = 0; x < width; x++) {
                     const xp = (x + 1) % width;
+                    const xm = (x - 1 + width) % width;
                     const yp = (y + 1) % height;
+                    const ym = (y - 1 + height) % height;
 
-                    const idx = (y * width + x) * 4;
-                    const idxX = (y * width + xp) * 4;
-                    const idxY = (yp * width + x) * 4;
+                    const idxC = (y * width + x) * 4;
+                    const idxR = (y * width + xp) * 4;
+                    const idxL = (y * width + xm) * 4;
+                    const idxD = (yp * width + x) * 4;
+                    const idxU = (ym * width + x) * 4;
 
-                    const current = imageData.data[idx] / 255;
-                    const right = imageData.data[idxX] / 255;
-                    const down = imageData.data[idxY] / 255;
+                    const right = imageData.data[idxR] / 255;
+                    const left = imageData.data[idxL] / 255;
+                    const down = imageData.data[idxD] / 255;
+                    const up = imageData.data[idxU] / 255;
 
-                    const dx = (current - right) * strength;
-                    const dy = (current - down) * strength;
+                    const dx = (left - right) * strength;
+                    const dy = (up - down) * strength;
+                    const dz = 1.0;
 
-                    const nx = dx * 0.5 + 0.5;
-                    const ny = dy * 0.5 + 0.5;
-                    const nz = 1;
+                    const len = Math.sqrt(dx * dx + dy * dy + dz * dz);
+                    const nx = (dx / len) * 0.5 + 0.5;
+                    const ny = (dy / len) * 0.5 + 0.5;
+                    const nz = (dz / len) * 0.5 + 0.5;
 
-                    normalData.data[idx] = Math.floor(nx * 255);
-                    normalData.data[idx + 1] = Math.floor(ny * 255);
-                    normalData.data[idx + 2] = Math.floor(nz * 255);
-                    normalData.data[idx + 3] = 255;
+                    normalData.data[idxC] = Math.floor(nx * 255);
+                    normalData.data[idxC + 1] = Math.floor(ny * 255);
+                    normalData.data[idxC + 2] = Math.floor(nz * 255);
+                    normalData.data[idxC + 3] = 255;
                 }
             }
 
             return normalData;
+        }
+
+        function generateDisplacementMap(imageData) {
+            const width = imageData.width;
+            const height = imageData.height;
+            const displacementData = new ImageData(width, height);
+
+            for (let y = 0; y < height; y++) {
+                for (let x = 0; x < width; x++) {
+                    const idx = (y * width + x) * 4;
+                    const baseValue = imageData.data[idx] / 255;
+                    const displacement = 0.5 + (baseValue * 0.5);
+                    const gray = Math.floor(displacement * 255);
+
+                    displacementData.data[idx] = gray;
+                    displacementData.data[idx + 1] = gray;
+                    displacementData.data[idx + 2] = gray;
+                    displacementData.data[idx + 3] = 255;
+                }
+            }
+
+            return displacementData;
         }
 
         function generateRoughnessMap(imageData) {
@@ -739,7 +1182,6 @@
                 for (let x = 0; x < width; x++) {
                     const idx = (y * width + x) * 4;
                     const baseValue = imageData.data[idx] / 255;
-
                     const roughness = 1.0 - (baseValue * 0.7 + 0.15);
                     const gray = Math.floor(Math.max(0, Math.min(1, roughness)) * 255);
 
@@ -762,7 +1204,6 @@
                 for (let x = 0; x < width; x++) {
                     const idx = (y * width + x) * 4;
                     const baseValue = imageData.data[idx] / 255;
-
                     const metalness = Math.pow(baseValue, 2.2);
                     const gray = Math.floor(metalness * 255);
 
@@ -791,7 +1232,8 @@
             const baseImageData = generateNoise(resolution, resolution);
 
             if (exportDisplacement) {
-                ctx.putImageData(baseImageData, 0, 0);
+                const displacementData = generateDisplacementMap(baseImageData);
+                ctx.putImageData(displacementData, 0, 0);
                 downloadCanvas(canvas, `noise_displacement_${resolution}x${resolution}.png`);
             }
 
@@ -822,10 +1264,12 @@
                 link.href = url;
                 link.click();
                 URL.revokeObjectURL(url);
+                setTimeout(() => URL.revokeObjectURL(url), 100);
             });
         }
 
-        // Initialize
+        // Initialiser l'état des contrôles au chargement
+        updateImageControlsState();
         updateNoise();
     </script>
 </body>
