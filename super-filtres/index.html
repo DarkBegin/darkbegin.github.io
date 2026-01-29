@@ -445,6 +445,11 @@
                 </div>
 
                 <div class="filter-category">
+                    <h3>🎨 Teintes (Hue Shift)</h3>
+                    <div class="filter-grid" id="hueFilters"></div>
+                </div>
+
+                <div class="filter-category">
                     <h3>🤪 WTF & Expérimental</h3>
                     <div class="filter-grid" id="wtfFilters"></div>
                 </div>
@@ -524,6 +529,16 @@
                 { name: 'Automne', filter: 'autumn' },
                 { name: 'Hiver', filter: 'winter' }
             ],
+            hueFilters: [
+                { name: 'Hue +45°', filter: 'hue45' },
+                { name: 'Hue +90°', filter: 'hue90' },
+                { name: 'Hue +135°', filter: 'hue135' },
+                { name: 'Hue +180°', filter: 'hue180' },
+                { name: 'Hue +225°', filter: 'hue225' },
+                { name: 'Hue +270°', filter: 'hue270' },
+                { name: 'Hue +315°', filter: 'hue315' },
+                { name: 'Hue Rotatif', filter: 'hueRotate' }
+            ],
             wtfFilters: [
                 { name: 'Psychédélique', filter: 'psychedelic' },
                 { name: 'Infrarouge', filter: 'infrared' },
@@ -532,7 +547,17 @@
                 { name: 'Acide', filter: 'acid' },
                 { name: 'Matrix', filter: 'matrix' },
                 { name: 'Deep Fry', filter: 'deepfry' },
-                { name: 'Glitch Max', filter: 'glitchmax' }
+                { name: 'Glitch Max', filter: 'glitchmax' },
+                { name: 'Radioactif', filter: 'radioactive' },
+                { name: 'Holographique', filter: 'holographic' },
+                { name: 'Compression JPEG', filter: 'jpegify' },
+                { name: 'Chromatic Aberration', filter: 'chromatic' },
+                { name: 'Vaporwave Max', filter: 'vaporwavemax' },
+                { name: 'Datamosh', filter: 'datamosh' },
+                { name: 'VHS Glitch', filter: 'vhsglitch' },
+                { name: 'Scanlines', filter: 'scanlines' },
+                { name: 'Color Bleed', filter: 'colorbleed' },
+                { name: 'Nuke', filter: 'nuke' }
             ]
         };
 
@@ -604,7 +629,6 @@
                             generatePreviews();
                         }
 
-                        // Réappliquer le filtre actuel si présent
                         if (currentFilter) {
                             applyFilterToAll(currentFilter.filter, currentFilter.name, activeFilterElement, true);
                         }
@@ -619,7 +643,6 @@
             e.target.value = '';
         });
 
-        // Mettre à jour le viewer avec toutes les images
         function updateViewer() {
             imagesGrid.innerHTML = '';
 
@@ -650,7 +673,6 @@
             });
         }
 
-        // Supprimer une image
         function removeImage(index) {
             loadedImages.splice(index, 1);
             
@@ -667,7 +689,6 @@
             updateButtons();
         }
 
-        // Générer les previews des filtres
         function generatePreviews() {
             if (loadedImages.length === 0) return;
 
@@ -701,21 +722,18 @@
             }
         }
 
-        // Appliquer un filtre à toutes les images
         function applyFilterToAll(filterName, displayName, element, skipStateUpdate = false) {
             if (loadedImages.length === 0) return;
 
             if (!skipStateUpdate) {
                 currentFilter = { filter: filterName, name: displayName };
                 
-                // Mettre à jour l'UI des filtres
                 if (activeFilterElement) {
                     activeFilterElement.classList.remove('active');
                 }
                 activeFilterElement = element;
                 element.classList.add('active');
 
-                // Afficher le badge du filtre actif
                 currentFilterBadge.style.display = 'block';
                 currentFilterName.textContent = displayName;
             }
@@ -732,7 +750,6 @@
             updateButtons();
         }
 
-        // Effacer le filtre
         function clearFilter() {
             if (loadedImages.length === 0) return;
 
@@ -754,7 +771,6 @@
             updateButtons();
         }
 
-        // Télécharger toutes les images dans un ZIP
         async function downloadAllAsZip() {
             if (loadedImages.length === 0) return;
 
@@ -778,7 +794,6 @@
             link.click();
         }
 
-        // Mettre à jour l'état des boutons
         function updateButtons() {
             const hasImages = loadedImages.length > 0;
             const hasFilter = currentFilter !== null;
@@ -830,6 +845,15 @@
                 case 'summer': summer(data); break;
                 case 'autumn': autumn(data); break;
                 case 'winter': winter(data); break;
+                // Hue Shifts
+                case 'hue45': hueShift(data, 45); break;
+                case 'hue90': hueShift(data, 90); break;
+                case 'hue135': hueShift(data, 135); break;
+                case 'hue180': hueShift(data, 180); break;
+                case 'hue225': hueShift(data, 225); break;
+                case 'hue270': hueShift(data, 270); break;
+                case 'hue315': hueShift(data, 315); break;
+                case 'hueRotate': hueRotateGradient(data); break;
                 // WTF
                 case 'psychedelic': psychedelic(data); break;
                 case 'infrared': infrared(data); break;
@@ -839,10 +863,20 @@
                 case 'matrix': matrix(data); break;
                 case 'deepfry': deepfry(data); break;
                 case 'glitchmax': glitchmax(data); break;
+                case 'radioactive': radioactive(data); break;
+                case 'holographic': holographic(data); break;
+                case 'jpegify': jpegify(data); break;
+                case 'chromatic': chromaticAberration(imageData, targetCanvas); return;
+                case 'vaporwavemax': vaporwavemax(data); break;
+                case 'datamosh': datamosh(data); break;
+                case 'vhsglitch': vhsglitch(data); break;
+                case 'scanlines': scanlines(data, targetCanvas); break;
+                case 'colorbleed': colorbleed(data); break;
+                case 'nuke': nuke(data); break;
             }
         }
 
-        // ===== FILTRES BASIQUES =====
+        // ===== FILTRES DE BASE (gardés identiques) =====
         function grayscale(data) {
             for (let i = 0; i < data.length; i += 4) {
                 const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
@@ -1172,39 +1206,107 @@
         // ===== FILTRES SAISONS =====
         function spring(data) {
             for (let i = 0; i < data.length; i += 4) {
-                data[i] = Math.min(255, data[i] * 1.05 + 15); // Un peu plus de rouge
-                data[i + 1] = Math.min(255, data[i + 1] * 1.2 + 30); // Beaucoup plus de vert
-                data[i + 2] = Math.min(255, data[i + 2] * 0.95 + 20); // Un peu de bleu
+                data[i] = Math.min(255, data[i] * 1.05 + 15);
+                data[i + 1] = Math.min(255, data[i + 1] * 1.2 + 30);
+                data[i + 2] = Math.min(255, data[i + 2] * 0.95 + 20);
             }
         }
 
         function summer(data) {
             for (let i = 0; i < data.length; i += 4) {
-                data[i] = Math.min(255, data[i] * 1.3 + 40); // Beaucoup de rouge
-                data[i + 1] = Math.min(255, data[i + 1] * 1.2 + 30); // Plus de vert
-                data[i + 2] = Math.min(255, data[i + 2] * 0.9); // Moins de bleu
+                data[i] = Math.min(255, data[i] * 1.3 + 40);
+                data[i + 1] = Math.min(255, data[i + 1] * 1.2 + 30);
+                data[i + 2] = Math.min(255, data[i + 2] * 0.9);
             }
             brightness(data, 20);
         }
 
         function autumn(data) {
             for (let i = 0; i < data.length; i += 4) {
-                data[i] = Math.min(255, data[i] * 1.4 + 50); // Beaucoup de rouge
-                data[i + 1] = Math.min(255, data[i + 1] * 1.1 + 20); // Un peu de vert
-                data[i + 2] = Math.max(0, data[i + 2] * 0.6 - 30); // Très peu de bleu
+                data[i] = Math.min(255, data[i] * 1.4 + 50);
+                data[i + 1] = Math.min(255, data[i + 1] * 1.1 + 20);
+                data[i + 2] = Math.max(0, data[i + 2] * 0.6 - 30);
             }
         }
 
         function winter(data) {
             for (let i = 0; i < data.length; i += 4) {
-                data[i] = Math.min(255, data[i] * 0.9 + 40); // Un peu de rouge
-                data[i + 1] = Math.min(255, data[i + 1] * 0.95 + 40); // Un peu de vert
-                data[i + 2] = Math.min(255, data[i + 2] * 1.3 + 60); // Beaucoup de bleu
+                data[i] = Math.min(255, data[i] * 0.9 + 40);
+                data[i + 1] = Math.min(255, data[i + 1] * 0.95 + 40);
+                data[i + 2] = Math.min(255, data[i + 2] * 1.3 + 60);
             }
             brightness(data, 30);
         }
 
-        // ===== FILTRES WTF =====
+        // ===== FILTRES HUE SHIFT =====
+        function rgbToHsl(r, g, b) {
+            r /= 255; g /= 255; b /= 255;
+            const max = Math.max(r, g, b), min = Math.min(r, g, b);
+            let h, s, l = (max + min) / 2;
+
+            if (max === min) {
+                h = s = 0;
+            } else {
+                const d = max - min;
+                s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+                switch (max) {
+                    case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
+                    case g: h = ((b - r) / d + 2) / 6; break;
+                    case b: h = ((r - g) / d + 4) / 6; break;
+                }
+            }
+            return [h * 360, s * 100, l * 100];
+        }
+
+        function hslToRgb(h, s, l) {
+            h /= 360; s /= 100; l /= 100;
+            let r, g, b;
+
+            if (s === 0) {
+                r = g = b = l;
+            } else {
+                const hue2rgb = (p, q, t) => {
+                    if (t < 0) t += 1;
+                    if (t > 1) t -= 1;
+                    if (t < 1/6) return p + (q - p) * 6 * t;
+                    if (t < 1/2) return q;
+                    if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+                    return p;
+                };
+                const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+                const p = 2 * l - q;
+                r = hue2rgb(p, q, h + 1/3);
+                g = hue2rgb(p, q, h);
+                b = hue2rgb(p, q, h - 1/3);
+            }
+            return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+        }
+
+        function hueShift(data, degrees) {
+            for (let i = 0; i < data.length; i += 4) {
+                const [h, s, l] = rgbToHsl(data[i], data[i + 1], data[i + 2]);
+                const newH = (h + degrees) % 360;
+                const [r, g, b] = hslToRgb(newH, s, l);
+                data[i] = r;
+                data[i + 1] = g;
+                data[i + 2] = b;
+            }
+        }
+
+        function hueRotateGradient(data) {
+            for (let i = 0; i < data.length; i += 4) {
+                const position = i / data.length;
+                const degrees = position * 360;
+                const [h, s, l] = rgbToHsl(data[i], data[i + 1], data[i + 2]);
+                const newH = (h + degrees) % 360;
+                const [r, g, b] = hslToRgb(newH, s, l);
+                data[i] = r;
+                data[i + 1] = g;
+                data[i + 2] = b;
+            }
+        }
+
+        // ===== FILTRES WTF SUPPLÉMENTAIRES =====
         function psychedelic(data) {
             for (let i = 0; i < data.length; i += 4) {
                 const offset = Math.sin(i * 0.01) * 128;
@@ -1216,7 +1318,7 @@
 
         function infrared(data) {
             for (let i = 0; i < data.length; i += 4) {
-                const temp = data[i + 1]; // Swap green et red
+                const temp = data[i + 1];
                 data[i] = Math.min(255, temp * 1.5);
                 data[i + 1] = Math.max(0, data[i] * 0.3);
                 data[i + 2] = Math.max(0, data[i + 2] * 0.3);
@@ -1266,7 +1368,6 @@
         }
 
         function deepfry(data) {
-            // Saturation extreme + contraste + posterize
             for (let i = 0; i < data.length; i += 4) {
                 data[i] = Math.min(255, data[i] * 1.8);
                 data[i + 1] = Math.min(255, data[i + 1] * 1.5);
@@ -1277,7 +1378,6 @@
         }
 
         function glitchmax(data) {
-            // Random pixel shifts et color corruption
             for (let i = 0; i < data.length; i += 16) {
                 if (Math.random() > 0.7) {
                     const shift = Math.floor(Math.random() * 100) * 4;
@@ -1287,6 +1387,126 @@
                     [data[i + 2], data[targetIdx + 2]] = [data[targetIdx + 2], data[i + 2]];
                 }
             }
+        }
+
+        function radioactive(data) {
+            for (let i = 0; i < data.length; i += 4) {
+                const intensity = (data[i] + data[i + 1] + data[i + 2]) / 3;
+                data[i] = Math.min(255, intensity * 0.3);
+                data[i + 1] = Math.min(255, intensity * 2);
+                data[i + 2] = Math.min(255, intensity * 0.3);
+            }
+            contrast(data, 70);
+        }
+
+        function holographic(data) {
+            for (let i = 0; i < data.length; i += 4) {
+                const wave = Math.sin(i * 0.005) * 50;
+                data[i] = Math.min(255, Math.max(0, data[i] + wave));
+                data[i + 1] = Math.min(255, Math.max(0, data[i + 1] + wave * 1.5));
+                data[i + 2] = Math.min(255, Math.max(0, data[i + 2] + wave * 2));
+            }
+        }
+
+        function jpegify(data) {
+            posterize(data, 5);
+            for (let i = 0; i < data.length; i += 4) {
+                if (Math.random() > 0.95) {
+                    data[i] = Math.min(255, data[i] + (Math.random() - 0.5) * 50);
+                    data[i + 1] = Math.min(255, data[i + 1] + (Math.random() - 0.5) * 50);
+                    data[i + 2] = Math.min(255, data[i + 2] + (Math.random() - 0.5) * 50);
+                }
+            }
+        }
+
+        function chromaticAberration(imageData, targetCanvas) {
+            const data = imageData.data;
+            const w = targetCanvas.width;
+            const offset = 8;
+            const output = new Uint8ClampedArray(data);
+            
+            for (let i = 0; i < data.length; i += 4) {
+                const pixel = i / 4;
+                const leftR = Math.max(0, i - offset * 4);
+                const rightB = Math.min(data.length - 4, i + offset * 4);
+                
+                output[i] = data[leftR];
+                output[i + 1] = data[i + 1];
+                output[i + 2] = data[rightB + 2];
+            }
+            
+            for (let i = 0; i < data.length; i++) data[i] = output[i];
+        }
+
+        function vaporwavemax(data) {
+            hueShift(data, 300);
+            for (let i = 0; i < data.length; i += 4) {
+                data[i] = Math.min(255, data[i] * 1.5 + 80);
+                data[i + 1] = Math.min(255, data[i + 1] * 0.7);
+                data[i + 2] = Math.min(255, data[i + 2] * 1.8 + 100);
+            }
+            contrast(data, 50);
+        }
+
+        function datamosh(data) {
+            for (let i = 0; i < data.length; i += 40) {
+                if (Math.random() > 0.5) {
+                    const blockSize = Math.floor(Math.random() * 200);
+                    for (let j = 0; j < blockSize && i + j < data.length; j += 4) {
+                        data[i + j] = data[Math.max(0, i - 4)];
+                        data[i + j + 1] = data[Math.max(0, i - 3)];
+                        data[i + j + 2] = data[Math.max(0, i - 2)];
+                    }
+                }
+            }
+        }
+
+        function vhsglitch(data) {
+            for (let i = 0; i < data.length; i += 4) {
+                if (Math.random() > 0.98) {
+                    const glitchLength = Math.floor(Math.random() * 500);
+                    for (let j = 0; j < glitchLength && i + j < data.length; j += 4) {
+                        data[i + j] = data[i];
+                        data[i + j + 1] = data[i + 1];
+                        data[i + j + 2] = data[i + 2];
+                    }
+                }
+            }
+        }
+
+        function scanlines(data, targetCanvas) {
+            const w = targetCanvas.width;
+            for (let i = 0; i < data.length; i += 4) {
+                const pixel = i / 4;
+                const y = Math.floor(pixel / w);
+                if (y % 3 === 0) {
+                    data[i] *= 0.5;
+                    data[i + 1] *= 0.5;
+                    data[i + 2] *= 0.5;
+                }
+            }
+        }
+
+        function colorbleed(data) {
+            const output = new Uint8ClampedArray(data);
+            for (let i = 4; i < data.length - 4; i += 4) {
+                output[i] = (data[i - 4] + data[i] + data[i + 4]) / 3;
+                output[i + 1] = (data[i - 3] + data[i + 1] + data[i + 5]) / 3;
+                output[i + 2] = (data[i - 2] + data[i + 2] + data[i + 6]) / 3;
+            }
+            for (let i = 0; i < data.length; i++) data[i] = output[i];
+        }
+
+        function nuke(data) {
+            for (let i = 0; i < data.length; i += 4) {
+                const intensity = (data[i] + data[i + 1] + data[i + 2]) / 3;
+                const boost = Math.pow(intensity / 255, 0.3) * 255;
+                data[i] = Math.min(255, boost * 1.5);
+                data[i + 1] = Math.min(255, boost * 1.3);
+                data[i + 2] = Math.min(255, boost * 0.8);
+            }
+            contrast(data, 100);
+            brightness(data, 80);
         }
 
         // Initialiser
