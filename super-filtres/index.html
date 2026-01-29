@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Éditeur d'Images Multi-Filtres</title>
+    <title id="pageTitle">Image Editor - Multi-Filters</title>
     <style>
         * {
             margin: 0;
@@ -32,6 +32,68 @@
             color: #333;
             margin-bottom: 20px;
             font-size: 2em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .language-selector {
+            position: relative;
+        }
+
+        .language-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+
+        .language-btn:hover {
+            background: #764ba2;
+        }
+
+        .language-dropdown {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            margin-top: 5px;
+            min-width: 150px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1000;
+        }
+
+        .language-dropdown.show {
+            display: block;
+        }
+
+        .language-option {
+            padding: 10px 15px;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .language-option:hover {
+            background: #f0f0f0;
+        }
+
+        .language-option.active {
+            background: #667eea;
+            color: white;
         }
 
         .main-area {
@@ -41,7 +103,6 @@
             align-items: start;
         }
 
-        /* Zone centrale - Viewer multi-images */
         .canvas-section {
             display: flex;
             flex-direction: column;
@@ -216,7 +277,6 @@
             transform: none;
         }
 
-        /* Panel de filtres à droite */
         .filters-panel {
             background: #f8f9fa;
             padding: 15px;
@@ -304,7 +364,6 @@
             background: white;
         }
 
-        /* Scrollbar personnalisée */
         .filters-panel::-webkit-scrollbar {
             width: 6px;
         }
@@ -363,10 +422,27 @@
 </head>
 <body>
     <div class="container">
-        <h1>🎨 Éditeur d'Images Multi-Filtres</h1>
+        <h1>
+            <span id="mainTitle">🎨 Image Editor - Multi-Filters</span>
+            <div class="language-selector">
+                <button class="language-btn" onclick="toggleLanguageDropdown()">
+                    <span id="currentLangFlag">🇬🇧</span>
+                    <span id="currentLangText">English</span>
+                    ▼
+                </button>
+                <div class="language-dropdown" id="languageDropdown">
+                    <div class="language-option" onclick="changeLanguage('en')">🇬🇧 English</div>
+                    <div class="language-option" onclick="changeLanguage('fr')">🇫🇷 Français</div>
+                    <div class="language-option" onclick="changeLanguage('es')">🇪🇸 Español</div>
+                    <div class="language-option" onclick="changeLanguage('de')">🇩🇪 Deutsch</div>
+                    <div class="language-option" onclick="changeLanguage('pt')">🇵🇹 Português</div>
+                    <div class="language-option" onclick="changeLanguage('ru')">🇷🇺 Русский</div>
+                    <div class="language-option" onclick="changeLanguage('ja')">🇯🇵 日本語</div>
+                </div>
+            </div>
+        </h1>
         
         <div class="main-area">
-            <!-- Zone viewer centrale -->
             <div class="canvas-section">
                 <div class="viewer-container">
                     <div class="images-grid" id="imagesGrid"></div>
@@ -375,102 +451,99 @@
                             <path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/>
                         </svg>
                         <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
-                            📁 Charger vos images (max 8)
+                            <span id="uploadBtnText">📁 Load images (max 20)</span>
                         </button>
-                        <p style="font-size: 13px;">Toutes les images s'affichent ensemble !</p>
+                        <p style="font-size: 13px;" id="uploadSubtext">All images display together!</p>
                     </div>
                 </div>
                 
                 <div class="controls">
                     <button class="control-btn add-btn" onclick="document.getElementById('fileInput').click()">
-                        ➕ Ajouter
+                        <span id="addBtnText">➕ Add</span>
                     </button>
                     <button class="control-btn clear-filter-btn" onclick="clearFilter()" id="clearFilterBtn" disabled>
-                        🔄 Effacer
+                        <span id="clearBtnText">🔄 Clear</span>
                     </button>
                     <button class="control-btn download-all-btn" onclick="downloadAllAsZip()" id="downloadAllBtn" disabled>
-                        📦 ZIP
+                        <span id="downloadBtnText">📦 ZIP</span>
                     </button>
                 </div>
             </div>
 
-            <!-- Panel de filtres à droite -->
             <div class="filters-panel">
-                <h2>Filtres disponibles</h2>
-                <div class="info-badge">
-                    Appliqué en temps réel sur toutes les images
-                </div>
+                <h2 id="filtersTitle">Available Filters</h2>
+                <div class="info-badge" id="infoBadge">Applied in real-time to all images</div>
                 <div class="current-filter-badge" id="currentFilterBadge" style="display: none;">
-                    <span id="currentFilterName">Aucun</span>
+                    <span id="currentFilterName">None</span>
                 </div>
                 
                 <div class="filter-category">
-                    <h3>🎭 Basiques</h3>
+                    <h3 id="catBasic">🎭 Basics</h3>
                     <div class="filter-grid" id="basicFilters"></div>
                 </div>
 
                 <div class="filter-category">
-                    <h3>🎮 Rétro Gaming</h3>
+                    <h3 id="catGaming">🎮 Retro Gaming</h3>
                     <div class="filter-grid" id="gamingFilters"></div>
                 </div>
 
                 <div class="filter-category">
-                    <h3>🌈 Vaporwave & Synthwave</h3>
+                    <h3 id="catVaporwave">🌈 Vaporwave & Synthwave</h3>
                     <div class="filter-grid" id="vaporFilters"></div>
                 </div>
 
                 <div class="filter-category">
-                    <h3>🌸 Vintage & Pastel</h3>
+                    <h3 id="catVintage">🌸 Vintage & Pastel</h3>
                     <div class="filter-grid" id="vintageFilters"></div>
                 </div>
 
                 <div class="filter-category">
-                    <h3>🎨 Artistique</h3>
+                    <h3 id="catArtistic">🎨 Artistic</h3>
                     <div class="filter-grid" id="artisticFilters"></div>
                 </div>
 
                 <div class="filter-category">
-                    <h3>🎬 Cinéma</h3>
+                    <h3 id="catCinema">🎬 Cinema</h3>
                     <div class="filter-grid" id="cinemaFilters"></div>
                 </div>
 
                 <div class="filter-category">
-                    <h3>🌟 Channels RGB</h3>
+                    <h3 id="catRGB">🌟 RGB Channels</h3>
                     <div class="filter-grid" id="rgbFilters"></div>
                 </div>
 
                 <div class="filter-category">
-                    <h3>🍂 Saisons</h3>
+                    <h3 id="catSeasons">🍂 Seasons</h3>
                     <div class="filter-grid" id="seasonFilters"></div>
                 </div>
 
                 <div class="filter-category">
-                    <h3>🎨 Teintes (Hue)</h3>
+                    <h3 id="catHue">🎨 Hue Shifts</h3>
                     <div class="filter-grid" id="hueFilters"></div>
                 </div>
 
                 <div class="filter-category">
-                    <h3>👻 Spéciaux</h3>
+                    <h3 id="catSpecial">👻 Special</h3>
                     <div class="filter-grid" id="specialFilters"></div>
                 </div>
 
                 <div class="filter-category">
-                    <h3>🌌 Cosmique</h3>
+                    <h3 id="catCosmic">🌌 Cosmic</h3>
                     <div class="filter-grid" id="cosmicFilters"></div>
                 </div>
 
                 <div class="filter-category">
-                    <h3>🧪 Chimique</h3>
+                    <h3 id="catChemical">🧪 Chemical</h3>
                     <div class="filter-grid" id="chemicalFilters"></div>
                 </div>
 
                 <div class="filter-category">
-                    <h3>🎃 Horror</h3>
+                    <h3 id="catHorror">🎃 Horror</h3>
                     <div class="filter-grid" id="horrorFilters"></div>
                 </div>
 
                 <div class="filter-category">
-                    <h3>🤪 WTF & Expérimental</h3>
+                    <h3 id="catWTF">🤪 WTF & Experimental</h3>
                     <div class="filter-grid" id="wtfFilters"></div>
                 </div>
             </div>
@@ -479,10 +552,285 @@
         <input type="file" id="fileInput" accept="image/*" multiple>
     </div>
 
-    <!-- JSZip library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
     <script>
+        // ===== SYSTÈME DE TRADUCTION =====
+        const translations = {
+            en: {
+                pageTitle: "Image Editor - Multi-Filters",
+                mainTitle: "🎨 Image Editor - Multi-Filters",
+                uploadBtn: "📁 Load images (max 20)",
+                uploadSubtext: "All images display together!",
+                addBtn: "➕ Add",
+                clearBtn: "🔄 Clear",
+                downloadBtn: "📦 ZIP",
+                filtersTitle: "Available Filters",
+                infoBadge: "Applied in real-time to all images",
+                catBasic: "🎭 Basics",
+                catGaming: "🎮 Retro Gaming",
+                catVaporwave: "🌈 Vaporwave & Synthwave",
+                catVintage: "🌸 Vintage & Pastel",
+                catArtistic: "🎨 Artistic",
+                catCinema: "🎬 Cinema",
+                catRGB: "🌟 RGB Channels",
+                catSeasons: "🍂 Seasons",
+                catHue: "🎨 Hue Shifts",
+                catSpecial: "👻 Special",
+                catCosmic: "🌌 Cosmic",
+                catChemical: "🧪 Chemical",
+                catHorror: "🎃 Horror",
+                catWTF: "🤪 WTF & Experimental",
+                alertMax: "You can only load {0} more image(s). Maximum 20 images."
+            },
+            fr: {
+                pageTitle: "Éditeur d'Images - Multi-Filtres",
+                mainTitle: "🎨 Éditeur d'Images - Multi-Filtres",
+                uploadBtn: "📁 Charger des images (max 20)",
+                uploadSubtext: "Toutes les images s'affichent ensemble !",
+                addBtn: "➕ Ajouter",
+                clearBtn: "🔄 Effacer",
+                downloadBtn: "📦 ZIP",
+                filtersTitle: "Filtres disponibles",
+                infoBadge: "Appliqué en temps réel sur toutes les images",
+                catBasic: "🎭 Basiques",
+                catGaming: "🎮 Rétro Gaming",
+                catVaporwave: "🌈 Vaporwave & Synthwave",
+                catVintage: "🌸 Vintage & Pastel",
+                catArtistic: "🎨 Artistique",
+                catCinema: "🎬 Cinéma",
+                catRGB: "🌟 Canaux RGB",
+                catSeasons: "🍂 Saisons",
+                catHue: "🎨 Teintes",
+                catSpecial: "👻 Spéciaux",
+                catCosmic: "🌌 Cosmique",
+                catChemical: "🧪 Chimique",
+                catHorror: "🎃 Horror",
+                catWTF: "🤪 WTF & Expérimental",
+                alertMax: "Vous ne pouvez charger que {0} image(s) supplémentaire(s). Maximum 20 images."
+            },
+            es: {
+                pageTitle: "Editor de Imágenes - Multi-Filtros",
+                mainTitle: "🎨 Editor de Imágenes - Multi-Filtros",
+                uploadBtn: "📁 Cargar imágenes (máx 20)",
+                uploadSubtext: "¡Todas las imágenes se muestran juntas!",
+                addBtn: "➕ Añadir",
+                clearBtn: "🔄 Borrar",
+                downloadBtn: "📦 ZIP",
+                filtersTitle: "Filtros Disponibles",
+                infoBadge: "Aplicado en tiempo real a todas las imágenes",
+                catBasic: "🎭 Básicos",
+                catGaming: "🎮 Retro Gaming",
+                catVaporwave: "🌈 Vaporwave & Synthwave",
+                catVintage: "🌸 Vintage & Pastel",
+                catArtistic: "🎨 Artístico",
+                catCinema: "🎬 Cine",
+                catRGB: "🌟 Canales RGB",
+                catSeasons: "🍂 Estaciones",
+                catHue: "🎨 Cambios de Tono",
+                catSpecial: "👻 Especial",
+                catCosmic: "🌌 Cósmico",
+                catChemical: "🧪 Químico",
+                catHorror: "🎃 Horror",
+                catWTF: "🤪 WTF & Experimental",
+                alertMax: "Solo puedes cargar {0} imagen(es) más. Máximo 20 imágenes."
+            },
+            de: {
+                pageTitle: "Bildbearbeitung - Multi-Filter",
+                mainTitle: "🎨 Bildbearbeitung - Multi-Filter",
+                uploadBtn: "📁 Bilder laden (max 20)",
+                uploadSubtext: "Alle Bilder werden zusammen angezeigt!",
+                addBtn: "➕ Hinzufügen",
+                clearBtn: "🔄 Löschen",
+                downloadBtn: "📦 ZIP",
+                filtersTitle: "Verfügbare Filter",
+                infoBadge: "In Echtzeit auf alle Bilder angewendet",
+                catBasic: "🎭 Grundlagen",
+                catGaming: "🎮 Retro Gaming",
+                catVaporwave: "🌈 Vaporwave & Synthwave",
+                catVintage: "🌸 Vintage & Pastel",
+                catArtistic: "🎨 Künstlerisch",
+                catCinema: "🎬 Kino",
+                catRGB: "🌟 RGB-Kanäle",
+                catSeasons: "🍂 Jahreszeiten",
+                catHue: "🎨 Farbtonverschiebungen",
+                catSpecial: "👻 Spezial",
+                catCosmic: "🌌 Kosmisch",
+                catChemical: "🧪 Chemisch",
+                catHorror: "🎃 Horror",
+                catWTF: "🤪 WTF & Experimentell",
+                alertMax: "Sie können nur noch {0} Bild(er) laden. Maximum 20 Bilder."
+            },
+            pt: {
+                pageTitle: "Editor de Imagens - Multi-Filtros",
+                mainTitle: "🎨 Editor de Imagens - Multi-Filtros",
+                uploadBtn: "📁 Carregar imagens (máx 20)",
+                uploadSubtext: "Todas as imagens são exibidas juntas!",
+                addBtn: "➕ Adicionar",
+                clearBtn: "🔄 Limpar",
+                downloadBtn: "📦 ZIP",
+                filtersTitle: "Filtros Disponíveis",
+                infoBadge: "Aplicado em tempo real a todas as imagens",
+                catBasic: "🎭 Básicos",
+                catGaming: "🎮 Retro Gaming",
+                catVaporwave: "🌈 Vaporwave & Synthwave",
+                catVintage: "🌸 Vintage & Pastel",
+                catArtistic: "🎨 Artístico",
+                catCinema: "🎬 Cinema",
+                catRGB: "🌟 Canais RGB",
+                catSeasons: "🍂 Estações",
+                catHue: "🎨 Mudanças de Matiz",
+                catSpecial: "👻 Especial",
+                catCosmic: "🌌 Cósmico",
+                catChemical: "🧪 Químico",
+                catHorror: "🎃 Horror",
+                catWTF: "🤪 WTF & Experimental",
+                alertMax: "Você só pode carregar mais {0} imagem(ns). Máximo 20 imagens."
+            },
+            ru: {
+                pageTitle: "Редактор Изображений - Мульти-Фильтры",
+                mainTitle: "🎨 Редактор Изображений - Мульти-Фильтры",
+                uploadBtn: "📁 Загрузить изображения (макс 20)",
+                uploadSubtext: "Все изображения отображаются вместе!",
+                addBtn: "➕ Добавить",
+                clearBtn: "🔄 Очистить",
+                downloadBtn: "📦 ZIP",
+                filtersTitle: "Доступные Фильтры",
+                infoBadge: "Применяется в реальном времени ко всем изображениям",
+                catBasic: "🎭 Базовые",
+                catGaming: "🎮 Ретро Игры",
+                catVaporwave: "🌈 Vaporwave & Synthwave",
+                catVintage: "🌸 Винтаж & Пастель",
+                catArtistic: "🎨 Художественные",
+                catCinema: "🎬 Кино",
+                catRGB: "🌟 RGB Каналы",
+                catSeasons: "🍂 Сезоны",
+                catHue: "🎨 Сдвиги Оттенка",
+                catSpecial: "👻 Специальные",
+                catCosmic: "🌌 Космические",
+                catChemical: "🧪 Химические",
+                catHorror: "🎃 Хоррор",
+                catWTF: "🤪 WTF & Экспериментальные",
+                alertMax: "Вы можете загрузить только {0} изображений. Максимум 20 изображений."
+            },
+            ja: {
+                pageTitle: "画像エディター - マルチフィルター",
+                mainTitle: "🎨 画像エディター - マルチフィルター",
+                uploadBtn: "📁 画像を読み込む（最大20枚）",
+                uploadSubtext: "すべての画像が一緒に表示されます！",
+                addBtn: "➕ 追加",
+                clearBtn: "🔄 クリア",
+                downloadBtn: "📦 ZIP",
+                filtersTitle: "利用可能なフィルター",
+                infoBadge: "すべての画像にリアルタイムで適用",
+                catBasic: "🎭 基本",
+                catGaming: "🎮 レトロゲーム",
+                catVaporwave: "🌈 Vaporwave & Synthwave",
+                catVintage: "🌸 ヴィンテージ & パステル",
+                catArtistic: "🎨 アーティスティック",
+                catCinema: "🎬 シネマ",
+                catRGB: "🌟 RGBチャンネル",
+                catSeasons: "🍂 季節",
+                catHue: "🎨 色相シフト",
+                catSpecial: "👻 スペシャル",
+                catCosmic: "🌌 コスミック",
+                catChemical: "🧪 ケミカル",
+                catHorror: "🎃 ホラー",
+                catWTF: "🤪 WTF & 実験的",
+                alertMax: "あと{0}枚しか読み込めません。最大20枚まで。"
+            }
+        };
+
+        const langFlags = {
+            en: '🇬🇧',
+            fr: '🇫🇷',
+            es: '🇪🇸',
+            de: '🇩🇪',
+            pt: '🇵🇹',
+            ru: '🇷🇺',
+            ja: '🇯🇵'
+        };
+
+        const langNames = {
+            en: 'English',
+            fr: 'Français',
+            es: 'Español',
+            de: 'Deutsch',
+            pt: 'Português',
+            ru: 'Русский',
+            ja: '日本語'
+        };
+
+        let currentLang = 'en';
+
+        // Détecter la langue du navigateur
+        function detectLanguage() {
+            const browserLang = navigator.language || navigator.userLanguage;
+            const langCode = browserLang.split('-')[0];
+            
+            if (translations[langCode]) {
+                return langCode;
+            }
+            return 'en';
+        }
+
+        function changeLanguage(lang) {
+            currentLang = lang;
+            localStorage.setItem('preferredLanguage', lang);
+            
+            const t = translations[lang];
+            
+            document.getElementById('pageTitle').textContent = t.pageTitle;
+            document.getElementById('mainTitle').textContent = t.mainTitle;
+            document.getElementById('uploadBtnText').textContent = t.uploadBtn;
+            document.getElementById('uploadSubtext').textContent = t.uploadSubtext;
+            document.getElementById('addBtnText').textContent = t.addBtn;
+            document.getElementById('clearBtnText').textContent = t.clearBtn;
+            document.getElementById('downloadBtnText').textContent = t.downloadBtn;
+            document.getElementById('filtersTitle').textContent = t.filtersTitle;
+            document.getElementById('infoBadge').textContent = t.infoBadge;
+            
+            document.getElementById('catBasic').textContent = t.catBasic;
+            document.getElementById('catGaming').textContent = t.catGaming;
+            document.getElementById('catVaporwave').textContent = t.catVaporwave;
+            document.getElementById('catVintage').textContent = t.catVintage;
+            document.getElementById('catArtistic').textContent = t.catArtistic;
+            document.getElementById('catCinema').textContent = t.catCinema;
+            document.getElementById('catRGB').textContent = t.catRGB;
+            document.getElementById('catSeasons').textContent = t.catSeasons;
+            document.getElementById('catHue').textContent = t.catHue;
+            document.getElementById('catSpecial').textContent = t.catSpecial;
+            document.getElementById('catCosmic').textContent = t.catCosmic;
+            document.getElementById('catChemical').textContent = t.catChemical;
+            document.getElementById('catHorror').textContent = t.catHorror;
+            document.getElementById('catWTF').textContent = t.catWTF;
+            
+            document.getElementById('currentLangFlag').textContent = langFlags[lang];
+            document.getElementById('currentLangText').textContent = langNames[lang];
+            
+            toggleLanguageDropdown();
+        }
+
+        function toggleLanguageDropdown() {
+            const dropdown = document.getElementById('languageDropdown');
+            dropdown.classList.toggle('show');
+        }
+
+        // Fermer le dropdown si on clique ailleurs
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.language-selector')) {
+                document.getElementById('languageDropdown').classList.remove('show');
+            }
+        });
+
+        // Initialiser la langue au chargement
+        window.addEventListener('DOMContentLoaded', function() {
+            const savedLang = localStorage.getItem('preferredLanguage');
+            const detectedLang = savedLang || detectLanguage();
+            changeLanguage(detectedLang);
+        });
+
+        // ===== CODE PRINCIPAL (Identique au précédent mais avec limite 20) =====
         const fileInput = document.getElementById('fileInput');
         const uploadOverlay = document.getElementById('uploadOverlay');
         const imagesGrid = document.getElementById('imagesGrid');
@@ -493,15 +841,17 @@
         let currentFilter = null;
         let activeFilterElement = null;
 
-        // Configuration des filtres par catégorie
+        const MAX_IMAGES = 20;
+
+        // Configuration des filtres (identique)
         const filterCategories = {
             basicFilters: [
-                { name: 'Noir et Blanc', filter: 'grayscale' },
-                { name: 'Sépia', filter: 'sepia' },
-                { name: 'Négatif', filter: 'invert' },
-                { name: 'Luminosité++', filter: 'brightness' },
-                { name: 'Obscurité', filter: 'darkness' },
-                { name: 'Contraste++', filter: 'contrast' }
+                { name: 'Grayscale', filter: 'grayscale' },
+                { name: 'Sepia', filter: 'sepia' },
+                { name: 'Negative', filter: 'invert' },
+                { name: 'Brightness++', filter: 'brightness' },
+                { name: 'Darkness', filter: 'darkness' },
+                { name: 'Contrast++', filter: 'contrast' }
             ],
             gamingFilters: [
                 { name: 'Game Boy', filter: 'gameboy' },
@@ -509,7 +859,7 @@
                 { name: 'NES 8-bit', filter: 'nes' },
                 { name: 'CGA PC', filter: 'cga' },
                 { name: 'Atari 2600', filter: 'atari' },
-                { name: 'Pixellisé', filter: 'pixelate' }
+                { name: 'Pixelated', filter: 'pixelate' }
             ],
             vaporFilters: [
                 { name: 'Vaporwave', filter: 'vaporwave' },
@@ -518,27 +868,27 @@
                 { name: 'Synthwave', filter: 'synthwave' },
                 { name: 'Cyberpunk', filter: 'cyberpunk' },
                 { name: 'Miami Vice', filter: 'miami' },
-                { name: 'Néon', filter: 'neon' },
+                { name: 'Neon', filter: 'neon' },
                 { name: 'Outrun', filter: 'outrun' }
             ],
             vintageFilters: [
                 { name: 'Vintage', filter: 'vintage' },
                 { name: 'Polaroid', filter: 'polaroid' },
                 { name: 'Pastel', filter: 'pastel' },
-                { name: 'Chaleureux', filter: 'warm' },
-                { name: 'Froid', filter: 'cold' },
-                { name: 'Rétro 70s', filter: 'retro70s' }
+                { name: 'Warm', filter: 'warm' },
+                { name: 'Cold', filter: 'cold' },
+                { name: 'Retro 70s', filter: 'retro70s' }
             ],
             artisticFilters: [
                 { name: 'Poster', filter: 'posterize' },
-                { name: 'Solarisation', filter: 'solarize' },
-                { name: 'Contours', filter: 'edge' },
-                { name: 'Relief', filter: 'emboss' },
-                { name: 'Flou', filter: 'blur' },
-                { name: 'Peinture', filter: 'painting' }
+                { name: 'Solarize', filter: 'solarize' },
+                { name: 'Edge', filter: 'edge' },
+                { name: 'Emboss', filter: 'emboss' },
+                { name: 'Blur', filter: 'blur' },
+                { name: 'Painting', filter: 'painting' }
             ],
             cinemaFilters: [
-                { name: 'Cinéma', filter: 'cinema' },
+                { name: 'Cinema', filter: 'cinema' },
                 { name: 'Film Noir', filter: 'noir' },
                 { name: 'Technicolor', filter: 'technicolor' },
                 { name: 'Bleach Bypass', filter: 'bleach' },
@@ -546,18 +896,18 @@
                 { name: 'Sci-Fi', filter: 'scifi' }
             ],
             rgbFilters: [
-                { name: 'Canal Rouge', filter: 'redChannel' },
-                { name: 'Canal Vert', filter: 'greenChannel' },
-                { name: 'Canal Bleu', filter: 'blueChannel' },
-                { name: 'Glitch RGB', filter: 'rgbShift' },
+                { name: 'Red Channel', filter: 'redChannel' },
+                { name: 'Green Channel', filter: 'greenChannel' },
+                { name: 'Blue Channel', filter: 'blueChannel' },
+                { name: 'RGB Glitch', filter: 'rgbShift' },
                 { name: 'Swap RB', filter: 'swapRB' },
                 { name: 'Swap GB', filter: 'swapGB' }
             ],
             seasonFilters: [
-                { name: 'Printemps', filter: 'spring' },
-                { name: 'Été', filter: 'summer' },
-                { name: 'Automne', filter: 'autumn' },
-                { name: 'Hiver', filter: 'winter' }
+                { name: 'Spring', filter: 'spring' },
+                { name: 'Summer', filter: 'summer' },
+                { name: 'Autumn', filter: 'autumn' },
+                { name: 'Winter', filter: 'winter' }
             ],
             hueFilters: [
                 { name: 'Hue +45°', filter: 'hue45' },
@@ -567,49 +917,49 @@
                 { name: 'Hue +225°', filter: 'hue225' },
                 { name: 'Hue +270°', filter: 'hue270' },
                 { name: 'Hue +315°', filter: 'hue315' },
-                { name: 'Hue Rotatif', filter: 'hueRotate' }
+                { name: 'Hue Rotate', filter: 'hueRotate' }
             ],
             specialFilters: [
                 { name: 'Silhouette', filter: 'silhouette' },
-                { name: 'Noir/Blanc Pur', filter: 'binarize' },
+                { name: 'B&W Pure', filter: 'binarize' },
                 { name: 'Transparent BG', filter: 'transparentbg' },
                 { name: 'Cartoon', filter: 'cartoon' },
-                { name: 'Aquarelle', filter: 'watercolor' },
-                { name: 'Crayon', filter: 'pencil' }
+                { name: 'Watercolor', filter: 'watercolor' },
+                { name: 'Pencil', filter: 'pencil' }
             ],
             cosmicFilters: [
-                { name: 'Galaxie', filter: 'galaxy' },
-                { name: 'Nébuleuse', filter: 'nebula' },
+                { name: 'Galaxy', filter: 'galaxy' },
+                { name: 'Nebula', filter: 'nebula' },
                 { name: 'Supernova', filter: 'supernova' },
-                { name: 'Trou Noir', filter: 'blackhole' },
+                { name: 'Black Hole', filter: 'blackhole' },
                 { name: 'Aurora', filter: 'aurora' },
                 { name: 'Cosmic', filter: 'cosmic' }
             ],
             chemicalFilters: [
-                { name: 'Radioactif', filter: 'radioactive' },
-                { name: 'Acide', filter: 'acid' },
-                { name: 'Toxique', filter: 'toxic' },
+                { name: 'Radioactive', filter: 'radioactive' },
+                { name: 'Acid', filter: 'acid' },
+                { name: 'Toxic', filter: 'toxic' },
                 { name: 'Uranium', filter: 'uranium' },
                 { name: 'Biohazard', filter: 'biohazard' },
                 { name: 'Plasma', filter: 'plasma' }
             ],
             horrorFilters: [
                 { name: 'Zombie', filter: 'zombie' },
-                { name: 'Corrompu', filter: 'corrupted' },
-                { name: 'Sang', filter: 'blood' },
-                { name: 'Démon', filter: 'demon' },
-                { name: 'Cauchemar', filter: 'nightmare' },
-                { name: 'Hanté', filter: 'haunted' }
+                { name: 'Corrupted', filter: 'corrupted' },
+                { name: 'Blood', filter: 'blood' },
+                { name: 'Demon', filter: 'demon' },
+                { name: 'Nightmare', filter: 'nightmare' },
+                { name: 'Haunted', filter: 'haunted' }
             ],
             wtfFilters: [
-                { name: 'Psychédélique', filter: 'psychedelic' },
-                { name: 'Infrarouge', filter: 'infrared' },
+                { name: 'Psychedelic', filter: 'psychedelic' },
+                { name: 'Infrared', filter: 'infrared' },
                 { name: 'X-Ray', filter: 'xray' },
-                { name: 'Thermique', filter: 'thermal' },
+                { name: 'Thermal', filter: 'thermal' },
                 { name: 'Matrix', filter: 'matrix' },
                 { name: 'Deep Fry', filter: 'deepfry' },
                 { name: 'Glitch Max', filter: 'glitchmax' },
-                { name: 'Holographique', filter: 'holographic' },
+                { name: 'Holographic', filter: 'holographic' },
                 { name: 'JPEG Artifacts', filter: 'jpegify' },
                 { name: 'Chromatic', filter: 'chromatic' },
                 { name: 'Datamosh', filter: 'datamosh' },
@@ -623,7 +973,6 @@
             ]
         };
 
-        // Créer les miniatures de preview
         function createFilterPreviews() {
             for (const [containerId, filters] of Object.entries(filterCategories)) {
                 const container = document.getElementById(containerId);
@@ -657,15 +1006,16 @@
 
         fileInput.addEventListener('change', function(e) {
             const files = Array.from(e.target.files);
-            const remainingSlots = 8 - loadedImages.length;
+            const remainingSlots = MAX_IMAGES - loadedImages.length;
             
             if (files.length > remainingSlots) {
-                alert(`Vous ne pouvez charger que ${remainingSlots} image(s) supplémentaire(s). Maximum 8 images.`);
+                const alertMsg = translations[currentLang].alertMax.replace('{0}', remainingSlots);
+                alert(alertMsg);
                 return;
             }
 
             files.forEach(file => {
-                if (loadedImages.length >= 8) return;
+                if (loadedImages.length >= MAX_IMAGES) return;
                 
                 const reader = new FileReader();
                 reader.onload = function(event) {
@@ -862,26 +1212,22 @@
             document.getElementById('clearFilterBtn').disabled = !hasFilter;
         }
 
-        // Fonction centrale pour appliquer les filtres
+        // [TOUS LES FILTRES - Code identique au précédent]
         function applyFilterToImageData(imageData, filterName, targetCanvas) {
             const data = imageData.data;
-
             switch(filterName) {
-                // Basiques
                 case 'grayscale': grayscale(data); break;
                 case 'sepia': sepia(data); break;
                 case 'invert': invert(data); break;
                 case 'brightness': brightness(data, 50); break;
                 case 'darkness': brightness(data, -50); break;
                 case 'contrast': contrast(data, 40); break;
-                // Gaming
                 case 'gameboy': gameboy(data); break;
                 case 'gameboyGreen': gameboyGreen(data); break;
                 case 'nes': nes(data); break;
                 case 'cga': cga(data); break;
                 case 'atari': atari(data); break;
                 case 'pixelate': pixelateData(imageData, targetCanvas); return;
-                // Vaporwave
                 case 'vaporwave': vaporwave(data); break;
                 case 'vaporwavemax': vaporwavemax(data); break;
                 case 'vaporwavearc': vaporwavearc(data); break;
@@ -890,40 +1236,34 @@
                 case 'miami': miami(data); break;
                 case 'neon': neon(data); break;
                 case 'outrun': outrun(data); break;
-                // Vintage
                 case 'vintage': vintage(data); break;
                 case 'polaroid': polaroid(data); break;
                 case 'pastel': pastel(data); break;
                 case 'warm': warm(data); break;
                 case 'cold': cold(data); break;
                 case 'retro70s': retro70s(data); break;
-                // Artistique
                 case 'posterize': posterize(data, 4); break;
                 case 'solarize': solarize(data); break;
                 case 'edge': edgeData(imageData, targetCanvas); return;
                 case 'emboss': embossData(imageData, targetCanvas); return;
                 case 'blur': blurData(imageData, targetCanvas); return;
                 case 'painting': painting(data); break;
-                // Cinéma
                 case 'cinema': cinema(data); break;
                 case 'noir': noir(data); break;
                 case 'technicolor': technicolor(data); break;
                 case 'bleach': bleach(data); break;
                 case 'western': western(data); break;
                 case 'scifi': scifi(data); break;
-                // RGB
                 case 'redChannel': redChannel(data); break;
                 case 'greenChannel': greenChannel(data); break;
                 case 'blueChannel': blueChannel(data); break;
                 case 'rgbShift': rgbShiftData(imageData, targetCanvas); return;
                 case 'swapRB': swapRB(data); break;
                 case 'swapGB': swapGB(data); break;
-                // Saisons
                 case 'spring': spring(data); break;
                 case 'summer': summer(data); break;
                 case 'autumn': autumn(data); break;
                 case 'winter': winter(data); break;
-                // Hue
                 case 'hue45': hueShift(data, 45); break;
                 case 'hue90': hueShift(data, 90); break;
                 case 'hue135': hueShift(data, 135); break;
@@ -932,35 +1272,30 @@
                 case 'hue270': hueShift(data, 270); break;
                 case 'hue315': hueShift(data, 315); break;
                 case 'hueRotate': hueRotateGradient(data); break;
-                // Spéciaux
                 case 'silhouette': silhouette(data); break;
                 case 'binarize': binarize(data); break;
                 case 'transparentbg': transparentbg(data); break;
                 case 'cartoon': cartoon(data); break;
                 case 'watercolor': watercolor(data); break;
                 case 'pencil': pencil(data); break;
-                // Cosmique
                 case 'galaxy': galaxy(data); break;
                 case 'nebula': nebula(data); break;
                 case 'supernova': supernova(data); break;
                 case 'blackhole': blackhole(data); break;
                 case 'aurora': aurora(data); break;
                 case 'cosmic': cosmic(data); break;
-                // Chimique
                 case 'radioactive': radioactive(data); break;
                 case 'acid': acid(data); break;
                 case 'toxic': toxic(data); break;
                 case 'uranium': uranium(data); break;
                 case 'biohazard': biohazard(data); break;
                 case 'plasma': plasma(data); break;
-                // Horror
                 case 'zombie': zombie(data); break;
                 case 'corrupted': corrupted(data); break;
                 case 'blood': blood(data); break;
                 case 'demon': demon(data); break;
                 case 'nightmare': nightmare(data); break;
                 case 'haunted': haunted(data); break;
-                // WTF
                 case 'psychedelic': psychedelic(data); break;
                 case 'infrared': infrared(data); break;
                 case 'xray': xray(data); break;
@@ -982,968 +1317,105 @@
             }
         }
 
-        // ===== FILTRES BASIQUES =====
-        function grayscale(data) {
-            for (let i = 0; i < data.length; i += 4) {
-                const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
-                data[i] = data[i + 1] = data[i + 2] = avg;
-            }
-        }
+        // [INSÉRER ICI TOUS LES FILTRES DU CODE PRÉCÉDENT - grayscale, sepia, etc.]
+        // Je les ai omis pour la brièveté mais ils sont identiques
+        
+        function grayscale(data){for(let i=0;i<data.length;i+=4){const avg=(data[i]+data[i+1]+data[i+2])/3;data[i]=data[i+1]=data[i+2]=avg}}
+        function sepia(data){for(let i=0;i<data.length;i+=4){const r=data[i],g=data[i+1],b=data[i+2];data[i]=Math.min(255,r*0.393+g*0.769+b*0.189);data[i+1]=Math.min(255,r*0.349+g*0.686+b*0.168);data[i+2]=Math.min(255,r*0.272+g*0.534+b*0.131)}}
+        function invert(data){for(let i=0;i<data.length;i+=4){data[i]=255-data[i];data[i+1]=255-data[i+1];data[i+2]=255-data[i+2]}}
+        function brightness(data,value){for(let i=0;i<data.length;i+=4){data[i]=Math.min(255,Math.max(0,data[i]+value));data[i+1]=Math.min(255,Math.max(0,data[i+1]+value));data[i+2]=Math.min(255,Math.max(0,data[i+2]+value))}}
+        function contrast(data,value){const factor=(259*(value+255))/(255*(259-value));for(let i=0;i<data.length;i+=4){data[i]=Math.min(255,Math.max(0,factor*(data[i]-128)+128));data[i+1]=Math.min(255,Math.max(0,factor*(data[i+1]-128)+128));data[i+2]=Math.min(255,Math.max(0,factor*(data[i+2]-128)+128))}}
+        function gameboy(data){const palette=[[15,56,15],[48,98,48],[139,172,15],[155,188,15]];for(let i=0;i<data.length;i+=4){const gray=(data[i]+data[i+1]+data[i+2])/3;const color=palette[Math.min(Math.floor(gray/64),3)];data[i]=color[0];data[i+1]=color[1];data[i+2]=color[2]}}
+        function gameboyGreen(data){grayscale(data);for(let i=0;i<data.length;i+=4){const gray=data[i];data[i]=gray*0.3;data[i+1]=gray*0.8;data[i+2]=gray*0.3}}
+        function nes(data){const palette=[[0,0,0],[252,252,252],[188,188,188],[0,88,248],[0,168,0],[216,0,204],[228,92,16],[248,56,0]];applyPalette(data,palette)}
+        function cga(data){const palette=[[0,0,0],[0,170,170],[170,0,170],[170,170,170],[255,85,255],[85,255,255],[255,255,85],[255,255,255]];applyPalette(data,palette)}
+        function atari(data){const palette=[[0,0,0],[68,68,0],[112,40,0],[132,24,0],[136,0,0],[120,0,92],[72,0,120],[20,0,132]];applyPalette(data,palette)}
+        function applyPalette(data,palette){for(let i=0;i<data.length;i+=4){let closest=0,minDist=Infinity;for(let j=0;j<palette.length;j++){const dist=Math.sqrt(Math.pow(data[i]-palette[j][0],2)+Math.pow(data[i+1]-palette[j][1],2)+Math.pow(data[i+2]-palette[j][2],2));if(dist<minDist){minDist=dist;closest=j}}data[i]=palette[closest][0];data[i+1]=palette[closest][1];data[i+2]=palette[closest][2]}}
+        function pixelateData(imageData,targetCanvas){const size=10;const w=targetCanvas.width,h=targetCanvas.height;const tempCtx=targetCanvas.getContext('2d');tempCtx.imageSmoothingEnabled=false;const tempCanvas=document.createElement('canvas');tempCanvas.width=w/size;tempCanvas.height=h/size;const tempContext=tempCanvas.getContext('2d');tempContext.drawImage(targetCanvas,0,0,w,h,0,0,w/size,h/size);tempCtx.drawImage(tempCanvas,0,0,w/size,h/size,0,0,w,h)}
+        function vaporwave(data){for(let i=0;i<data.length;i+=4){data[i]=Math.min(255,data[i]*1.2+50);data[i+1]=Math.min(255,data[i+1]*0.8);data[i+2]=Math.min(255,data[i+2]*1.3+60)}}
+        function vaporwavemax(data){hueShift(data,300);for(let i=0;i<data.length;i+=4){data[i]=Math.min(255,data[i]*1.5+80);data[i+1]=Math.min(255,data[i+1]*0.7);data[i+2]=Math.min(255,data[i+2]*1.8+100)}contrast(data,50)}
+        function vaporwavearc(data){for(let i=0;i<data.length;i+=4){const position=(i/data.length)*6.28;const wave=Math.sin(position)*0.5+0.5;data[i]=Math.min(255,data[i]*(0.3+wave*0.7)+80);data[i+1]=Math.min(255,data[i+1]*0.6+40);data[i+2]=Math.min(255,data[i+2]*(1.2+wave*0.8)+100)}contrast(data,40)}
+        function synthwave(data){for(let i=0;i<data.length;i+=4){data[i]=Math.min(255,data[i]*1.4);data[i+1]=Math.min(255,data[i+1]*0.5);data[i+2]=Math.min(255,data[i+2]*1.5)}}
+        function cyberpunk(data){for(let i=0;i<data.length;i+=4){const avg=(data[i]+data[i+1]+data[i+2])/3;if(avg>128){data[i]=Math.min(255,data[i]*1.3);data[i+1]=Math.min(255,data[i+1]*0.7);data[i+2]=Math.min(255,data[i+2]*1.5)}else{data[i]*=0.5;data[i+1]=Math.min(255,data[i+1]*1.3);data[i+2]=Math.min(255,data[i+2]*1.3)}}}
+        function miami(data){for(let i=0;i<data.length;i+=4){data[i]=Math.min(255,data[i]*1.3+20);data[i+1]=Math.min(255,data[i+1]*0.9+30);data[i+2]=Math.min(255,data[i+2]*1.4)}}
+        function neon(data){contrast(data,60);for(let i=0;i<data.length;i+=4){data[i]=Math.min(255,data[i]*1.5);data[i+1]=Math.min(255,data[i+1]*1.3);data[i+2]=Math.min(255,data[i+2]*1.6)}}
+        function outrun(data){for(let i=0;i<data.length;i+=4){data[i]=Math.min(255,data[i]*1.6+100);data[i+1]=Math.min(255,data[i+1]*0.4);data[i+2]=Math.min(255,data[i+2]*1.7+80)}contrast(data,50)}
+        function vintage(data){sepia(data);for(let i=0;i<data.length;i+=4){data[i]=Math.max(0,data[i]-20);data[i+1]=Math.max(0,data[i+1]-10);data[i+2]=Math.max(0,data[i+2]-30)}}
+        function polaroid(data){for(let i=0;i<data.length;i+=4){data[i]=Math.min(255,data[i]*1.1+20);data[i+1]=Math.min(255,data[i+1]*1.05+15);data[i+2]=Math.min(255,data[i+2]*0.95)}}
+        function pastel(data){for(let i=0;i<data.length;i+=4){data[i]=(data[i]+255)/2;data[i+1]=(data[i+1]+255)/2;data[i+2]=(data[i+2]+255)/2}}
+        function warm(data){for(let i=0;i<data.length;i+=4){data[i]=Math.min(255,data[i]+30);data[i+1]=Math.min(255,data[i+1]+10);data[i+2]=Math.max(0,data[i+2]-20)}}
+        function cold(data){for(let i=0;i<data.length;i+=4){data[i]=Math.max(0,data[i]-20);data[i+1]=Math.min(255,data[i+1]+10);data[i+2]=Math.min(255,data[i+2]+30)}}
+        function retro70s(data){for(let i=0;i<data.length;i+=4){data[i]=Math.min(255,data[i]*1.3+40);data[i+1]=Math.min(255,data[i+1]*1.2+20);data[i+2]=Math.max(0,data[i+2]*0.7-10)}contrast(data,20)}
+        function posterize(data,levels){const step=255/levels;for(let i=0;i<data.length;i+=4){data[i]=Math.floor(data[i]/step)*step;data[i+1]=Math.floor(data[i+1]/step)*step;data[i+2]=Math.floor(data[i+2]/step)*step}}
+        function solarize(data){for(let i=0;i<data.length;i+=4){data[i]=data[i]<128?data[i]:255-data[i];data[i+1]=data[i+1]<128?data[i+1]:255-data[i+1];data[i+2]=data[i+2]<128?data[i+2]:255-data[i+2]}}
+        function edgeData(imageData,targetCanvas){applyKernel(imageData,targetCanvas,[-1,-1,-1,-1,8,-1,-1,-1,-1],0)}
+        function embossData(imageData,targetCanvas){applyKernel(imageData,targetCanvas,[-2,-1,0,-1,1,1,0,1,2],128)}
+        function applyKernel(imageData,targetCanvas,kernel,offset){const data=imageData.data;const w=targetCanvas.width,h=targetCanvas.height;const output=new Uint8ClampedArray(data);for(let y=1;y<h-1;y++){for(let x=1;x<w-1;x++){let r=0,g=0,b=0;for(let ky=-1;ky<=1;ky++){for(let kx=-1;kx<=1;kx++){const idx=((y+ky)*w+(x+kx))*4;const k=kernel[(ky+1)*3+(kx+1)];r+=data[idx]*k;g+=data[idx+1]*k;b+=data[idx+2]*k}}const idx=(y*w+x)*4;output[idx]=Math.min(255,Math.max(0,r+offset));output[idx+1]=Math.min(255,Math.max(0,g+offset));output[idx+2]=Math.min(255,Math.max(0,b+offset))}}for(let i=0;i<data.length;i++)data[i]=output[i]}
+        function blurData(imageData,targetCanvas){const data=imageData.data;const w=targetCanvas.width,h=targetCanvas.height;const output=new Uint8ClampedArray(data);for(let y=1;y<h-1;y++){for(let x=1;x<w-1;x++){let r=0,g=0,b=0,count=0;for(let ky=-1;ky<=1;ky++){for(let kx=-1;kx<=1;kx++){const idx=((y+ky)*w+(x+kx))*4;r+=data[idx];g+=data[idx+1];b+=data[idx+2];count++}}const idx=(y*w+x)*4;output[idx]=r/count;output[idx+1]=g/count;output[idx+2]=b/count}}for(let i=0;i<data.length;i++)data[i]=output[i]}
+        function painting(data){posterize(data,6);for(let i=0;i<data.length;i+=4){data[i]=Math.min(255,data[i]*1.2);data[i+1]=Math.min(255,data[i+1]*1.2);data[i+2]=Math.min(255,data[i+2]*1.2)}}
+        function cinema(data){for(let i=0;i<data.length;i+=4){const avg=data[i]*0.3+data[i+1]*0.59+data[i+2]*0.11;data[i]=Math.min(255,avg*1.2-10);data[i+1]=Math.min(255,avg*1.1-20);data[i+2]=Math.min(255,avg*0.9)}}
+        function noir(data){grayscale(data);contrast(data,50);brightness(data,-20)}
+        function technicolor(data){for(let i=0;i<data.length;i+=4){data[i]=Math.min(255,data[i]*1.3);data[i+1]=Math.min(255,data[i+1]*1.1);data[i+2]=Math.min(255,data[i+2]*1.2)}contrast(data,30)}
+        function bleach(data){grayscale(data);for(let i=0;i<data.length;i+=4){const gray=data[i];data[i]=Math.min(255,gray*0.9+30);data[i+1]=Math.min(255,gray*0.95+20);data[i+2]=Math.min(255,gray*0.85+40)}contrast(data,50)}
+        function western(data){sepia(data);for(let i=0;i<data.length;i+=4){data[i]=Math.min(255,data[i]*1.3);data[i+1]=Math.min(255,data[i+1]*1.1);data[i+2]=Math.max(0,data[i+2]*0.7)}contrast(data,40);brightness(data,-15)}
+        function scifi(data){for(let i=0;i<data.length;i+=4){data[i]=Math.min(255,data[i]*0.8);data[i+1]=Math.min(255,data[i+1]*1.1+20);data[i+2]=Math.min(255,data[i+2]*1.4+40)}contrast(data,45)}
+        function redChannel(data){for(let i=0;i<data.length;i+=4){data[i+1]=0;data[i+2]=0}}
+        function greenChannel(data){for(let i=0;i<data.length;i+=4){data[i]=0;data[i+2]=0}}
+        function blueChannel(data){for(let i=0;i<data.length;i+=4){data[i]=0;data[i+1]=0}}
+        function rgbShiftData(imageData,targetCanvas){const data=imageData.data;const w=targetCanvas.width,h=targetCanvas.height;const shift=5;const output=new Uint8ClampedArray(data);for(let y=0;y<h;y++){for(let x=0;x<w;x++){const idx=(y*w+x)*4;const idxShift=(y*w+Math.min(w-1,x+shift))*4;output[idx]=data[idxShift];output[idx+1]=data[idx+1];output[idx+2]=data[Math.max(0,(y*w+x-shift)*4)+2]}}for(let i=0;i<data.length;i++)data[i]=output[i]}
+        function swapRB(data){for(let i=0;i<data.length;i+=4){[data[i],data[i+2]]=[data[i+2],data[i]]}}
+        function swapGB(data){for(let i=0;i<data.length;i+=4){[data[i+1],data[i+2]]=[data[i+2],data[i+1]]}}
+        function spring(data){for(let i=0;i<data.length;i+=4){data[i]=Math.min(255,data[i]*1.05+15);data[i+1]=Math.min(255,data[i+1]*1.2+30);data[i+2]=Math.min(255,data[i+2]*0.95+20)}}
+        function summer(data){for(let i=0;i<data.length;i+=4){data[i]=Math.min(255,data[i]*1.3+40);data[i+1]=Math.min(255,data[i+1]*1.2+30);data[i+2]=Math.min(255,data[i+2]*0.9)}brightness(data,20)}
+        function autumn(data){for(let i=0;i<data.length;i+=4){data[i]=Math.min(255,data[i]*1.4+50);data[i+1]=Math.min(255,data[i+1]*1.1+20);data[i+2]=Math.max(0,data[i+2]*0.6-30)}}
+        function winter(data){for(let i=0;i<data.length;i+=4){data[i]=Math.min(255,data[i]*0.9+40);data[i+1]=Math.min(255,data[i+1]*0.95+40);data[i+2]=Math.min(255,data[i+2]*1.3+60)}brightness(data,30)}
+        function rgbToHsl(r,g,b){r/=255;g/=255;b/=255;const max=Math.max(r,g,b),min=Math.min(r,g,b);let h,s,l=(max+min)/2;if(max===min){h=s=0}else{const d=max-min;s=l>0.5?d/(2-max-min):d/(max+min);switch(max){case r:h=((g-b)/d+(g<b?6:0))/6;break;case g:h=((b-r)/d+2)/6;break;case b:h=((r-g)/d+4)/6;break}}return[h*360,s*100,l*100]}
+        function hslToRgb(h,s,l){h/=360;s/=100;l/=100;let r,g,b;if(s===0){r=g=b=l}else{const hue2rgb=(p,q,t)=>{if(t<0)t+=1;if(t>1)t-=1;if(t<1/6)return p+(q-p)*6*t;if(t<1/2)return q;if(t<2/3)return p+(q-p)*(2/3-t)*6;return p};const q=l<0.5?l*(1+s):l+s-l*s;const p=2*l-q;r=hue2rgb(p,q,h+1/3);g=hue2rgb(p,q,h);b=hue2rgb(p,q,h-1/3)}return[Math.round(r*255),Math.round(g*255),Math.round(b*255)]}
+        function hueShift(data,degrees){for(let i=0;i<data.length;i+=4){const[h,s,l]=rgbToHsl(data[i],data[i+1],data[i+2]);const newH=(h+degrees)%360;const[r,g,b]=hslToRgb(newH,s,l);data[i]=r;data[i+1]=g;data[i+2]=b}}
+        function hueRotateGradient(data){for(let i=0;i<data.length;i+=4){const position=i/data.length;const degrees=position*360;const[h,s,l]=rgbToHsl(data[i],data[i+1],data[i+2]);const newH=(h+degrees)%360;const[r,g,b]=hslToRgb(newH,s,l);data[i]=r;data[i+1]=g;data[i+2]=b}}
+        function silhouette(data){for(let i=0;i<data.length;i+=4){if(data[i+3]>0){data[i]=0;data[i+1]=0;data[i+2]=0}}}
+        function binarize(data){for(let i=0;i<data.length;i+=4){const avg=(data[i]+data[i+1]+data[i+2])/3;const val=avg>127?255:0;data[i]=data[i+1]=data[i+2]=val}}
+        function transparentbg(data){for(let i=0;i<data.length;i+=4){const brightness=(data[i]+data[i+1]+data[i+2])/3;if(brightness>200){data[i+3]=0}}}
+        function cartoon(data){posterize(data,5);contrast(data,50);for(let i=0;i<data.length;i+=4){data[i]=Math.min(255,data[i]*1.3);data[i+1]=Math.min(255,data[i+1]*1.3);data[i+2]=Math.min(255,data[i+2]*1.3)}}
+        function watercolor(data){for(let i=0;i<data.length;i+=4){data[i]=(data[i]+200)/2;data[i+1]=(data[i+1]+200)/2;data[i+2]=(data[i+2]+200)/2}posterize(data,8)}
+        function pencil(data){grayscale(data);invert(data);for(let i=0;i<data.length;i+=4){data[i]=Math.min(255,data[i]*0.8+40);data[i+1]=Math.min(255,data[i+1]*0.8+40);data[i+2]=Math.min(255,data[i+2]*0.8+40)}}
+        function galaxy(data){for(let i=0;i<data.length;i+=4){const wave=Math.sin(i*0.003)*100;data[i]=Math.min(255,data[i]*0.5+wave+100);data[i+1]=Math.min(255,data[i+1]*0.3+wave*0.5);data[i+2]=Math.min(255,data[i+2]*1.5+wave+150)}}
+        function nebula(data){for(let i=0;i<data.length;i+=4){const wave1=Math.sin(i*0.002)*80;const wave2=Math.cos(i*0.003)*60;data[i]=Math.min(255,data[i]*1.2+wave1+100);data[i+1]=Math.min(255,data[i+1]*0.6+wave2);data[i+2]=Math.min(255,data[i+2]*1.4+wave1+120)}}
+        function supernova(data){for(let i=0;i<data.length;i+=4){const intensity=(data[i]+data[i+1]+data[i+2])/3;const boost=Math.pow(intensity/255,0.4)*300;data[i]=Math.min(255,boost);data[i+1]=Math.min(255,boost*0.8);data[i+2]=Math.min(255,boost*0.6)}}
+        function blackhole(data){grayscale(data);invert(data);for(let i=0;i<data.length;i+=4){const intensity=data[i];data[i]=Math.max(0,intensity*0.3);data[i+1]=Math.max(0,intensity*0.2);data[i+2]=Math.max(0,intensity*0.5)}contrast(data,80)}
+        function aurora(data){for(let i=0;i<data.length;i+=4){const wave=Math.sin(i*0.001)*100;data[i]=Math.min(255,data[i]*0.4+wave*0.3);data[i+1]=Math.min(255,data[i+1]*1.3+wave+80);data[i+2]=Math.min(255,data[i+2]*1.2+wave*0.8+60)}}
+        function cosmic(data){hueRotateGradient(data);for(let i=0;i<data.length;i+=4){data[i]=Math.min(255,data[i]*1.5);data[i+1]=Math.min(255,data[i+1]*1.5);data[i+2]=Math.min(255,data[i+2]*1.8)}contrast(data,60)}
+        function radioactive(data){for(let i=0;i<data.length;i+=4){const intensity=(data[i]+data[i+1]+data[i+2])/3;data[i]=Math.min(255,intensity*0.3);data[i+1]=Math.min(255,intensity*2);data[i+2]=Math.min(255,intensity*0.3)}contrast(data,70)}
+        function acid(data){for(let i=0;i<data.length;i+=4){data[i]=(data[i]+data[i+2])%256;data[i+1]=(data[i+1]+data[i])%256;data[i+2]=(data[i+2]+data[i+1])%256}contrast(data,80)}
+        function toxic(data){for(let i=0;i<data.length;i+=4){data[i]=Math.min(255,data[i]*0.5+50);data[i+1]=Math.min(255,data[i+1]*1.8+100);data[i+2]=Math.min(255,data[i+2]*0.3)}}
+        function uranium(data){for(let i=0;i<data.length;i+=4){const wave=Math.sin(i*0.005)*50;data[i]=Math.min(255,data[i]*0.4+wave);data[i+1]=Math.min(255,data[i+1]*2+80);data[i+2]=Math.min(255,data[i+2]*0.2)}}
+        function biohazard(data){for(let i=0;i<data.length;i+=4){data[i]=Math.min(255,data[i]*1.1+60);data[i+1]=Math.min(255,data[i+1]*1.5+80);data[i+2]=Math.min(255,data[i+2]*0.3)}contrast(data,50)}
+        function plasma(data){for(let i=0;i<data.length;i+=4){const wave1=Math.sin(i*0.004)*128;const wave2=Math.cos(i*0.003)*128;data[i]=Math.min(255,Math.abs(wave1+wave2)+100);data[i+1]=Math.min(255,Math.abs(wave1*0.5)+50);data[i+2]=Math.min(255,Math.abs(wave2)+150)}}
+        function zombie(data){for(let i=0;i<data.length;i+=4){data[i]=Math.min(255,data[i]*0.8+40);data[i+1]=Math.min(255,data[i+1]*1.1+30);data[i+2]=Math.max(0,data[i+2]*0.5-20)}contrast(data,30);brightness(data,-10)}
+        function corrupted(data){for(let i=0;i<data.length;i+=20){if(Math.random()>0.7){const corruption=Math.floor(Math.random()*150);for(let j=0;j<corruption&&i+j<data.length;j+=4){data[i+j]=Math.random()*255;data[i+j+1]=Math.random()*255;data[i+j+2]=Math.random()*255}}}}
+        function blood(data){for(let i=0;i<data.length;i+=4){data[i]=Math.min(255,data[i]*1.6+80);data[i+1]=Math.max(0,data[i+1]*0.3-30);data[i+2]=Math.max(0,data[i+2]*0.3-30)}contrast(data,50)}
+        function demon(data){for(let i=0;i<data.length;i+=4){data[i]=Math.min(255,data[i]*1.8+100);data[i+1]=Math.max(0,data[i+1]*0.2);data[i+2]=Math.max(0,data[i+2]*0.2)}invert(data);contrast(data,70)}
+        function nightmare(data){for(let i=0;i<data.length;i+=4){const wave=Math.sin(i*0.01)*100;data[i]=Math.min(255,data[i]*0.5+wave);data[i+1]=Math.max(0,data[i+1]*0.3-50);data[i+2]=Math.min(255,data[i+2]*0.8+wave*0.5)}contrast(data,60)}
+        function haunted(data){grayscale(data);for(let i=0;i<data.length;i+=4){const gray=data[i];data[i]=Math.min(255,gray*0.7+30);data[i+1]=Math.min(255,gray*0.8+50);data[i+2]=Math.min(255,gray*0.9+70)}contrast(data,40);brightness(data,-30)}
+        function psychedelic(data){for(let i=0;i<data.length;i+=4){const offset=Math.sin(i*0.01)*128;data[i]=Math.min(255,Math.max(0,(data[i]+offset)%256));data[i+1]=Math.min(255,Math.max(0,(data[i+1]+offset+85)%256));data[i+2]=Math.min(255,Math.max(0,(data[i+2]+offset+170)%256))}}
+        function infrared(data){for(let i=0;i<data.length;i+=4){const temp=data[i+1];data[i]=Math.min(255,temp*1.5);data[i+1]=Math.max(0,data[i]*0.3);data[i+2]=Math.max(0,data[i+2]*0.3)}}
+        function xray(data){invert(data);grayscale(data);contrast(data,60);brightness(data,40)}
+        function thermal(data){for(let i=0;i<data.length;i+=4){const intensity=(data[i]+data[i+1]+data[i+2])/3;if(intensity<64){data[i]=0;data[i+1]=0;data[i+2]=intensity*4}else if(intensity<128){data[i]=0;data[i+1]=(intensity-64)*4;data[i+2]=255}else if(intensity<192){data[i]=(intensity-128)*4;data[i+1]=255;data[i+2]=255-(intensity-128)*4}else{data[i]=255;data[i+1]=255-(intensity-192)*4;data[i+2]=0}}}
+        function matrix(data){for(let i=0;i<data.length;i+=4){const green=(data[i]+data[i+1]+data[i+2])/3;data[i]=0;data[i+1]=Math.min(255,green*1.5);data[i+2]=0}contrast(data,50);brightness(data,-30)}
+        function deepfry(data){for(let i=0;i<data.length;i+=4){data[i]=Math.min(255,data[i]*1.8);data[i+1]=Math.min(255,data[i+1]*1.5);data[i+2]=Math.min(255,data[i+2]*0.7)}contrast(data,80);posterize(data,3)}
+        function glitchmax(data){for(let i=0;i<data.length;i+=16){if(Math.random()>0.7){const shift=Math.floor(Math.random()*100)*4;const targetIdx=Math.min(data.length-4,i+shift);[data[i],data[targetIdx]]=[data[targetIdx],data[i]];[data[i+1],data[targetIdx+1]]=[data[targetIdx+1],data[i+1]];[data[i+2],data[targetIdx+2]]=[data[targetIdx+2],data[i+2]]}}}
+        function holographic(data){for(let i=0;i<data.length;i+=4){const wave=Math.sin(i*0.005)*50;data[i]=Math.min(255,Math.max(0,data[i]+wave));data[i+1]=Math.min(255,Math.max(0,data[i+1]+wave*1.5));data[i+2]=Math.min(255,Math.max(0,data[i+2]+wave*2))}}
+        function jpegify(data){posterize(data,5);for(let i=0;i<data.length;i+=4){if(Math.random()>0.95){data[i]=Math.min(255,data[i]+(Math.random()-0.5)*50);data[i+1]=Math.min(255,data[i+1]+(Math.random()-0.5)*50);data[i+2]=Math.min(255,data[i+2]+(Math.random()-0.5)*50)}}}
+        function chromaticAberration(imageData,targetCanvas){const data=imageData.data;const offset=8;const output=new Uint8ClampedArray(data);for(let i=0;i<data.length;i+=4){const leftR=Math.max(0,i-offset*4);const rightB=Math.min(data.length-4,i+offset*4);output[i]=data[leftR];output[i+1]=data[i+1];output[i+2]=data[rightB+2]}for(let i=0;i<data.length;i++)data[i]=output[i]}
+        function datamosh(data){for(let i=0;i<data.length;i+=40){if(Math.random()>0.5){const blockSize=Math.floor(Math.random()*200);for(let j=0;j<blockSize&&i+j<data.length;j+=4){data[i+j]=data[Math.max(0,i-4)];data[i+j+1]=data[Math.max(0,i-3)];data[i+j+2]=data[Math.max(0,i-2)]}}}}
+        function vhsglitch(data){for(let i=0;i<data.length;i+=4){if(Math.random()>0.98){const glitchLength=Math.floor(Math.random()*500);for(let j=0;j<glitchLength&&i+j<data.length;j+=4){data[i+j]=data[i];data[i+j+1]=data[i+1];data[i+j+2]=data[i+2]}}}}
+        function scanlines(data,targetCanvas){const w=targetCanvas.width;for(let i=0;i<data.length;i+=4){const pixel=i/4;const y=Math.floor(pixel/w);if(y%3===0){data[i]*=0.5;data[i+1]*=0.5;data[i+2]*=0.5}}}
+        function colorbleed(data){const output=new Uint8ClampedArray(data);for(let i=4;i<data.length-4;i+=4){output[i]=(data[i-4]+data[i]+data[i+4])/3;output[i+1]=(data[i-3]+data[i+1]+data[i+5])/3;output[i+2]=(data[i-2]+data[i+2]+data[i+6])/3}for(let i=0;i<data.length;i++)data[i]=output[i]}
+        function nuke(data){for(let i=0;i<data.length;i+=4){const intensity=(data[i]+data[i+1]+data[i+2])/3;const boost=Math.pow(intensity/255,0.3)*255;data[i]=Math.min(255,boost*1.5);data[i+1]=Math.min(255,boost*1.3);data[i+2]=Math.min(255,boost*0.8)}contrast(data,100);brightness(data,80)}
+        function drunk(data){for(let i=0;i<data.length;i+=4){const wave=Math.sin(i*0.002)*50+Math.cos(i*0.003)*30;data[i]=Math.min(255,Math.max(0,data[i]+wave));data[i+1]=Math.min(255,Math.max(0,data[i+1]+wave*0.8));data[i+2]=Math.min(255,Math.max(0,data[i+2]+wave*1.2))}}
+        function rave(data){for(let i=0;i<data.length;i+=4){const multi=Math.sin(i*0.001)*2+Math.cos(i*0.002)*2;data[i]=Math.min(255,Math.abs(data[i]*multi));data[i+1]=Math.min(255,Math.abs(data[i+1]*multi*1.3));data[i+2]=Math.min(255,Math.abs(data[i+2]*multi*1.5))}contrast(data,90)}
+        function dimensionx(data){for(let i=0;i<data.length;i+=4){const twist=Math.sin(i*0.0008)*200;data[i]=Math.min(255,Math.abs((data[i]+twist)%256));data[i+1]=Math.min(255,Math.abs((data[i+1]-twist*0.7)%256));data[i+2]=Math.min(255,Math.abs((data[i+2]+twist*1.3)%256))}}
 
-        function sepia(data) {
-            for (let i = 0; i < data.length; i += 4) {
-                const r = data[i], g = data[i + 1], b = data[i + 2];
-                data[i] = Math.min(255, r * 0.393 + g * 0.769 + b * 0.189);
-                data[i + 1] = Math.min(255, r * 0.349 + g * 0.686 + b * 0.168);
-                data[i + 2] = Math.min(255, r * 0.272 + g * 0.534 + b * 0.131);
-            }
-        }
-
-        function invert(data) {
-            for (let i = 0; i < data.length; i += 4) {
-                data[i] = 255 - data[i];
-                data[i + 1] = 255 - data[i + 1];
-                data[i + 2] = 255 - data[i + 2];
-            }
-        }
-
-        function brightness(data, value) {
-            for (let i = 0; i < data.length; i += 4) {
-                data[i] = Math.min(255, Math.max(0, data[i] + value));
-                data[i + 1] = Math.min(255, Math.max(0, data[i + 1] + value));
-                data[i + 2] = Math.min(255, Math.max(0, data[i + 2] + value));
-            }
-        }
-
-        function contrast(data, value) {
-            const factor = (259 * (value + 255)) / (255 * (259 - value));
-            for (let i = 0; i < data.length; i += 4) {
-                data[i] = Math.min(255, Math.max(0, factor * (data[i] - 128) + 128));
-                data[i + 1] = Math.min(255, Math.max(0, factor * (data[i + 1] - 128) + 128));
-                data[i + 2] = Math.min(255, Math.max(0, factor * (data[i + 2] - 128) + 128));
-            }
-        }
-
-        // ===== GAMING =====
-        function gameboy(data) {
-            const palette = [[15, 56, 15], [48, 98, 48], [139, 172, 15], [155, 188, 15]];
-            for (let i = 0; i < data.length; i += 4) {
-                const gray = (data[i] + data[i + 1] + data[i + 2]) / 3;
-                const color = palette[Math.min(Math.floor(gray / 64), 3)];
-                data[i] = color[0]; data[i + 1] = color[1]; data[i + 2] = color[2];
-            }
-        }
-
-        function gameboyGreen(data) {
-            grayscale(data);
-            for (let i = 0; i < data.length; i += 4) {
-                const gray = data[i];
-                data[i] = gray * 0.3; data[i + 1] = gray * 0.8; data[i + 2] = gray * 0.3;
-            }
-        }
-
-        function nes(data) {
-            const palette = [[0, 0, 0], [252, 252, 252], [188, 188, 188], [0, 88, 248], [0, 168, 0], [216, 0, 204], [228, 92, 16], [248, 56, 0]];
-            applyPalette(data, palette);
-        }
-
-        function cga(data) {
-            const palette = [[0, 0, 0], [0, 170, 170], [170, 0, 170], [170, 170, 170], [255, 85, 255], [85, 255, 255], [255, 255, 85], [255, 255, 255]];
-            applyPalette(data, palette);
-        }
-
-        function atari(data) {
-            const palette = [[0, 0, 0], [68, 68, 0], [112, 40, 0], [132, 24, 0], [136, 0, 0], [120, 0, 92], [72, 0, 120], [20, 0, 132]];
-            applyPalette(data, palette);
-        }
-
-        function applyPalette(data, palette) {
-            for (let i = 0; i < data.length; i += 4) {
-                let closest = 0, minDist = Infinity;
-                for (let j = 0; j < palette.length; j++) {
-                    const dist = Math.sqrt(Math.pow(data[i] - palette[j][0], 2) + Math.pow(data[i + 1] - palette[j][1], 2) + Math.pow(data[i + 2] - palette[j][2], 2));
-                    if (dist < minDist) { minDist = dist; closest = j; }
-                }
-                data[i] = palette[closest][0]; data[i + 1] = palette[closest][1]; data[i + 2] = palette[closest][2];
-            }
-        }
-
-        function pixelateData(imageData, targetCanvas) {
-            const size = 10;
-            const w = targetCanvas.width, h = targetCanvas.height;
-            const tempCtx = targetCanvas.getContext('2d');
-            tempCtx.imageSmoothingEnabled = false;
-            const tempCanvas = document.createElement('canvas');
-            tempCanvas.width = w / size; tempCanvas.height = h / size;
-            const tempContext = tempCanvas.getContext('2d');
-            tempContext.drawImage(targetCanvas, 0, 0, w, h, 0, 0, w / size, h / size);
-            tempCtx.drawImage(tempCanvas, 0, 0, w / size, h / size, 0, 0, w, h);
-        }
-
-        // ===== VAPORWAVE =====
-        function vaporwave(data) {
-            for (let i = 0; i < data.length; i += 4) {
-                data[i] = Math.min(255, data[i] * 1.2 + 50);
-                data[i + 1] = Math.min(255, data[i + 1] * 0.8);
-                data[i + 2] = Math.min(255, data[i + 2] * 1.3 + 60);
-            }
-        }
-
-        function vaporwavemax(data) {
-            hueShift(data, 300);
-            for (let i = 0; i < data.length; i += 4) {
-                data[i] = Math.min(255, data[i] * 1.5 + 80);
-                data[i + 1] = Math.min(255, data[i + 1] * 0.7);
-                data[i + 2] = Math.min(255, data[i + 2] * 1.8 + 100);
-            }
-            contrast(data, 50);
-        }
-
-        function vaporwavearc(data) {
-            for (let i = 0; i < data.length; i += 4) {
-                const position = (i / data.length) * 6.28;
-                const wave = Math.sin(position) * 0.5 + 0.5;
-                
-                data[i] = Math.min(255, data[i] * (0.3 + wave * 0.7) + 80);
-                data[i + 1] = Math.min(255, data[i + 1] * 0.6 + 40);
-                data[i + 2] = Math.min(255, data[i + 2] * (1.2 + wave * 0.8) + 100);
-            }
-            contrast(data, 40);
-        }
-
-        function synthwave(data) {
-            for (let i = 0; i < data.length; i += 4) {
-                data[i] = Math.min(255, data[i] * 1.4);
-                data[i + 1] = Math.min(255, data[i + 1] * 0.5);
-                data[i + 2] = Math.min(255, data[i + 2] * 1.5);
-            }
-        }
-
-        function cyberpunk(data) {
-            for (let i = 0; i < data.length; i += 4) {
-                const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
-                if (avg > 128) {
-                    data[i] = Math.min(255, data[i] * 1.3);
-                    data[i + 1] = Math.min(255, data[i + 1] * 0.7);
-                    data[i + 2] = Math.min(255, data[i + 2] * 1.5);
-                } else {
-                    data[i] *= 0.5;
-                    data[i + 1] = Math.min(255, data[i + 1] * 1.3);
-                    data[i + 2] = Math.min(255, data[i + 2] * 1.3);
-                }
-            }
-        }
-
-        function miami(data) {
-            for (let i = 0; i < data.length; i += 4) {
-                data[i] = Math.min(255, data[i] * 1.3 + 20);
-                data[i + 1] = Math.min(255, data[i + 1] * 0.9 + 30);
-                data[i + 2] = Math.min(255, data[i + 2] * 1.4);
-            }
-        }
-
-        function neon(data) {
-            contrast(data, 60);
-            for (let i = 0; i < data.length; i += 4) {
-                data[i] = Math.min(255, data[i] * 1.5);
-                data[i + 1] = Math.min(255, data[i + 1] * 1.3);
-                data[i + 2] = Math.min(255, data[i + 2] * 1.6);
-            }
-        }
-
-        function outrun(data) {
-            for (let i = 0; i < data.length; i += 4) {
-                data[i] = Math.min(255, data[i] * 1.6 + 100);
-                data[i + 1] = Math.min(255, data[i + 1] * 0.4);
-                data[i + 2] = Math.min(255, data[i + 2] * 1.7 + 80);
-            }
-            contrast(data, 50);
-        }
-
-        // ===== VINTAGE =====
-        function vintage(data) {
-            sepia(data);
-            for (let i = 0; i < data.length; i += 4) {
-                data[i] = Math.max(0, data[i] - 20);
-                data[i + 1] = Math.max(0, data[i + 1] - 10);
-                data[i + 2] = Math.max(0, data[i + 2] - 30);
-            }
-        }
-
-        function polaroid(data) {
-            for (let i = 0; i < data.length; i += 4) {
-                data[i] = Math.min(255, data[i] * 1.1 + 20);
-                data[i + 1] = Math.min(255, data[i + 1] * 1.05 + 15);
-                data[i + 2] = Math.min(255, data[i + 2] * 0.95);
-            }
-        }
-
-        function pastel(data) {
-            for (let i = 0; i < data.length; i += 4) {
-                data[i] = (data[i] + 255) / 2;
-                data[i + 1] = (data[i + 1] + 255) / 2;
-                data[i + 2] = (data[i + 2] + 255) / 2;
-            }
-        }
-
-        function warm(data) {
-            for (let i = 0; i < data.length; i += 4) {
-                data[i] = Math.min(255, data[i] + 30);
-                data[i + 1] = Math.min(255, data[i + 1] + 10);
-                data[i + 2] = Math.max(0, data[i + 2] - 20);
-            }
-        }
-
-        function cold(data) {
-            for (let i = 0; i < data.length; i += 4) {
-                data[i] = Math.max(0, data[i] - 20);
-                data[i + 1] = Math.min(255, data[i + 1] + 10);
-                data[i + 2] = Math.min(255, data[i + 2] + 30);
-            }
-        }
-
-        function retro70s(data) {
-            for (let i = 0; i < data.length; i += 4) {
-                data[i] = Math.min(255, data[i] * 1.3 + 40);
-                data[i + 1] = Math.min(255, data[i + 1] * 1.2 + 20);
-                data[i + 2] = Math.max(0, data[i + 2] * 0.7 - 10);
-            }
-            contrast(data, 20);
-        }
-
-        // ===== ARTISTIQUE =====
-        function posterize(data, levels) {
-            const step = 255 / levels;
-            for (let i = 0; i < data.length; i += 4) {
-                data[i] = Math.floor(data[i] / step) * step;
-                data[i + 1] = Math.floor(data[i + 1] / step) * step;
-                data[i + 2] = Math.floor(data[i + 2] / step) * step;
-            }
-        }
-
-        function solarize(data) {
-            for (let i = 0; i < data.length; i += 4) {
-                data[i] = data[i] < 128 ? data[i] : 255 - data[i];
-                data[i + 1] = data[i + 1] < 128 ? data[i + 1] : 255 - data[i + 1];
-                data[i + 2] = data[i + 2] < 128 ? data[i + 2] : 255 - data[i + 2];
-            }
-        }
-
-        function edgeData(imageData, targetCanvas) {
-            applyKernel(imageData, targetCanvas, [-1, -1, -1, -1, 8, -1, -1, -1, -1], 0);
-        }
-
-        function embossData(imageData, targetCanvas) {
-            applyKernel(imageData, targetCanvas, [-2, -1, 0, -1, 1, 1, 0, 1, 2], 128);
-        }
-
-        function applyKernel(imageData, targetCanvas, kernel, offset) {
-            const data = imageData.data;
-            const w = targetCanvas.width, h = targetCanvas.height;
-            const output = new Uint8ClampedArray(data);
-            
-            for (let y = 1; y < h - 1; y++) {
-                for (let x = 1; x < w - 1; x++) {
-                    let r = 0, g = 0, b = 0;
-                    for (let ky = -1; ky <= 1; ky++) {
-                        for (let kx = -1; kx <= 1; kx++) {
-                            const idx = ((y + ky) * w + (x + kx)) * 4;
-                            const k = kernel[(ky + 1) * 3 + (kx + 1)];
-                            r += data[idx] * k;
-                            g += data[idx + 1] * k;
-                            b += data[idx + 2] * k;
-                        }
-                    }
-                    const idx = (y * w + x) * 4;
-                    output[idx] = Math.min(255, Math.max(0, r + offset));
-                    output[idx + 1] = Math.min(255, Math.max(0, g + offset));
-                    output[idx + 2] = Math.min(255, Math.max(0, b + offset));
-                }
-            }
-            
-            for (let i = 0; i < data.length; i++) data[i] = output[i];
-        }
-
-        function blurData(imageData, targetCanvas) {
-            const data = imageData.data;
-            const w = targetCanvas.width, h = targetCanvas.height;
-            const output = new Uint8ClampedArray(data);
-            
-            for (let y = 1; y < h - 1; y++) {
-                for (let x = 1; x < w - 1; x++) {
-                    let r = 0, g = 0, b = 0, count = 0;
-                    for (let ky = -1; ky <= 1; ky++) {
-                        for (let kx = -1; kx <= 1; kx++) {
-                            const idx = ((y + ky) * w + (x + kx)) * 4;
-                            r += data[idx]; g += data[idx + 1]; b += data[idx + 2]; count++;
-                        }
-                    }
-                    const idx = (y * w + x) * 4;
-                    output[idx] = r / count; output[idx + 1] = g / count; output[idx + 2] = b / count;
-                }
-            }
-            
-            for (let i = 0; i < data.length; i++) data[i] = output[i];
-        }
-
-        function painting(data) {
-            posterize(data, 6);
-            for (let i = 0; i < data.length; i += 4) {
-                data[i] = Math.min(255, data[i] * 1.2);
-                data[i + 1] = Math.min(255, data[i + 1] * 1.2);
-                data[i + 2] = Math.min(255, data[i + 2] * 1.2);
-            }
-        }
-
-        // ===== CINEMA =====
-        function cinema(data) {
-            for (let i = 0; i < data.length; i += 4) {
-                const avg = data[i] * 0.3 + data[i + 1] * 0.59 + data[i + 2] * 0.11;
-                data[i] = Math.min(255, avg * 1.2 - 10);
-                data[i + 1] = Math.min(255, avg * 1.1 - 20);
-                data[i + 2] = Math.min(255, avg * 0.9);
-            }
-        }
-
-        function noir(data) {
-            grayscale(data);
-            contrast(data, 50);
-            brightness(data, -20);
-        }
-
-        function technicolor(data) {
-            for (let i = 0; i < data.length; i += 4) {
-                data[i] = Math.min(255, data[i] * 1.3);
-                data[i + 1] = Math.min(255, data[i + 1] * 1.1);
-                data[i + 2] = Math.min(255, data[i + 2] * 1.2);
-            }
-            contrast(data, 30);
-        }
-
-        function bleach(data) {
-            grayscale(data);
-            for (let i = 0; i < data.length; i += 4) {
-                const gray = data[i];
-                data[i] = Math.min(255, gray * 0.9 + 30);
-                data[i + 1] = Math.min(255, gray * 0.95 + 20);
-                data[i + 2] = Math.min(255, gray * 0.85 + 40);
-            }
-            contrast(data, 50);
-        }
-
-        function western(data) {
-            sepia(data);
-            for (let i = 0; i < data.length; i += 4) {
-                data[i] = Math.min(255, data[i] * 1.3);
-                data[i + 1] = Math.min(255, data[i + 1] * 1.1);
-                data[i + 2] = Math.max(0, data[i + 2] * 0.7);
-            }
-            contrast(data, 40);
-            brightness(data, -15);
-        }
-
-        function scifi(data) {
-            for (let i = 0; i < data.length; i += 4) {
-                data[i] = Math.min(255, data[i] * 0.8);
-                data[i + 1] = Math.min(255, data[i + 1] * 1.1 + 20);
-                data[i + 2] = Math.min(255, data[i + 2] * 1.4 + 40);
-            }
-            contrast(data, 45);
-        }
-
-        // ===== RGB =====
-        function redChannel(data) {
-            for (let i = 0; i < data.length; i += 4) {
-                data[i + 1] = 0; data[i + 2] = 0;
-            }
-        }
-
-        function greenChannel(data) {
-            for (let i = 0; i < data.length; i += 4) {
-                data[i] = 0; data[i + 2] = 0;
-            }
-        }
-
-        function blueChannel(data) {
-            for (let i = 0; i < data.length; i += 4) {
-                data[i] = 0; data[i + 1] = 0;
-            }
-        }
-
-        function rgbShiftData(imageData, targetCanvas) {
-            const data = imageData.data;
-            const w = targetCanvas.width, h = targetCanvas.height;
-            const shift = 5;
-            const output = new Uint8ClampedArray(data);
-            
-            for (let y = 0; y < h; y++) {
-                for (let x = 0; x < w; x++) {
-                    const idx = (y * w + x) * 4;
-                    const idxShift = (y * w + Math.min(w - 1, x + shift)) * 4;
-                    output[idx] = data[idxShift];
-                    output[idx + 1] = data[idx + 1];
-                    output[idx + 2] = data[Math.max(0, (y * w + x - shift) * 4) + 2];
-                }
-            }
-            
-            for (let i = 0; i < data.length; i++) data[i] = output[i];
-        }
-
-        function swapRB(data) {
-            for (let i = 0; i < data.length; i += 4) {
-                [data[i], data[i + 2]] = [data[i + 2], data[i]];
-            }
-        }
-
-        function swapGB(data) {
-            for (let i = 0; i < data.length; i += 4) {
-                [data[i + 1], data[i + 2]] = [data[i + 2], data[i + 1]];
-            }
-        }
-
-        // ===== SAISONS =====
-        function spring(data) {
-            for (let i = 0; i < data.length; i += 4) {
-                data[i] = Math.min(255, data[i] * 1.05 + 15);
-                data[i + 1] = Math.min(255, data[i + 1] * 1.2 + 30);
-                data[i + 2] = Math.min(255, data[i + 2] * 0.95 + 20);
-            }
-        }
-
-        function summer(data) {
-            for (let i = 0; i < data.length; i += 4) {
-                data[i] = Math.min(255, data[i] * 1.3 + 40);
-                data[i + 1] = Math.min(255, data[i + 1] * 1.2 + 30);
-                data[i + 2] = Math.min(255, data[i + 2] * 0.9);
-            }
-            brightness(data, 20);
-        }
-
-        function autumn(data) {
-            for (let i = 0; i < data.length; i += 4) {
-                data[i] = Math.min(255, data[i] * 1.4 + 50);
-                data[i + 1] = Math.min(255, data[i + 1] * 1.1 + 20);
-                data[i + 2] = Math.max(0, data[i + 2] * 0.6 - 30);
-            }
-        }
-
-        function winter(data) {
-            for (let i = 0; i < data.length; i += 4) {
-                data[i] = Math.min(255, data[i] * 0.9 + 40);
-                data[i + 1] = Math.min(255, data[i + 1] * 0.95 + 40);
-                data[i + 2] = Math.min(255, data[i + 2] * 1.3 + 60);
-            }
-            brightness(data, 30);
-        }
-
-        // ===== HUE =====
-        function rgbToHsl(r, g, b) {
-            r /= 255; g /= 255; b /= 255;
-            const max = Math.max(r, g, b), min = Math.min(r, g, b);
-            let h, s, l = (max + min) / 2;
-
-            if (max === min) {
-                h = s = 0;
-            } else {
-                const d = max - min;
-                s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-                switch (max) {
-                    case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
-                    case g: h = ((b - r) / d + 2) / 6; break;
-                    case b: h = ((r - g) / d + 4) / 6; break;
-                }
-            }
-            return [h * 360, s * 100, l * 100];
-        }
-
-        function hslToRgb(h, s, l) {
-            h /= 360; s /= 100; l /= 100;
-            let r, g, b;
-
-            if (s === 0) {
-                r = g = b = l;
-            } else {
-                const hue2rgb = (p, q, t) => {
-                    if (t < 0) t += 1;
-                    if (t > 1) t -= 1;
-                    if (t < 1/6) return p + (q - p) * 6 * t;
-                    if (t < 1/2) return q;
-                    if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
-                    return p;
-                };
-                const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
-                const p = 2 * l - q;
-                r = hue2rgb(p, q, h + 1/3);
-                g = hue2rgb(p, q, h);
-                b = hue2rgb(p, q, h - 1/3);
-            }
-            return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
-        }
-
-        function hueShift(data, degrees) {
-            for (let i = 0; i < data.length; i += 4) {
-                const [h, s, l] = rgbToHsl(data[i], data[i + 1], data[i + 2]);
-                const newH = (h + degrees) % 360;
-                const [r, g, b] = hslToRgb(newH, s, l);
-                data[i] = r;
-                data[i + 1] = g;
-                data[i + 2] = b;
-            }
-        }
-
-        function hueRotateGradient(data) {
-            for (let i = 0; i < data.length; i += 4) {
-                const position = i / data.length;
-                const degrees = position * 360;
-                const [h, s, l] = rgbToHsl(data[i], data[i + 1], data[i + 2]);
-                const newH = (h + degrees) % 360;
-                const [r, g, b] = hslToRgb(newH, s, l);
-                data[i] = r;
-                data[i + 1] = g;
-                data[i + 2] = b;
-            }
-        }
-
-        // ===== SPECIAUX =====
-        function silhouette(data) {
-            for (let i = 0; i < data.length; i += 4) {
-                if (data[i + 3] > 0) {
-                    data[i] = 0;
-                    data[i + 1] = 0;
-                    data[i + 2] = 0;
-                }
-            }
-        }
-
-        function binarize(data) {
-            for (let i = 0; i < data.length; i += 4) {
-                const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
-                const val = avg > 127 ? 255 : 0;
-                data[i] = data[i + 1] = data[i + 2] = val;
-            }
-        }
-
-        function transparentbg(data) {
-            for (let i = 0; i < data.length; i += 4) {
-                const brightness = (data[i] + data[i + 1] + data[i + 2]) / 3;
-                if (brightness > 200) {
-                    data[i + 3] = 0;
-                }
-            }
-        }
-
-        function cartoon(data) {
-            posterize(data, 5);
-            contrast(data, 50);
-            for (let i = 0; i < data.length; i += 4) {
-                data[i] = Math.min(255, data[i] * 1.3);
-                data[i + 1] = Math.min(255, data[i + 1] * 1.3);
-                data[i + 2] = Math.min(255, data[i + 2] * 1.3);
-            }
-        }
-
-        function watercolor(data) {
-            for (let i = 0; i < data.length; i += 4) {
-                data[i] = (data[i] + 200) / 2;
-                data[i + 1] = (data[i + 1] + 200) / 2;
-                data[i + 2] = (data[i + 2] + 200) / 2;
-            }
-            posterize(data, 8);
-        }
-
-        function pencil(data) {
-            grayscale(data);
-            invert(data);
-            for (let i = 0; i < data.length; i += 4) {
-                data[i] = Math.min(255, data[i] * 0.8 + 40);
-                data[i + 1] = Math.min(255, data[i + 1] * 0.8 + 40);
-                data[i + 2] = Math.min(255, data[i + 2] * 0.8 + 40);
-            }
-        }
-
-        // ===== COSMIQUE =====
-        function galaxy(data) {
-            for (let i = 0; i < data.length; i += 4) {
-                const wave = Math.sin(i * 0.003) * 100;
-                data[i] = Math.min(255, data[i] * 0.5 + wave + 100);
-                data[i + 1] = Math.min(255, data[i + 1] * 0.3 + wave * 0.5);
-                data[i + 2] = Math.min(255, data[i + 2] * 1.5 + wave + 150);
-            }
-        }
-
-        function nebula(data) {
-            for (let i = 0; i < data.length; i += 4) {
-                const wave1 = Math.sin(i * 0.002) * 80;
-                const wave2 = Math.cos(i * 0.003) * 60;
-                data[i] = Math.min(255, data[i] * 1.2 + wave1 + 100);
-                data[i + 1] = Math.min(255, data[i + 1] * 0.6 + wave2);
-                data[i + 2] = Math.min(255, data[i + 2] * 1.4 + wave1 + 120);
-            }
-        }
-
-        function supernova(data) {
-            for (let i = 0; i < data.length; i += 4) {
-                const intensity = (data[i] + data[i + 1] + data[i + 2]) / 3;
-                const boost = Math.pow(intensity / 255, 0.4) * 300;
-                data[i] = Math.min(255, boost);
-                data[i + 1] = Math.min(255, boost * 0.8);
-                data[i + 2] = Math.min(255, boost * 0.6);
-            }
-        }
-
-        function blackhole(data) {
-            grayscale(data);
-            invert(data);
-            for (let i = 0; i < data.length; i += 4) {
-                const intensity = data[i];
-                data[i] = Math.max(0, intensity * 0.3);
-                data[i + 1] = Math.max(0, intensity * 0.2);
-                data[i + 2] = Math.max(0, intensity * 0.5);
-            }
-            contrast(data, 80);
-        }
-
-        function aurora(data) {
-            for (let i = 0; i < data.length; i += 4) {
-                const wave = Math.sin(i * 0.001) * 100;
-                data[i] = Math.min(255, data[i] * 0.4 + wave * 0.3);
-                data[i + 1] = Math.min(255, data[i + 1] * 1.3 + wave + 80);
-                data[i + 2] = Math.min(255, data[i + 2] * 1.2 + wave * 0.8 + 60);
-            }
-        }
-
-        function cosmic(data) {
-            hueRotateGradient(data);
-            for (let i = 0; i < data.length; i += 4) {
-                data[i] = Math.min(255, data[i] * 1.5);
-                data[i + 1] = Math.min(255, data[i + 1] * 1.5);
-                data[i + 2] = Math.min(255, data[i + 2] * 1.8);
-            }
-            contrast(data, 60);
-        }
-
-        // ===== CHIMIQUE =====
-        function radioactive(data) {
-            for (let i = 0; i < data.length; i += 4) {
-                const intensity = (data[i] + data[i + 1] + data[i + 2]) / 3;
-                data[i] = Math.min(255, intensity * 0.3);
-                data[i + 1] = Math.min(255, intensity * 2);
-                data[i + 2] = Math.min(255, intensity * 0.3);
-            }
-            contrast(data, 70);
-        }
-
-        function acid(data) {
-            for (let i = 0; i < data.length; i += 4) {
-                data[i] = (data[i] + data[i + 2]) % 256;
-                data[i + 1] = (data[i + 1] + data[i]) % 256;
-                data[i + 2] = (data[i + 2] + data[i + 1]) % 256;
-            }
-            contrast(data, 80);
-        }
-
-        function toxic(data) {
-            for (let i = 0; i < data.length; i += 4) {
-                data[i] = Math.min(255, data[i] * 0.5 + 50);
-                data[i + 1] = Math.min(255, data[i + 1] * 1.8 + 100);
-                data[i + 2] = Math.min(255, data[i + 2] * 0.3);
-            }
-        }
-
-        function uranium(data) {
-            for (let i = 0; i < data.length; i += 4) {
-                const wave = Math.sin(i * 0.005) * 50;
-                data[i] = Math.min(255, data[i] * 0.4 + wave);
-                data[i + 1] = Math.min(255, data[i + 1] * 2 + 80);
-                data[i + 2] = Math.min(255, data[i + 2] * 0.2);
-            }
-        }
-
-        function biohazard(data) {
-            for (let i = 0; i < data.length; i += 4) {
-                data[i] = Math.min(255, data[i] * 1.1 + 60);
-                data[i + 1] = Math.min(255, data[i + 1] * 1.5 + 80);
-                data[i + 2] = Math.min(255, data[i + 2] * 0.3);
-            }
-            contrast(data, 50);
-        }
-
-        function plasma(data) {
-            for (let i = 0; i < data.length; i += 4) {
-                const wave1 = Math.sin(i * 0.004) * 128;
-                const wave2 = Math.cos(i * 0.003) * 128;
-                data[i] = Math.min(255, Math.abs(wave1 + wave2) + 100);
-                data[i + 1] = Math.min(255, Math.abs(wave1 * 0.5) + 50);
-                data[i + 2] = Math.min(255, Math.abs(wave2) + 150);
-            }
-        }
-
-        // ===== HORROR =====
-        function zombie(data) {
-            for (let i = 0; i < data.length; i += 4) {
-                data[i] = Math.min(255, data[i] * 0.8 + 40);
-                data[i + 1] = Math.min(255, data[i + 1] * 1.1 + 30);
-                data[i + 2] = Math.max(0, data[i + 2] * 0.5 - 20);
-            }
-            contrast(data, 30);
-            brightness(data, -10);
-        }
-
-        function corrupted(data) {
-            for (let i = 0; i < data.length; i += 20) {
-                if (Math.random() > 0.7) {
-                    const corruption = Math.floor(Math.random() * 150);
-                    for (let j = 0; j < corruption && i + j < data.length; j += 4) {
-                        data[i + j] = Math.random() * 255;
-                        data[i + j + 1] = Math.random() * 255;
-                        data[i + j + 2] = Math.random() * 255;
-                    }
-                }
-            }
-        }
-
-        function blood(data) {
-            for (let i = 0; i < data.length; i += 4) {
-                data[i] = Math.min(255, data[i] * 1.6 + 80);
-                data[i + 1] = Math.max(0, data[i + 1] * 0.3 - 30);
-                data[i + 2] = Math.max(0, data[i + 2] * 0.3 - 30);
-            }
-            contrast(data, 50);
-        }
-
-        function demon(data) {
-            for (let i = 0; i < data.length; i += 4) {
-                data[i] = Math.min(255, data[i] * 1.8 + 100);
-                data[i + 1] = Math.max(0, data[i + 1] * 0.2);
-                data[i + 2] = Math.max(0, data[i + 2] * 0.2);
-            }
-            invert(data);
-            contrast(data, 70);
-        }
-
-        function nightmare(data) {
-            for (let i = 0; i < data.length; i += 4) {
-                const wave = Math.sin(i * 0.01) * 100;
-                data[i] = Math.min(255, data[i] * 0.5 + wave);
-                data[i + 1] = Math.max(0, data[i + 1] * 0.3 - 50);
-                data[i + 2] = Math.min(255, data[i + 2] * 0.8 + wave * 0.5);
-            }
-            contrast(data, 60);
-        }
-
-        function haunted(data) {
-            grayscale(data);
-            for (let i = 0; i < data.length; i += 4) {
-                const gray = data[i];
-                data[i] = Math.min(255, gray * 0.7 + 30);
-                data[i + 1] = Math.min(255, gray * 0.8 + 50);
-                data[i + 2] = Math.min(255, gray * 0.9 + 70);
-            }
-            contrast(data, 40);
-            brightness(data, -30);
-        }
-
-        // ===== WTF =====
-        function psychedelic(data) {
-            for (let i = 0; i < data.length; i += 4) {
-                const offset = Math.sin(i * 0.01) * 128;
-                data[i] = Math.min(255, Math.max(0, (data[i] + offset) % 256));
-                data[i + 1] = Math.min(255, Math.max(0, (data[i + 1] + offset + 85) % 256));
-                data[i + 2] = Math.min(255, Math.max(0, (data[i + 2] + offset + 170) % 256));
-            }
-        }
-
-        function infrared(data) {
-            for (let i = 0; i < data.length; i += 4) {
-                const temp = data[i + 1];
-                data[i] = Math.min(255, temp * 1.5);
-                data[i + 1] = Math.max(0, data[i] * 0.3);
-                data[i + 2] = Math.max(0, data[i + 2] * 0.3);
-            }
-        }
-
-        function xray(data) {
-            invert(data);
-            grayscale(data);
-            contrast(data, 60);
-            brightness(data, 40);
-        }
-
-        function thermal(data) {
-            for (let i = 0; i < data.length; i += 4) {
-                const intensity = (data[i] + data[i + 1] + data[i + 2]) / 3;
-                if (intensity < 64) {
-                    data[i] = 0; data[i + 1] = 0; data[i + 2] = intensity * 4;
-                } else if (intensity < 128) {
-                    data[i] = 0; data[i + 1] = (intensity - 64) * 4; data[i + 2] = 255;
-                } else if (intensity < 192) {
-                    data[i] = (intensity - 128) * 4; data[i + 1] = 255; data[i + 2] = 255 - (intensity - 128) * 4;
-                } else {
-                    data[i] = 255; data[i + 1] = 255 - (intensity - 192) * 4; data[i + 2] = 0;
-                }
-            }
-        }
-
-        function matrix(data) {
-            for (let i = 0; i < data.length; i += 4) {
-                const green = (data[i] + data[i + 1] + data[i + 2]) / 3;
-                data[i] = 0;
-                data[i + 1] = Math.min(255, green * 1.5);
-                data[i + 2] = 0;
-            }
-            contrast(data, 50);
-            brightness(data, -30);
-        }
-
-        function deepfry(data) {
-            for (let i = 0; i < data.length; i += 4) {
-                data[i] = Math.min(255, data[i] * 1.8);
-                data[i + 1] = Math.min(255, data[i + 1] * 1.5);
-                data[i + 2] = Math.min(255, data[i + 2] * 0.7);
-            }
-            contrast(data, 80);
-            posterize(data, 3);
-        }
-
-        function glitchmax(data) {
-            for (let i = 0; i < data.length; i += 16) {
-                if (Math.random() > 0.7) {
-                    const shift = Math.floor(Math.random() * 100) * 4;
-                    const targetIdx = Math.min(data.length - 4, i + shift);
-                    [data[i], data[targetIdx]] = [data[targetIdx], data[i]];
-                    [data[i + 1], data[targetIdx + 1]] = [data[targetIdx + 1], data[i + 1]];
-                    [data[i + 2], data[targetIdx + 2]] = [data[targetIdx + 2], data[i + 2]];
-                }
-            }
-        }
-
-        function holographic(data) {
-            for (let i = 0; i < data.length; i += 4) {
-                const wave = Math.sin(i * 0.005) * 50;
-                data[i] = Math.min(255, Math.max(0, data[i] + wave));
-                data[i + 1] = Math.min(255, Math.max(0, data[i + 1] + wave * 1.5));
-                data[i + 2] = Math.min(255, Math.max(0, data[i + 2] + wave * 2));
-            }
-        }
-
-        function jpegify(data) {
-            posterize(data, 5);
-            for (let i = 0; i < data.length; i += 4) {
-                if (Math.random() > 0.95) {
-                    data[i] = Math.min(255, data[i] + (Math.random() - 0.5) * 50);
-                    data[i + 1] = Math.min(255, data[i + 1] + (Math.random() - 0.5) * 50);
-                    data[i + 2] = Math.min(255, data[i + 2] + (Math.random() - 0.5) * 50);
-                }
-            }
-        }
-
-        function chromaticAberration(imageData, targetCanvas) {
-            const data = imageData.data;
-            const offset = 8;
-            const output = new Uint8ClampedArray(data);
-            
-            for (let i = 0; i < data.length; i += 4) {
-                const leftR = Math.max(0, i - offset * 4);
-                const rightB = Math.min(data.length - 4, i + offset * 4);
-                
-                output[i] = data[leftR];
-                output[i + 1] = data[i + 1];
-                output[i + 2] = data[rightB + 2];
-            }
-            
-            for (let i = 0; i < data.length; i++) data[i] = output[i];
-        }
-
-        function datamosh(data) {
-            for (let i = 0; i < data.length; i += 40) {
-                if (Math.random() > 0.5) {
-                    const blockSize = Math.floor(Math.random() * 200);
-                    for (let j = 0; j < blockSize && i + j < data.length; j += 4) {
-                        data[i + j] = data[Math.max(0, i - 4)];
-                        data[i + j + 1] = data[Math.max(0, i - 3)];
-                        data[i + j + 2] = data[Math.max(0, i - 2)];
-                    }
-                }
-            }
-        }
-
-        function vhsglitch(data) {
-            for (let i = 0; i < data.length; i += 4) {
-                if (Math.random() > 0.98) {
-                    const glitchLength = Math.floor(Math.random() * 500);
-                    for (let j = 0; j < glitchLength && i + j < data.length; j += 4) {
-                        data[i + j] = data[i];
-                        data[i + j + 1] = data[i + 1];
-                        data[i + j + 2] = data[i + 2];
-                    }
-                }
-            }
-        }
-
-        function scanlines(data, targetCanvas) {
-            const w = targetCanvas.width;
-            for (let i = 0; i < data.length; i += 4) {
-                const pixel = i / 4;
-                const y = Math.floor(pixel / w);
-                if (y % 3 === 0) {
-                    data[i] *= 0.5;
-                    data[i + 1] *= 0.5;
-                    data[i + 2] *= 0.5;
-                }
-            }
-        }
-
-        function colorbleed(data) {
-            const output = new Uint8ClampedArray(data);
-            for (let i = 4; i < data.length - 4; i += 4) {
-                output[i] = (data[i - 4] + data[i] + data[i + 4]) / 3;
-                output[i + 1] = (data[i - 3] + data[i + 1] + data[i + 5]) / 3;
-                output[i + 2] = (data[i - 2] + data[i + 2] + data[i + 6]) / 3;
-            }
-            for (let i = 0; i < data.length; i++) data[i] = output[i];
-        }
-
-        function nuke(data) {
-            for (let i = 0; i < data.length; i += 4) {
-                const intensity = (data[i] + data[i + 1] + data[i + 2]) / 3;
-                const boost = Math.pow(intensity / 255, 0.3) * 255;
-                data[i] = Math.min(255, boost * 1.5);
-                data[i + 1] = Math.min(255, boost * 1.3);
-                data[i + 2] = Math.min(255, boost * 0.8);
-            }
-            contrast(data, 100);
-            brightness(data, 80);
-        }
-
-        function drunk(data) {
-            for (let i = 0; i < data.length; i += 4) {
-                const wave = Math.sin(i * 0.002) * 50 + Math.cos(i * 0.003) * 30;
-                data[i] = Math.min(255, Math.max(0, data[i] + wave));
-                data[i + 1] = Math.min(255, Math.max(0, data[i + 1] + wave * 0.8));
-                data[i + 2] = Math.min(255, Math.max(0, data[i + 2] + wave * 1.2));
-            }
-        }
-
-        function rave(data) {
-            for (let i = 0; i < data.length; i += 4) {
-                const multi = Math.sin(i * 0.001) * 2 + Math.cos(i * 0.002) * 2;
-                data[i] = Math.min(255, Math.abs(data[i] * multi));
-                data[i + 1] = Math.min(255, Math.abs(data[i + 1] * multi * 1.3));
-                data[i + 2] = Math.min(255, Math.abs(data[i + 2] * multi * 1.5));
-            }
-            contrast(data, 90);
-        }
-
-        function dimensionx(data) {
-            for (let i = 0; i < data.length; i += 4) {
-                const twist = Math.sin(i * 0.0008) * 200;
-                data[i] = Math.min(255, Math.abs((data[i] + twist) % 256));
-                data[i + 1] = Math.min(255, Math.abs((data[i + 1] - twist * 0.7) % 256));
-                data[i + 2] = Math.min(255, Math.abs((data[i + 2] + twist * 1.3) % 256));
-            }
-        }
-
-        // Initialiser
         createFilterPreviews();
     </script>
 </body>
