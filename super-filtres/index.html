@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Éditeur d'Images - Filtres avec Previews</title>
+    <title>Éditeur d'Images Multi-Filtres</title>
     <style>
         * {
             margin: 0;
@@ -60,7 +60,7 @@
             overflow: hidden;
         }
 
-        #canvas {
+        #mainCanvas {
             max-width: 100%;
             max-height: 600px;
             border-radius: 10px;
@@ -105,11 +105,109 @@
             display: none;
         }
 
+        /* Galerie d'images chargées */
+        .images-gallery {
+            width: 100%;
+            margin-top: 20px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 15px;
+        }
+
+        .gallery-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .gallery-header h3 {
+            color: #333;
+            font-size: 1.1em;
+        }
+
+        .gallery-count {
+            background: #667eea;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 10px;
+        }
+
+        .gallery-item {
+            position: relative;
+            aspect-ratio: 1;
+            border-radius: 10px;
+            overflow: hidden;
+            cursor: pointer;
+            border: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .gallery-item:hover {
+            border-color: #667eea;
+            transform: translateY(-3px);
+        }
+
+        .gallery-item.active {
+            border-color: #764ba2;
+            box-shadow: 0 6px 20px rgba(118, 75, 162, 0.4);
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .gallery-item .remove-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(231, 76, 60, 0.9);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            line-height: 1;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .gallery-item:hover .remove-btn {
+            opacity: 1;
+        }
+
+        .gallery-item .image-number {
+            position: absolute;
+            bottom: 5px;
+            left: 5px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
         .controls {
             display: flex;
             justify-content: center;
             gap: 15px;
             margin-top: 20px;
+            flex-wrap: wrap;
         }
 
         .control-btn {
@@ -120,15 +218,18 @@
             font-size: 15px;
             transition: all 0.3s;
             font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        .reset-btn {
-            background: #e74c3c;
+        .add-btn {
+            background: #667eea;
             color: white;
         }
 
-        .reset-btn:hover {
-            background: #c0392b;
+        .add-btn:hover {
+            background: #764ba2;
             transform: translateY(-2px);
         }
 
@@ -140,6 +241,22 @@
         .download-btn:hover {
             background: #229954;
             transform: translateY(-2px);
+        }
+
+        .download-all-btn {
+            background: #3498db;
+            color: white;
+        }
+
+        .download-all-btn:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        .control-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
         }
 
         /* Panel de filtres à droite */
@@ -245,6 +362,17 @@
             pointer-events: none;
         }
 
+        /* Info badge */
+        .info-badge {
+            background: #3498db;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
         @media (max-width: 1200px) {
             .main-area {
                 grid-template-columns: 1fr;
@@ -264,33 +392,52 @@
 </head>
 <body>
     <div class="container">
-        <h1>🎨 Éditeur d'Images avec Filtres</h1>
+        <h1>🎨 Éditeur d'Images Multi-Filtres</h1>
         
         <div class="main-area">
             <!-- Zone canvas centrale -->
             <div class="canvas-section">
                 <div class="canvas-container">
-                    <canvas id="canvas" style="display: none;"></canvas>
+                    <canvas id="mainCanvas" style="display: none;"></canvas>
                     <div class="upload-overlay" id="uploadOverlay">
                         <svg viewBox="0 0 24 24" fill="currentColor">
                             <path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/>
                         </svg>
                         <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
-                            📁 Charger une image
+                            📁 Charger vos images (max 8)
                         </button>
-                        <p style="font-size: 14px;">Chargez une image pour voir les previews</p>
+                        <p style="font-size: 14px;">Sélectionnez jusqu'à 8 images à éditer ensemble</p>
                     </div>
+                </div>
+
+                <!-- Galerie d'images -->
+                <div class="images-gallery" id="imagesGallery" style="display: none;">
+                    <div class="gallery-header">
+                        <h3>Images chargées</h3>
+                        <span class="gallery-count" id="galleryCount">0/8</span>
+                    </div>
+                    <div class="gallery-grid" id="galleryGrid"></div>
                 </div>
                 
                 <div class="controls">
-                    <button class="control-btn reset-btn" onclick="resetImage()">🔄 Réinitialiser</button>
-                    <button class="control-btn download-btn" onclick="downloadImage()">💾 Télécharger</button>
+                    <button class="control-btn add-btn" onclick="document.getElementById('fileInput').click()">
+                        ➕ Ajouter des images
+                    </button>
+                    <button class="control-btn download-btn" onclick="downloadCurrentImage()" id="downloadSingleBtn" disabled>
+                        💾 Télécharger l'image actuelle
+                    </button>
+                    <button class="control-btn download-all-btn" onclick="downloadAllAsZip()" id="downloadAllBtn" disabled>
+                        📦 Télécharger tout (ZIP)
+                    </button>
                 </div>
             </div>
 
             <!-- Panel de filtres à droite -->
             <div class="filters-panel">
                 <h2>Filtres disponibles</h2>
+                <div class="info-badge">
+                    Les filtres s'appliquent à toutes les images
+                </div>
                 
                 <div class="filter-category">
                     <h3>🎭 Basiques</h3>
@@ -329,16 +476,24 @@
             </div>
         </div>
 
-        <input type="file" id="fileInput" accept="image/*">
+        <input type="file" id="fileInput" accept="image/*" multiple>
     </div>
 
+    <!-- JSZip library for creating ZIP files -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
     <script>
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
+        const mainCanvas = document.getElementById('mainCanvas');
+        const ctx = mainCanvas.getContext('2d');
         const fileInput = document.getElementById('fileInput');
         const uploadOverlay = document.getElementById('uploadOverlay');
-        let originalImageData = null;
-        let currentImage = null;
+        const galleryGrid = document.getElementById('galleryGrid');
+        const imagesGallery = document.getElementById('imagesGallery');
+        const galleryCount = document.getElementById('galleryCount');
+        
+        let loadedImages = []; // Array pour stocker les images
+        let currentImageIndex = 0;
+        let currentFilter = null;
 
         // Configuration des filtres par catégorie
         const filterCategories = {
@@ -399,7 +554,7 @@
                 filters.forEach(filterInfo => {
                     const filterItem = document.createElement('div');
                     filterItem.className = 'filter-item';
-                    filterItem.onclick = () => applyFilter(filterInfo.filter);
+                    filterItem.onclick = () => applyFilterToAll(filterInfo.filter);
 
                     const preview = document.createElement('div');
                     preview.className = 'filter-preview';
@@ -417,26 +572,160 @@
                     filterItem.appendChild(name);
                     container.appendChild(filterItem);
 
-                    // Stocker la référence au canvas de preview
                     filterInfo.previewCanvas = previewCanvas;
                     filterInfo.previewContainer = preview;
                 });
             }
         }
 
+        // Charger les images
+        fileInput.addEventListener('change', function(e) {
+            const files = Array.from(e.target.files);
+            const remainingSlots = 8 - loadedImages.length;
+            
+            if (files.length > remainingSlots) {
+                alert(`Vous ne pouvez charger que ${remainingSlots} image(s) supplémentaire(s). Maximum 8 images.`);
+                return;
+            }
+
+            files.forEach(file => {
+                if (loadedImages.length >= 8) return;
+                
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const img = new Image();
+                    img.onload = function() {
+                        // Créer un canvas pour l'image originale
+                        const imgCanvas = document.createElement('canvas');
+                        imgCanvas.width = img.width;
+                        imgCanvas.height = img.height;
+                        const imgCtx = imgCanvas.getContext('2d');
+                        imgCtx.drawImage(img, 0, 0);
+
+                        // Créer un canvas pour la version avec filtre
+                        const filteredCanvas = document.createElement('canvas');
+                        filteredCanvas.width = img.width;
+                        filteredCanvas.height = img.height;
+
+                        loadedImages.push({
+                            original: img,
+                            originalCanvas: imgCanvas,
+                            filteredCanvas: filteredCanvas,
+                            name: file.name
+                        });
+
+                        updateGallery();
+                        
+                        // Si c'est la première image, afficher et générer les previews
+                        if (loadedImages.length === 1) {
+                            currentImageIndex = 0;
+                            displayCurrentImage();
+                            generatePreviews();
+                            uploadOverlay.style.display = 'none';
+                            mainCanvas.style.display = 'block';
+                            imagesGallery.style.display = 'block';
+                        }
+
+                        updateButtons();
+                    };
+                    img.src = event.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
+
+            // Reset input
+            e.target.value = '';
+        });
+
+        // Mettre à jour la galerie
+        function updateGallery() {
+            galleryGrid.innerHTML = '';
+            galleryCount.textContent = `${loadedImages.length}/8`;
+
+            loadedImages.forEach((imgData, index) => {
+                const item = document.createElement('div');
+                item.className = 'gallery-item' + (index === currentImageIndex ? ' active' : '');
+                item.onclick = () => switchToImage(index);
+
+                const img = document.createElement('img');
+                img.src = imgData.original.src;
+
+                const removeBtn = document.createElement('button');
+                removeBtn.className = 'remove-btn';
+                removeBtn.textContent = '×';
+                removeBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    removeImage(index);
+                };
+
+                const number = document.createElement('div');
+                number.className = 'image-number';
+                number.textContent = `#${index + 1}`;
+
+                item.appendChild(img);
+                item.appendChild(removeBtn);
+                item.appendChild(number);
+                galleryGrid.appendChild(item);
+            });
+        }
+
+        // Changer d'image active
+        function switchToImage(index) {
+            currentImageIndex = index;
+            displayCurrentImage();
+            updateGallery();
+        }
+
+        // Supprimer une image
+        function removeImage(index) {
+            loadedImages.splice(index, 1);
+            
+            if (loadedImages.length === 0) {
+                uploadOverlay.style.display = 'flex';
+                mainCanvas.style.display = 'none';
+                imagesGallery.style.display = 'none';
+                currentFilter = null;
+            } else {
+                if (currentImageIndex >= loadedImages.length) {
+                    currentImageIndex = loadedImages.length - 1;
+                }
+                displayCurrentImage();
+                generatePreviews();
+            }
+            
+            updateGallery();
+            updateButtons();
+        }
+
+        // Afficher l'image courante
+        function displayCurrentImage() {
+            if (loadedImages.length === 0) return;
+
+            const imgData = loadedImages[currentImageIndex];
+            mainCanvas.width = imgData.original.width;
+            mainCanvas.height = imgData.original.height;
+
+            // Afficher la version filtrée si un filtre est actif, sinon l'originale
+            if (currentFilter) {
+                ctx.drawImage(imgData.filteredCanvas, 0, 0);
+            } else {
+                ctx.drawImage(imgData.original, 0, 0);
+            }
+        }
+
         // Générer les previews des filtres
         function generatePreviews() {
-            if (!currentImage) return;
+            if (loadedImages.length === 0) return;
 
             const previewSize = 150;
+            const imgData = loadedImages[0]; // Utiliser la première image pour les previews
             
             for (const filters of Object.values(filterCategories)) {
                 filters.forEach(filterInfo => {
                     const previewCanvas = filterInfo.previewCanvas;
                     const container = filterInfo.previewContainer;
                     
-                    // Configurer la taille du canvas de preview
-                    const aspectRatio = currentImage.width / currentImage.height;
+                    const aspectRatio = imgData.original.width / imgData.original.height;
                     if (aspectRatio > 1) {
                         previewCanvas.width = previewSize;
                         previewCanvas.height = previewSize / aspectRatio;
@@ -446,184 +735,137 @@
                     }
 
                     const previewCtx = previewCanvas.getContext('2d');
-                    previewCtx.drawImage(currentImage, 0, 0, previewCanvas.width, previewCanvas.height);
+                    previewCtx.drawImage(imgData.original, 0, 0, previewCanvas.width, previewCanvas.height);
 
-                    // Appliquer le filtre sur le preview
                     const imageData = previewCtx.getImageData(0, 0, previewCanvas.width, previewCanvas.height);
                     applyFilterToImageData(imageData, filterInfo.filter, previewCanvas);
                     previewCtx.putImageData(imageData, 0, 0);
 
-                    // Afficher le canvas de preview
                     container.querySelector('.no-image').style.display = 'none';
                     previewCanvas.style.display = 'block';
                 });
             }
         }
 
-        // Charger l'image
-        fileInput.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    const img = new Image();
-                    img.onload = function() {
-                        currentImage = img;
-                        canvas.width = img.width;
-                        canvas.height = img.height;
-                        ctx.drawImage(img, 0, 0);
-                        originalImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                        
-                        uploadOverlay.style.display = 'none';
-                        canvas.style.display = 'block';
+        // Appliquer un filtre à toutes les images
+        function applyFilterToAll(filterName) {
+            if (loadedImages.length === 0) return;
 
-                        // Générer les previews
-                        generatePreviews();
-                    };
-                    img.src = event.target.result;
-                };
-                reader.readAsDataURL(file);
-            }
-        });
+            currentFilter = filterName;
 
-        // Réinitialiser l'image
-        function resetImage() {
-            if (originalImageData) {
-                ctx.putImageData(originalImageData, 0, 0);
-            }
+            loadedImages.forEach(imgData => {
+                const canvas = imgData.filteredCanvas;
+                const ctx = canvas.getContext('2d');
+                
+                // Réinitialiser avec l'image originale
+                ctx.drawImage(imgData.original, 0, 0);
+                
+                // Appliquer le filtre
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                applyFilterToImageData(imageData, filterName, canvas);
+                ctx.putImageData(imageData, 0, 0);
+            });
+
+            // Afficher l'image courante avec le filtre
+            displayCurrentImage();
         }
 
-        // Télécharger l'image
-        function downloadImage() {
-            if (!currentImage) return;
+        // Télécharger l'image courante
+        function downloadCurrentImage() {
+            if (loadedImages.length === 0) return;
+
+            const imgData = loadedImages[currentImageIndex];
             const link = document.createElement('a');
-            link.download = 'image_editee.png';
-            link.href = canvas.toDataURL();
+            const filterSuffix = currentFilter ? `_${currentFilter}` : '';
+            link.download = imgData.name.replace(/\.[^/.]+$/, '') + filterSuffix + '.png';
+            
+            if (currentFilter) {
+                link.href = imgData.filteredCanvas.toDataURL();
+            } else {
+                link.href = imgData.originalCanvas.toDataURL();
+            }
+            
             link.click();
         }
 
-        // Appliquer un filtre
-        function applyFilter(filterName) {
-            if (!originalImageData) return;
-            
-            resetImage();
-            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            applyFilterToImageData(imageData, filterName, canvas);
-            ctx.putImageData(imageData, 0, 0);
+        // Télécharger toutes les images dans un ZIP
+        async function downloadAllAsZip() {
+            if (loadedImages.length === 0) return;
+
+            const zip = new JSZip();
+            const filterSuffix = currentFilter ? `_${currentFilter}` : '_original';
+
+            for (let i = 0; i < loadedImages.length; i++) {
+                const imgData = loadedImages[i];
+                const canvas = currentFilter ? imgData.filteredCanvas : imgData.originalCanvas;
+                
+                // Convertir canvas en blob
+                const blob = await new Promise(resolve => {
+                    canvas.toBlob(resolve, 'image/png');
+                });
+
+                const filename = imgData.name.replace(/\.[^/.]+$/, '') + filterSuffix + '.png';
+                zip.file(filename, blob);
+            }
+
+            // Générer et télécharger le ZIP
+            const content = await zip.generateAsync({ type: 'blob' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(content);
+            link.download = `images${filterSuffix}_${Date.now()}.zip`;
+            link.click();
+        }
+
+        // Mettre à jour l'état des boutons
+        function updateButtons() {
+            const hasImages = loadedImages.length > 0;
+            document.getElementById('downloadSingleBtn').disabled = !hasImages;
+            document.getElementById('downloadAllBtn').disabled = !hasImages;
         }
 
         // Fonction centrale pour appliquer les filtres
         function applyFilterToImageData(imageData, filterName, targetCanvas) {
             const data = imageData.data;
-            const tempCtx = targetCanvas.getContext('2d');
 
             switch(filterName) {
-                case 'grayscale':
-                    grayscale(data);
-                    break;
-                case 'sepia':
-                    sepia(data);
-                    break;
-                case 'invert':
-                    invert(data);
-                    break;
-                case 'brightness':
-                    brightness(data, 50);
-                    break;
-                case 'darkness':
-                    brightness(data, -50);
-                    break;
-                case 'contrast':
-                    contrast(data, 40);
-                    break;
-                case 'gameboy':
-                    gameboy(data);
-                    break;
-                case 'gameboyGreen':
-                    gameboyGreen(data);
-                    break;
-                case 'nes':
-                    nes(data);
-                    break;
-                case 'cga':
-                    cga(data);
-                    break;
-                case 'pixelate':
-                    pixelateData(imageData, targetCanvas);
-                    return;
-                case 'vaporwave':
-                    vaporwave(data);
-                    break;
-                case 'synthwave':
-                    synthwave(data);
-                    break;
-                case 'cyberpunk':
-                    cyberpunk(data);
-                    break;
-                case 'miami':
-                    miami(data);
-                    break;
-                case 'neon':
-                    neon(data);
-                    break;
-                case 'vintage':
-                    vintage(data);
-                    break;
-                case 'polaroid':
-                    polaroid(data);
-                    break;
-                case 'pastel':
-                    pastel(data);
-                    break;
-                case 'warm':
-                    warm(data);
-                    break;
-                case 'cold':
-                    cold(data);
-                    break;
-                case 'posterize':
-                    posterize(data, 4);
-                    break;
-                case 'solarize':
-                    solarize(data);
-                    break;
-                case 'edge':
-                    edgeData(imageData, targetCanvas);
-                    return;
-                case 'emboss':
-                    embossData(imageData, targetCanvas);
-                    return;
-                case 'blur':
-                    blurData(imageData, targetCanvas);
-                    return;
-                case 'cinema':
-                    cinema(data);
-                    break;
-                case 'noir':
-                    noir(data);
-                    break;
-                case 'technicolor':
-                    technicolor(data);
-                    break;
-                case 'bleach':
-                    bleach(data);
-                    break;
-                case 'redChannel':
-                    redChannel(data);
-                    break;
-                case 'greenChannel':
-                    greenChannel(data);
-                    break;
-                case 'blueChannel':
-                    blueChannel(data);
-                    break;
-                case 'rgbShift':
-                    rgbShiftData(imageData, targetCanvas);
-                    return;
+                case 'grayscale': grayscale(data); break;
+                case 'sepia': sepia(data); break;
+                case 'invert': invert(data); break;
+                case 'brightness': brightness(data, 50); break;
+                case 'darkness': brightness(data, -50); break;
+                case 'contrast': contrast(data, 40); break;
+                case 'gameboy': gameboy(data); break;
+                case 'gameboyGreen': gameboyGreen(data); break;
+                case 'nes': nes(data); break;
+                case 'cga': cga(data); break;
+                case 'pixelate': pixelateData(imageData, targetCanvas); return;
+                case 'vaporwave': vaporwave(data); break;
+                case 'synthwave': synthwave(data); break;
+                case 'cyberpunk': cyberpunk(data); break;
+                case 'miami': miami(data); break;
+                case 'neon': neon(data); break;
+                case 'vintage': vintage(data); break;
+                case 'polaroid': polaroid(data); break;
+                case 'pastel': pastel(data); break;
+                case 'warm': warm(data); break;
+                case 'cold': cold(data); break;
+                case 'posterize': posterize(data, 4); break;
+                case 'solarize': solarize(data); break;
+                case 'edge': edgeData(imageData, targetCanvas); return;
+                case 'emboss': embossData(imageData, targetCanvas); return;
+                case 'blur': blurData(imageData, targetCanvas); return;
+                case 'cinema': cinema(data); break;
+                case 'noir': noir(data); break;
+                case 'technicolor': technicolor(data); break;
+                case 'bleach': bleach(data); break;
+                case 'redChannel': redChannel(data); break;
+                case 'greenChannel': greenChannel(data); break;
+                case 'blueChannel': blueChannel(data); break;
+                case 'rgbShift': rgbShiftData(imageData, targetCanvas); return;
             }
         }
 
-        // ===== FILTRES BASIQUES =====
+        // ===== FILTRES =====
         function grayscale(data) {
             for (let i = 0; i < data.length; i += 4) {
                 const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
@@ -665,18 +907,11 @@
             }
         }
 
-        // ===== FILTRES GAMING RÉTRO =====
         function gameboy(data) {
-            const palette = [
-                [15, 56, 15],
-                [48, 98, 48],
-                [139, 172, 15],
-                [155, 188, 15]
-            ];
+            const palette = [[15, 56, 15], [48, 98, 48], [139, 172, 15], [155, 188, 15]];
             for (let i = 0; i < data.length; i += 4) {
                 const gray = (data[i] + data[i + 1] + data[i + 2]) / 3;
-                const index = Math.floor(gray / 64);
-                const color = palette[Math.min(index, 3)];
+                const color = palette[Math.min(Math.floor(gray / 64), 3)];
                 data[i] = color[0];
                 data[i + 1] = color[1];
                 data[i + 2] = color[2];
@@ -694,49 +929,21 @@
         }
 
         function nes(data) {
-            const palette = [
-                [0, 0, 0], [252, 252, 252], [188, 188, 188],
-                [0, 88, 248], [0, 168, 0], [216, 0, 204],
-                [228, 92, 16], [248, 56, 0]
-            ];
-            for (let i = 0; i < data.length; i += 4) {
-                let closest = 0;
-                let minDist = Infinity;
-                for (let j = 0; j < palette.length; j++) {
-                    const dist = Math.sqrt(
-                        Math.pow(data[i] - palette[j][0], 2) +
-                        Math.pow(data[i + 1] - palette[j][1], 2) +
-                        Math.pow(data[i + 2] - palette[j][2], 2)
-                    );
-                    if (dist < minDist) {
-                        minDist = dist;
-                        closest = j;
-                    }
-                }
-                data[i] = palette[closest][0];
-                data[i + 1] = palette[closest][1];
-                data[i + 2] = palette[closest][2];
-            }
+            const palette = [[0, 0, 0], [252, 252, 252], [188, 188, 188], [0, 88, 248], [0, 168, 0], [216, 0, 204], [228, 92, 16], [248, 56, 0]];
+            applyPalette(data, palette);
         }
 
         function cga(data) {
-            const palette = [
-                [0, 0, 0], [0, 170, 170], [170, 0, 170], [170, 170, 170],
-                [255, 85, 255], [85, 255, 255], [255, 255, 85], [255, 255, 255]
-            ];
+            const palette = [[0, 0, 0], [0, 170, 170], [170, 0, 170], [170, 170, 170], [255, 85, 255], [85, 255, 255], [255, 255, 85], [255, 255, 255]];
+            applyPalette(data, palette);
+        }
+
+        function applyPalette(data, palette) {
             for (let i = 0; i < data.length; i += 4) {
-                let closest = 0;
-                let minDist = Infinity;
+                let closest = 0, minDist = Infinity;
                 for (let j = 0; j < palette.length; j++) {
-                    const dist = Math.sqrt(
-                        Math.pow(data[i] - palette[j][0], 2) +
-                        Math.pow(data[i + 1] - palette[j][1], 2) +
-                        Math.pow(data[i + 2] - palette[j][2], 2)
-                    );
-                    if (dist < minDist) {
-                        minDist = dist;
-                        closest = j;
-                    }
+                    const dist = Math.sqrt(Math.pow(data[i] - palette[j][0], 2) + Math.pow(data[i + 1] - palette[j][1], 2) + Math.pow(data[i + 2] - palette[j][2], 2));
+                    if (dist < minDist) { minDist = dist; closest = j; }
                 }
                 data[i] = palette[closest][0];
                 data[i + 1] = palette[closest][1];
@@ -745,11 +952,9 @@
         }
 
         function pixelateData(imageData, targetCanvas) {
-            const size = targetCanvas === canvas ? 10 : 5;
-            const w = targetCanvas.width;
-            const h = targetCanvas.height;
+            const size = targetCanvas === mainCanvas ? 10 : 5;
+            const w = targetCanvas.width, h = targetCanvas.height;
             const tempCtx = targetCanvas.getContext('2d');
-            
             tempCtx.imageSmoothingEnabled = false;
             const tempCanvas = document.createElement('canvas');
             tempCanvas.width = w / size;
@@ -759,7 +964,6 @@
             tempCtx.drawImage(tempCanvas, 0, 0, w / size, h / size, 0, 0, w, h);
         }
 
-        // ===== VAPORWAVE & SYNTHWAVE =====
         function vaporwave(data) {
             for (let i = 0; i < data.length; i += 4) {
                 data[i] = Math.min(255, data[i] * 1.2 + 50);
@@ -784,7 +988,7 @@
                     data[i + 1] = Math.min(255, data[i + 1] * 0.7);
                     data[i + 2] = Math.min(255, data[i + 2] * 1.5);
                 } else {
-                    data[i] = data[i] * 0.5;
+                    data[i] *= 0.5;
                     data[i + 1] = Math.min(255, data[i + 1] * 1.3);
                     data[i + 2] = Math.min(255, data[i + 2] * 1.3);
                 }
@@ -808,7 +1012,6 @@
             }
         }
 
-        // ===== VINTAGE & PASTEL =====
         function vintage(data) {
             sepia(data);
             for (let i = 0; i < data.length; i += 4) {
@@ -850,7 +1053,6 @@
             }
         }
 
-        // ===== ARTISTIQUE =====
         function posterize(data, levels) {
             const step = 255 / levels;
             for (let i = 0; i < data.length; i += 4) {
@@ -869,43 +1071,16 @@
         }
 
         function edgeData(imageData, targetCanvas) {
-            const data = imageData.data;
-            const w = targetCanvas.width;
-            const h = targetCanvas.height;
-            
-            const kernel = [-1, -1, -1, -1, 8, -1, -1, -1, -1];
-            const output = new Uint8ClampedArray(data);
-            
-            for (let y = 1; y < h - 1; y++) {
-                for (let x = 1; x < w - 1; x++) {
-                    let r = 0, g = 0, b = 0;
-                    for (let ky = -1; ky <= 1; ky++) {
-                        for (let kx = -1; kx <= 1; kx++) {
-                            const idx = ((y + ky) * w + (x + kx)) * 4;
-                            const k = kernel[(ky + 1) * 3 + (kx + 1)];
-                            r += data[idx] * k;
-                            g += data[idx + 1] * k;
-                            b += data[idx + 2] * k;
-                        }
-                    }
-                    const idx = (y * w + x) * 4;
-                    output[idx] = Math.min(255, Math.max(0, r));
-                    output[idx + 1] = Math.min(255, Math.max(0, g));
-                    output[idx + 2] = Math.min(255, Math.max(0, b));
-                }
-            }
-            
-            for (let i = 0; i < data.length; i++) {
-                data[i] = output[i];
-            }
+            applyKernel(imageData, targetCanvas, [-1, -1, -1, -1, 8, -1, -1, -1, -1], 0);
         }
 
         function embossData(imageData, targetCanvas) {
+            applyKernel(imageData, targetCanvas, [-2, -1, 0, -1, 1, 1, 0, 1, 2], 128);
+        }
+
+        function applyKernel(imageData, targetCanvas, kernel, offset) {
             const data = imageData.data;
-            const w = targetCanvas.width;
-            const h = targetCanvas.height;
-            
-            const kernel = [-2, -1, 0, -1, 1, 1, 0, 1, 2];
+            const w = targetCanvas.width, h = targetCanvas.height;
             const output = new Uint8ClampedArray(data);
             
             for (let y = 1; y < h - 1; y++) {
@@ -921,21 +1096,18 @@
                         }
                     }
                     const idx = (y * w + x) * 4;
-                    output[idx] = Math.min(255, Math.max(0, r + 128));
-                    output[idx + 1] = Math.min(255, Math.max(0, g + 128));
-                    output[idx + 2] = Math.min(255, Math.max(0, b + 128));
+                    output[idx] = Math.min(255, Math.max(0, r + offset));
+                    output[idx + 1] = Math.min(255, Math.max(0, g + offset));
+                    output[idx + 2] = Math.min(255, Math.max(0, b + offset));
                 }
             }
             
-            for (let i = 0; i < data.length; i++) {
-                data[i] = output[i];
-            }
+            for (let i = 0; i < data.length; i++) data[i] = output[i];
         }
 
         function blurData(imageData, targetCanvas) {
             const data = imageData.data;
-            const w = targetCanvas.width;
-            const h = targetCanvas.height;
+            const w = targetCanvas.width, h = targetCanvas.height;
             const output = new Uint8ClampedArray(data);
             
             for (let y = 1; y < h - 1; y++) {
@@ -957,15 +1129,12 @@
                 }
             }
             
-            for (let i = 0; i < data.length; i++) {
-                data[i] = output[i];
-            }
+            for (let i = 0; i < data.length; i++) data[i] = output[i];
         }
 
-        // ===== CINÉMA =====
         function cinema(data) {
             for (let i = 0; i < data.length; i += 4) {
-                const avg = (data[i] * 0.3 + data[i + 1] * 0.59 + data[i + 2] * 0.11);
+                const avg = data[i] * 0.3 + data[i + 1] * 0.59 + data[i + 2] * 0.11;
                 data[i] = Math.min(255, avg * 1.2 - 10);
                 data[i + 1] = Math.min(255, avg * 1.1 - 20);
                 data[i + 2] = Math.min(255, avg * 0.9);
@@ -998,7 +1167,6 @@
             contrast(data, 50);
         }
 
-        // ===== CHANNELS RGB =====
         function redChannel(data) {
             for (let i = 0; i < data.length; i += 4) {
                 data[i + 1] = 0;
@@ -1022,9 +1190,8 @@
 
         function rgbShiftData(imageData, targetCanvas) {
             const data = imageData.data;
-            const w = targetCanvas.width;
-            const h = targetCanvas.height;
-            const shift = targetCanvas === canvas ? 5 : 2;
+            const w = targetCanvas.width, h = targetCanvas.height;
+            const shift = targetCanvas === mainCanvas ? 5 : 2;
             const output = new Uint8ClampedArray(data);
             
             for (let y = 0; y < h; y++) {
@@ -1037,12 +1204,10 @@
                 }
             }
             
-            for (let i = 0; i < data.length; i++) {
-                data[i] = output[i];
-            }
+            for (let i = 0; i < data.length; i++) data[i] = output[i];
         }
 
-        // Initialiser les previews au chargement
+        // Initialiser
         createFilterPreviews();
     </script>
 </body>
