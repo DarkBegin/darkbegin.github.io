@@ -13,18 +13,31 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: url('https://media.discordapp.net/attachments/426022765934673921/1466584888533717205/2538529031.png') center center fixed;
+            background-size: cover;
             min-height: 100vh;
             padding: 15px;
+        }
+
+        /* Overlay pour améliorer la lisibilité */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: -1;
         }
 
         .container {
             max-width: 1800px;
             margin: 0 auto;
-            background: white;
+            background: rgba(255, 255, 255, 0.98);
             border-radius: 20px;
             padding: 25px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
         }
 
         h1 {
@@ -98,7 +111,7 @@
 
         .main-area {
             display: grid;
-            grid-template-columns: 1fr 320px;
+            grid-template-columns: 1fr 360px;
             gap: 20px;
             align-items: start;
         }
@@ -120,8 +133,8 @@
 
         .images-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 12px;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
             width: 100%;
         }
 
@@ -145,7 +158,7 @@
         }
 
         .image-card-footer {
-            padding: 8px;
+            padding: 10px;
             background: #f8f9fa;
             display: flex;
             justify-content: space-between;
@@ -155,9 +168,39 @@
         .image-number {
             background: #667eea;
             color: white;
-            padding: 3px 10px;
+            padding: 4px 12px;
             border-radius: 12px;
-            font-size: 11px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .image-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .download-single-btn {
+            background: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .download-single-btn:hover {
+            background: #229954;
+            transform: scale(1.1);
+        }
+
+        .download-single-btn::before {
+            content: '↓';
             font-weight: bold;
         }
 
@@ -166,12 +209,15 @@
             color: white;
             border: none;
             border-radius: 50%;
-            width: 24px;
-            height: 24px;
+            width: 32px;
+            height: 32px;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 20px;
             line-height: 1;
             transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .remove-btn:hover {
@@ -278,7 +324,7 @@
         }
 
         .filters-panel {
-            background: #f8f9fa;
+            background: rgba(248, 249, 250, 0.98);
             padding: 15px;
             border-radius: 15px;
             max-height: 850px;
@@ -307,7 +353,7 @@
         .filter-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 8px;
+            gap: 10px;
         }
 
         .filter-item {
@@ -333,16 +379,19 @@
 
         .filter-preview {
             width: 100%;
-            aspect-ratio: 1;
+            height: 150px;
             overflow: hidden;
             background: #ddd;
             position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .filter-preview canvas {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
         }
 
         .filter-preview .no-image {
@@ -352,13 +401,13 @@
             align-items: center;
             justify-content: center;
             background: linear-gradient(135deg, #e0e0e0 0%, #f5f5f5 100%);
-            font-size: 30px;
+            font-size: 40px;
         }
 
         .filter-name {
-            padding: 6px;
+            padding: 8px;
             text-align: center;
-            font-size: 10px;
+            font-size: 11px;
             font-weight: 600;
             color: #333;
             background: white;
@@ -763,7 +812,6 @@
 
         let currentLang = 'en';
 
-        // Détecter la langue du navigateur
         function detectLanguage() {
             const browserLang = navigator.language || navigator.userLanguage;
             const langCode = browserLang.split('-')[0];
@@ -816,21 +864,19 @@
             dropdown.classList.toggle('show');
         }
 
-        // Fermer le dropdown si on clique ailleurs
         document.addEventListener('click', function(e) {
             if (!e.target.closest('.language-selector')) {
                 document.getElementById('languageDropdown').classList.remove('show');
             }
         });
 
-        // Initialiser la langue au chargement
         window.addEventListener('DOMContentLoaded', function() {
             const savedLang = localStorage.getItem('preferredLanguage');
             const detectedLang = savedLang || detectLanguage();
             changeLanguage(detectedLang);
         });
 
-        // ===== CODE PRINCIPAL (Identique au précédent mais avec limite 20) =====
+        // ===== CODE PRINCIPAL =====
         const fileInput = document.getElementById('fileInput');
         const uploadOverlay = document.getElementById('uploadOverlay');
         const imagesGrid = document.getElementById('imagesGrid');
@@ -843,7 +889,6 @@
 
         const MAX_IMAGES = 20;
 
-        // Configuration des filtres (identique)
         const filterCategories = {
             basicFilters: [
                 { name: 'Grayscale', filter: 'grayscale' },
@@ -1054,6 +1099,19 @@
             e.target.value = '';
         });
 
+        function downloadSingleImage(index) {
+            const imgData = loadedImages[index];
+            const filterSuffix = currentFilter ? `_${currentFilter.filter}` : '_original';
+            const filename = imgData.name.replace(/\.[^/.]+$/, '') + filterSuffix + '.png';
+            
+            imgData.canvas.toBlob(function(blob) {
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = filename;
+                link.click();
+            }, 'image/png');
+        }
+
         function updateViewer() {
             imagesGrid.innerHTML = '';
 
@@ -1071,13 +1129,24 @@
                 number.className = 'image-number';
                 number.textContent = `#${index + 1}`;
 
+                const actions = document.createElement('div');
+                actions.className = 'image-actions';
+
+                const downloadBtn = document.createElement('button');
+                downloadBtn.className = 'download-single-btn';
+                downloadBtn.title = 'Download';
+                downloadBtn.onclick = () => downloadSingleImage(index);
+
                 const removeBtn = document.createElement('button');
                 removeBtn.className = 'remove-btn';
                 removeBtn.textContent = '×';
                 removeBtn.onclick = () => removeImage(index);
 
+                actions.appendChild(downloadBtn);
+                actions.appendChild(removeBtn);
+
                 footer.appendChild(number);
-                footer.appendChild(removeBtn);
+                footer.appendChild(actions);
                 card.appendChild(footer);
 
                 imagesGrid.appendChild(card);
@@ -1103,7 +1172,7 @@
         function generatePreviews() {
             if (loadedImages.length === 0) return;
 
-            const previewSize = 120;
+            const previewMaxSize = 140;
             const imgData = loadedImages[0];
             
             for (const filters of Object.values(filterCategories)) {
@@ -1112,12 +1181,13 @@
                     const container = filterInfo.previewContainer;
                     
                     const aspectRatio = imgData.original.width / imgData.original.height;
+                    
                     if (aspectRatio > 1) {
-                        previewCanvas.width = previewSize;
-                        previewCanvas.height = previewSize / aspectRatio;
+                        previewCanvas.width = previewMaxSize;
+                        previewCanvas.height = previewMaxSize / aspectRatio;
                     } else {
-                        previewCanvas.height = previewSize;
-                        previewCanvas.width = previewSize * aspectRatio;
+                        previewCanvas.height = previewMaxSize;
+                        previewCanvas.width = previewMaxSize * aspectRatio;
                     }
 
                     const previewCtx = previewCanvas.getContext('2d');
@@ -1212,7 +1282,7 @@
             document.getElementById('clearFilterBtn').disabled = !hasFilter;
         }
 
-        // [TOUS LES FILTRES - Code identique au précédent]
+        // ===== FILTRES (Code complet identique) =====
         function applyFilterToImageData(imageData, filterName, targetCanvas) {
             const data = imageData.data;
             switch(filterName) {
@@ -1317,9 +1387,7 @@
             }
         }
 
-        // [INSÉRER ICI TOUS LES FILTRES DU CODE PRÉCÉDENT - grayscale, sepia, etc.]
-        // Je les ai omis pour la brièveté mais ils sont identiques
-        
+        // Tous les filtres (minifiés pour gagner de la place)
         function grayscale(data){for(let i=0;i<data.length;i+=4){const avg=(data[i]+data[i+1]+data[i+2])/3;data[i]=data[i+1]=data[i+2]=avg}}
         function sepia(data){for(let i=0;i<data.length;i+=4){const r=data[i],g=data[i+1],b=data[i+2];data[i]=Math.min(255,r*0.393+g*0.769+b*0.189);data[i+1]=Math.min(255,r*0.349+g*0.686+b*0.168);data[i+2]=Math.min(255,r*0.272+g*0.534+b*0.131)}}
         function invert(data){for(let i=0;i<data.length;i+=4){data[i]=255-data[i];data[i+1]=255-data[i+1];data[i+2]=255-data[i+2]}}
