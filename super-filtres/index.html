@@ -13,7 +13,7 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: url('https://media.discordapp.net/attachments/426022765934673921/1466584888533717205/2538529031.png') center center fixed;
+            background: url('https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?q=80&w=2000') center center fixed;
             background-size: cover;
             min-height: 100vh;
             padding: 15px;
@@ -323,12 +323,13 @@
         }
 
         .filters-panel {
-            background: rgba(248, 249, 250, 0.98);
-            padding: 15px;
-            border-radius: 15px;
-            max-height: 850px;
-            overflow-y: auto;
+        background: rgba(248, 249, 250, 0.98);
+        padding: 15px;
+        border-radius: 15px;
+        height: calc(100vh - 180px);
+        overflow-y: auto;
         }
+
 
         .filters-panel h2 {
             font-size: 1.1em;
@@ -338,21 +339,58 @@
         }
 
         .filter-category {
-            margin-bottom: 20px;
+            margin-bottom: 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
         }
 
-        .filter-category h3 {
-            color: #667eea;
-            margin-bottom: 10px;
+        .filter-category-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.3s;
+        }
+
+        .filter-category-header:hover {
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        }
+
+        .filter-category-header h3 {
             font-size: 0.85em;
-            border-bottom: 2px solid #667eea;
-            padding-bottom: 5px;
+            margin: 0;
+        }
+
+        .filter-category-toggle {
+            font-size: 1.2em;
+            transition: transform 0.3s;
+        }
+
+        .filter-category.collapsed .filter-category-toggle {
+            transform: rotate(-90deg);
+        }
+
+        .filter-category-content {
+            max-height: 1000px;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .filter-category.collapsed .filter-category-content {
+            max-height: 0;
         }
 
         .filter-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 10px;
+            padding: 10px;
+            background: white;
         }
 
         .filter-item {
@@ -363,6 +401,7 @@
             transition: all 0.3s;
             background: white;
             box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            position: relative;
         }
 
         .filter-item:hover {
@@ -371,9 +410,31 @@
             box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
         }
 
-        .filter-item.active {
-            border-color: #764ba2;
-            box-shadow: 0 4px 12px rgba(118, 75, 162, 0.5);
+        .filter-item.active-primary {
+            border-color: #667eea;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.5);
+        }
+
+        .filter-item.active-secondary {
+            border-color: #e67e22;
+            box-shadow: 0 4px 12px rgba(230, 126, 34, 0.5);
+        }
+
+        .filter-badge {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: #667eea;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 9px;
+            font-weight: bold;
+            z-index: 10;
+        }
+
+        .filter-badge.secondary {
+            background: #e67e22;
         }
 
         .filter-preview {
@@ -447,6 +508,34 @@
             font-weight: 600;
         }
 
+        .fusion-mode-badge {
+            background: #e67e22;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.75em;
+            text-align: center;
+            margin-bottom: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .fusion-mode-badge:hover {
+            background: #d35400;
+            transform: scale(1.02);
+        }
+
+        .fusion-mode-badge.active {
+            background: #c0392b;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
         @media (max-width: 1200px) {
             .main-area {
                 grid-template-columns: 1fr;
@@ -484,8 +573,6 @@
                     <div class="language-option" onclick="changeLanguage('es')">🇪🇸 Español</div>
                     <div class="language-option" onclick="changeLanguage('de')">🇩🇪 Deutsch</div>
                     <div class="language-option" onclick="changeLanguage('pt')">🇵🇹 Português</div>
-                    <div class="language-option" onclick="changeLanguage('ru')">🇷🇺 Русский</div>
-                    <div class="language-option" onclick="changeLanguage('ja')">🇯🇵 日本語</div>
                 </div>
             </div>
         </h1>
@@ -521,78 +608,163 @@
             <div class="filters-panel">
                 <h2 id="filtersTitle">Available Filters</h2>
                 <div class="info-badge" id="infoBadge">Applied in real-time to all images</div>
+                
+                <div class="fusion-mode-badge" id="fusionModeBadge" onclick="toggleFusionMode()">
+                    <span id="fusionModeText">🎭 Fusion Mode: OFF</span>
+                </div>
+                
                 <div class="current-filter-badge" id="currentFilterBadge" style="display: none;">
                     <span id="currentFilterName">None</span>
                 </div>
                 
                 <div class="filter-category">
-                    <h3 id="catBasic">🎭 Basics</h3>
-                    <div class="filter-grid" id="basicFilters"></div>
+                    <div class="filter-category-header" onclick="toggleCategory(this)">
+                        <h3 id="catPixel">🔲 Pixelization</h3>
+                        <span class="filter-category-toggle">▼</span>
+                    </div>
+                    <div class="filter-category-content">
+                        <div class="filter-grid" id="pixelFilters"></div>
+                    </div>
                 </div>
 
                 <div class="filter-category">
-                    <h3 id="catGaming">🎮 Retro Gaming</h3>
-                    <div class="filter-grid" id="gamingFilters"></div>
+                    <div class="filter-category-header" onclick="toggleCategory(this)">
+                        <h3 id="catBasic">🎭 Basics</h3>
+                        <span class="filter-category-toggle">▼</span>
+                    </div>
+                    <div class="filter-category-content">
+                        <div class="filter-grid" id="basicFilters"></div>
+                    </div>
                 </div>
 
                 <div class="filter-category">
-                    <h3 id="catVaporwave">🌈 Vaporwave & Synthwave</h3>
-                    <div class="filter-grid" id="vaporFilters"></div>
+                    <div class="filter-category-header" onclick="toggleCategory(this)">
+                        <h3 id="catGaming">🎮 Retro Gaming</h3>
+                        <span class="filter-category-toggle">▼</span>
+                    </div>
+                    <div class="filter-category-content">
+                        <div class="filter-grid" id="gamingFilters"></div>
+                    </div>
                 </div>
 
                 <div class="filter-category">
-                    <h3 id="catVintage">🌸 Vintage & Pastel</h3>
-                    <div class="filter-grid" id="vintageFilters"></div>
+                    <div class="filter-category-header" onclick="toggleCategory(this)">
+                        <h3 id="catVaporwave">🌈 Vaporwave & Synthwave</h3>
+                        <span class="filter-category-toggle">▼</span>
+                    </div>
+                    <div class="filter-category-content">
+                        <div class="filter-grid" id="vaporFilters"></div>
+                    </div>
                 </div>
 
                 <div class="filter-category">
-                    <h3 id="catArtistic">🎨 Artistic</h3>
-                    <div class="filter-grid" id="artisticFilters"></div>
+                    <div class="filter-category-header" onclick="toggleCategory(this)">
+                        <h3 id="catVintage">🌸 Vintage & Pastel</h3>
+                        <span class="filter-category-toggle">▼</span>
+                    </div>
+                    <div class="filter-category-content">
+                        <div class="filter-grid" id="vintageFilters"></div>
+                    </div>
                 </div>
 
                 <div class="filter-category">
-                    <h3 id="catCinema">🎬 Cinema</h3>
-                    <div class="filter-grid" id="cinemaFilters"></div>
+                    <div class="filter-category-header" onclick="toggleCategory(this)">
+                        <h3 id="catArtistic">🎨 Artistic</h3>
+                        <span class="filter-category-toggle">▼</span>
+                    </div>
+                    <div class="filter-category-content">
+                        <div class="filter-grid" id="artisticFilters"></div>
+                    </div>
                 </div>
 
                 <div class="filter-category">
-                    <h3 id="catRGB">🌟 RGB Channels</h3>
-                    <div class="filter-grid" id="rgbFilters"></div>
+                    <div class="filter-category-header" onclick="toggleCategory(this)">
+                        <h3 id="catCinema">🎬 Cinema</h3>
+                        <span class="filter-category-toggle">▼</span>
+                    </div>
+                    <div class="filter-category-content">
+                        <div class="filter-grid" id="cinemaFilters"></div>
+                    </div>
                 </div>
 
                 <div class="filter-category">
-                    <h3 id="catSeasons">🍂 Seasons</h3>
-                    <div class="filter-grid" id="seasonFilters"></div>
+                    <div class="filter-category-header" onclick="toggleCategory(this)">
+                        <h3 id="catRGB">🌟 RGB Channels</h3>
+                        <span class="filter-category-toggle">▼</span>
+                    </div>
+                    <div class="filter-category-content">
+                        <div class="filter-grid" id="rgbFilters"></div>
+                    </div>
                 </div>
 
                 <div class="filter-category">
-                    <h3 id="catHue">🎨 Hue Shifts</h3>
-                    <div class="filter-grid" id="hueFilters"></div>
+                    <div class="filter-category-header" onclick="toggleCategory(this)">
+                        <h3 id="catSeasons">🍂 Seasons</h3>
+                        <span class="filter-category-toggle">▼</span>
+                    </div>
+                    <div class="filter-category-content">
+                        <div class="filter-grid" id="seasonFilters"></div>
+                    </div>
                 </div>
 
                 <div class="filter-category">
-                    <h3 id="catSpecial">👻 Special</h3>
-                    <div class="filter-grid" id="specialFilters"></div>
+                    <div class="filter-category-header" onclick="toggleCategory(this)">
+                        <h3 id="catHue">🎨 Hue Shifts</h3>
+                        <span class="filter-category-toggle">▼</span>
+                    </div>
+                    <div class="filter-category-content">
+                        <div class="filter-grid" id="hueFilters"></div>
+                    </div>
                 </div>
 
                 <div class="filter-category">
-                    <h3 id="catCosmic">🌌 Cosmic</h3>
-                    <div class="filter-grid" id="cosmicFilters"></div>
+                    <div class="filter-category-header" onclick="toggleCategory(this)">
+                        <h3 id="catSpecial">👻 Special</h3>
+                        <span class="filter-category-toggle">▼</span>
+                    </div>
+                    <div class="filter-category-content">
+                        <div class="filter-grid" id="specialFilters"></div>
+                    </div>
                 </div>
 
                 <div class="filter-category">
-                    <h3 id="catChemical">🧪 Chemical</h3>
-                    <div class="filter-grid" id="chemicalFilters"></div>
+                    <div class="filter-category-header" onclick="toggleCategory(this)">
+                        <h3 id="catCosmic">🌌 Cosmic</h3>
+                        <span class="filter-category-toggle">▼</span>
+                    </div>
+                    <div class="filter-category-content">
+                        <div class="filter-grid" id="cosmicFilters"></div>
+                    </div>
                 </div>
 
                 <div class="filter-category">
-                    <h3 id="catHorror">🎃 Horror</h3>
-                    <div class="filter-grid" id="horrorFilters"></div>
+                    <div class="filter-category-header" onclick="toggleCategory(this)">
+                        <h3 id="catChemical">🧪 Chemical</h3>
+                        <span class="filter-category-toggle">▼</span>
+                    </div>
+                    <div class="filter-category-content">
+                        <div class="filter-grid" id="chemicalFilters"></div>
+                    </div>
                 </div>
 
                 <div class="filter-category">
-                    <h3 id="catWTF">🤪 WTF & Experimental</h3>
-                    <div class="filter-grid" id="wtfFilters"></div>
+                    <div class="filter-category-header" onclick="toggleCategory(this)">
+                        <h3 id="catHorror">🎃 Horror</h3>
+                        <span class="filter-category-toggle">▼</span>
+                    </div>
+                    <div class="filter-category-content">
+                        <div class="filter-grid" id="horrorFilters"></div>
+                    </div>
+                </div>
+
+                <div class="filter-category">
+                    <div class="filter-category-header" onclick="toggleCategory(this)">
+                        <h3 id="catWTF">🤪 WTF & Experimental</h3>
+                        <span class="filter-category-toggle">▼</span>
+                    </div>
+                    <div class="filter-category-content">
+                        <div class="filter-grid" id="wtfFilters"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -603,7 +775,13 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
     <script>
-        // ===== SYSTÈME DE TRADUCTION =====
+        // ===== FONCTION ACCORDION =====
+        function toggleCategory(header) {
+            const category = header.parentElement;
+            category.classList.toggle('collapsed');
+        }
+
+        // ===== SYSTÈME DE TRADUCTION (identique) =====
         const translations = {
             en: {
                 pageTitle: "Image Editor - Multi-Filters",
@@ -615,6 +793,9 @@
                 downloadBtn: "📦 ZIP",
                 filtersTitle: "Available Filters",
                 infoBadge: "Applied in real-time to all images",
+                fusionModeOff: "🎭 Fusion Mode: OFF",
+                fusionModeOn: "🎭 Fusion Mode: ON - Select 2nd filter",
+                catPixel: "🔲 Pixelization",
                 catBasic: "🎭 Basics",
                 catGaming: "🎮 Retro Gaming",
                 catVaporwave: "🌈 Vaporwave & Synthwave",
@@ -631,6 +812,13 @@
                 catWTF: "🤪 WTF & Experimental",
                 alertMax: "You can only load {0} more image(s). Maximum 20 images.",
                 filters: {
+                    pixel10: "Pixel 10%",
+                    pixel30: "Pixel 30%",
+                    pixel25: "Pixel 25%",
+                    pixel50: "Pixel 50%",
+                    pixel75: "Pixel 75%",
+                    pixel100: "Pixel 100%",
+                    pixel150: "Pixel 150%",
                     grayscale: "Grayscale",
                     sepia: "Sepia",
                     invert: "Negative",
@@ -716,6 +904,7 @@
                     xray: "X-Ray",
                     thermal: "Thermal",
                     matrix: "Matrix",
+					rio: "Rio de Janeiro",
                     deepfry: "Deep Fry",
                     glitchmax: "Glitch Max",
                     holographic: "Holographic",
@@ -741,6 +930,9 @@
                 downloadBtn: "📦 ZIP",
                 filtersTitle: "Filtres disponibles",
                 infoBadge: "Appliqué en temps réel sur toutes les images",
+                fusionModeOff: "🎭 Mode Fusion: OFF",
+                fusionModeOn: "🎭 Mode Fusion: ON - Sélectionnez 2ème filtre",
+                catPixel: "🔲 Pixellisation",
                 catBasic: "🎭 Basiques",
                 catGaming: "🎮 Rétro Gaming",
                 catVaporwave: "🌈 Vaporwave & Synthwave",
@@ -757,6 +949,13 @@
                 catWTF: "🤪 WTF & Expérimental",
                 alertMax: "Vous ne pouvez charger que {0} image(s) supplémentaire(s). Maximum 20 images.",
                 filters: {
+                    pixel10: "Pixel 10%",
+                    pixel30: "Pixel 30%",
+                    pixel25: "Pixel 25%",
+                    pixel50: "Pixel 50%",
+                    pixel75: "Pixel 75%",
+                    pixel100: "Pixel 100%",
+                    pixel150: "Pixel 150%",
                     grayscale: "Noir et Blanc",
                     sepia: "Sépia",
                     invert: "Négatif",
@@ -848,6 +1047,7 @@
                     jpegify: "Artifacts JPEG",
                     chromatic: "Chromatique",
                     datamosh: "Datamosh",
+					rio: "Rio de Janeiro",
                     vhsglitch: "Glitch VHS",
                     scanlines: "Scanlines",
                     colorbleed: "Bavure Couleur",
@@ -864,9 +1064,13 @@
                 uploadSubtext: "¡Todas las imágenes se muestran juntas!",
                 addBtn: "➕ Añadir",
                 clearBtn: "🔄 Borrar",
+				rio: "Rio de Janeiro",
                 downloadBtn: "📦 ZIP",
                 filtersTitle: "Filtros Disponibles",
                 infoBadge: "Aplicado en tiempo real a todas las imágenes",
+                fusionModeOff: "🎭 Modo Fusión: OFF",
+                fusionModeOn: "🎭 Modo Fusión: ON - Selecciona 2º filtro",
+                catPixel: "🔲 Pixelización",
                 catBasic: "🎭 Básicos",
                 catGaming: "🎮 Retro Gaming",
                 catVaporwave: "🌈 Vaporwave & Synthwave",
@@ -883,6 +1087,13 @@
                 catWTF: "🤪 WTF & Experimental",
                 alertMax: "Solo puedes cargar {0} imagen(es) más. Máximo 20 imágenes.",
                 filters: {
+                    pixel10: "Píxel 10%",
+                    pixel30: "Píxel 30%",
+                    pixel25: "Píxel 25%",
+                    pixel50: "Píxel 50%",
+                    pixel75: "Píxel 75%",
+                    pixel100: "Píxel 100%",
+                    pixel150: "Píxel 150%",
                     grayscale: "Escala de Grises",
                     sepia: "Sepia",
                     invert: "Negativo",
@@ -993,7 +1204,11 @@
                 downloadBtn: "📦 ZIP",
                 filtersTitle: "Verfügbare Filter",
                 infoBadge: "In Echtzeit auf alle Bilder angewendet",
+                fusionModeOff: "🎭 Fusion-Modus: AUS",
+                fusionModeOn: "🎭 Fusion-Modus: AN - Wähle 2. Filter",
+                catPixel: "🔲 Pixelierung",
                 catBasic: "🎭 Grundlagen",
+				rio: "Rio de Janeiro",
                 catGaming: "🎮 Retro Gaming",
                 catVaporwave: "🌈 Vaporwave & Synthwave",
                 catVintage: "🌸 Vintage & Pastel",
@@ -1009,6 +1224,13 @@
                 catWTF: "🤪 WTF & Experimentell",
                 alertMax: "Sie können nur noch {0} Bild(er) laden. Maximum 20 Bilder.",
                 filters: {
+                    pixel10: "Pixel 10%",
+                    pixel30: "Pixel 30%",
+                    pixel25: "Pixel 25%",
+                    pixel50: "Pixel 50%",
+                    pixel75: "Pixel 75%",
+                    pixel100: "Pixel 100%",
+                    pixel150: "Pixel 150%",
                     grayscale: "Graustufen",
                     sepia: "Sepia",
                     invert: "Negativ",
@@ -1117,8 +1339,12 @@
                 addBtn: "➕ Adicionar",
                 clearBtn: "🔄 Limpar",
                 downloadBtn: "📦 ZIP",
+				rio: "Rio de Janeiro",
                 filtersTitle: "Filtros Disponíveis",
                 infoBadge: "Aplicado em tempo real a todas as imagens",
+                fusionModeOff: "🎭 Modo Fusão: OFF",
+                fusionModeOn: "🎭 Modo Fusão: ON - Selecione 2º filtro",
+                catPixel: "🔲 Pixelização",
                 catBasic: "🎭 Básicos",
                 catGaming: "🎮 Retro Gaming",
                 catVaporwave: "🌈 Vaporwave & Synthwave",
@@ -1135,6 +1361,13 @@
                 catWTF: "🤪 WTF & Experimental",
                 alertMax: "Você só pode carregar mais {0} imagem(ns). Máximo 20 imagens.",
                 filters: {
+                    pixel10: "Pixel 10%",
+                    pixel30: "Pixel 30%",
+                    pixel25: "Pixel 25%",
+                    pixel50: "Pixel 50%",
+                    pixel75: "Pixel 75%",
+                    pixel100: "Pixel 100%",
+                    pixel150: "Pixel 150%",
                     grayscale: "Escala de Cinza",
                     sepia: "Sépia",
                     invert: "Negativo",
@@ -1234,291 +1467,23 @@
                     rave: "Rave",
                     dimensionx: "Dimensão X"
                 }
-            },
-            ru: {
-                pageTitle: "Редактор Изображений - Мульти-Фильтры",
-                mainTitle: "🎨 Редактор Изображений - Мульти-Фильтры",
-                uploadBtn: "📁 Загрузить изображения (макс 20)",
-                uploadSubtext: "Все изображения отображаются вместе!",
-                addBtn: "➕ Добавить",
-                clearBtn: "🔄 Очистить",
-                downloadBtn: "📦 ZIP",
-                filtersTitle: "Доступные Фильтры",
-                infoBadge: "Применяется в реальном времени ко всем изображениям",
-                catBasic: "🎭 Базовые",
-                catGaming: "🎮 Ретро Игры",
-                catVaporwave: "🌈 Vaporwave & Synthwave",
-                catVintage: "🌸 Винтаж & Пастель",
-                catArtistic: "🎨 Художественные",
-                catCinema: "🎬 Кино",
-                catRGB: "🌟 RGB Каналы",
-                catSeasons: "🍂 Сезоны",
-                catHue: "🎨 Сдвиги Оттенка",
-                catSpecial: "👻 Специальные",
-                catCosmic: "🌌 Космические",
-                catChemical: "🧪 Химические",
-                catHorror: "🎃 Хоррор",
-                catWTF: "🤪 WTF & Экспериментальные",
-                alertMax: "Вы можете загрузить только {0} изображений. Максимум 20 изображений.",
-                filters: {
-                    grayscale: "Оттенки Серого",
-                    sepia: "Сепия",
-                    invert: "Негатив",
-                    brightness: "Яркость++",
-                    darkness: "Темнота",
-                    contrast: "Контраст++",
-                    gameboy: "Game Boy",
-                    gameboyGreen: "Game Boy Зелёный",
-                    nes: "NES 8-бит",
-                    cga: "CGA PC",
-                    atari: "Atari 2600",
-                    pixelate: "Пиксельный",
-                    vaporwave: "Vaporwave",
-                    vaporwavemax: "Vaporwave Max",
-                    vaporwavearc: "Vaporwave Arc",
-                    synthwave: "Synthwave",
-                    cyberpunk: "Киберпанк",
-                    miami: "Miami Vice",
-                    neon: "Неон",
-                    outrun: "Outrun",
-                    vintage: "Винтаж",
-                    polaroid: "Polaroid",
-                    pastel: "Пастель",
-                    warm: "Тёплый",
-                    cold: "Холодный",
-                    retro70s: "Ретро 70-х",
-                    posterize: "Постер",
-                    solarize: "Соляризация",
-                    edge: "Края",
-                    emboss: "Рельеф",
-                    blur: "Размытие",
-                    painting: "Картина",
-                    cinema: "Кино",
-                    noir: "Нуар",
-                    technicolor: "Technicolor",
-                    bleach: "Bleach Bypass",
-                    western: "Вестерн",
-                    scifi: "Sci-Fi",
-                    redChannel: "Красный Канал",
-                    greenChannel: "Зелёный Канал",
-                    blueChannel: "Синий Канал",
-                    rgbShift: "RGB Глитч",
-                    swapRB: "Swap КС",
-                    swapGB: "Swap ЗС",
-                    spring: "Весна",
-                    summer: "Лето",
-                    autumn: "Осень",
-                    winter: "Зима",
-                    hue45: "Оттенок +45°",
-                    hue90: "Оттенок +90°",
-                    hue135: "Оттенок +135°",
-                    hue180: "Оттенок +180°",
-                    hue225: "Оттенок +225°",
-                    hue270: "Оттенок +270°",
-                    hue315: "Оттенок +315°",
-                    hueRotate: "Вращение Оттенка",
-                    silhouette: "Силуэт",
-                    binarize: "Ч&Б Чистый",
-                    transparentbg: "Прозрачный Фон",
-                    cartoon: "Мультфильм",
-                    watercolor: "Акварель",
-                    pencil: "Карандаш",
-                    galaxy: "Галактика",
-                    nebula: "Туманность",
-                    supernova: "Сверхновая",
-                    blackhole: "Чёрная Дыра",
-                    aurora: "Аврора",
-                    cosmic: "Космический",
-                    radioactive: "Радиоактивный",
-                    acid: "Кислота",
-                    toxic: "Токсичный",
-                    uranium: "Уран",
-                    biohazard: "Биоопасность",
-                    plasma: "Плазма",
-                    zombie: "Зомби",
-                    corrupted: "Повреждённый",
-                    blood: "Кровь",
-                    demon: "Демон",
-                    nightmare: "Кошмар",
-                    haunted: "Призрачный",
-                    psychedelic: "Психоделический",
-                    infrared: "Инфракрасный",
-                    xray: "Рентген",
-                    thermal: "Тепловой",
-                    matrix: "Матрица",
-                    deepfry: "Deep Fry",
-                    glitchmax: "Глитч Макс",
-                    holographic: "Голографический",
-                    jpegify: "Артефакты JPEG",
-                    chromatic: "Хроматический",
-                    datamosh: "Datamosh",
-                    vhsglitch: "VHS Глитч",
-                    scanlines: "Линии Развёртки",
-                    colorbleed: "Растекание Цвета",
-                    nuke: "Ядерный",
-                    drunk: "Пьяный",
-                    rave: "Рейв",
-                    dimensionx: "Измерение X"
-                }
-            },
-            ja: {
-                pageTitle: "画像エディター - マルチフィルター",
-                mainTitle: "🎨 画像エディター - マルチフィルター",
-                uploadBtn: "📁 画像を読み込む（最大20枚）",
-                uploadSubtext: "すべての画像が一緒に表示されます！",
-                addBtn: "➕ 追加",
-                clearBtn: "🔄 クリア",
-                downloadBtn: "📦 ZIP",
-                filtersTitle: "利用可能なフィルター",
-                infoBadge: "すべての画像にリアルタイムで適用",
-                catBasic: "🎭 基本",
-                catGaming: "🎮 レトロゲーム",
-                catVaporwave: "🌈 Vaporwave & Synthwave",
-                catVintage: "🌸 ヴィンテージ & パステル",
-                catArtistic: "🎨 アーティスティック",
-                catCinema: "🎬 シネマ",
-                catRGB: "🌟 RGBチャンネル",
-                catSeasons: "🍂 季節",
-                catHue: "🎨 色相シフト",
-                catSpecial: "👻 スペシャル",
-                catCosmic: "🌌 コスミック",
-                catChemical: "🧪 ケミカル",
-                catHorror: "🎃 ホラー",
-                catWTF: "🤪 WTF & 実験的",
-                alertMax: "あと{0}枚しか読み込めません。最大20枚まで。",
-                filters: {
-                    grayscale: "グレースケール",
-                    sepia: "セピア",
-                    invert: "ネガティブ",
-                    brightness: "明度++",
-                    darkness: "暗さ",
-                    contrast: "コントラスト++",
-                    gameboy: "ゲームボーイ",
-                    gameboyGreen: "ゲームボーイ緑",
-                    nes: "NES 8ビット",
-                    cga: "CGA PC",
-                    atari: "Atari 2600",
-                    pixelate: "ピクセル化",
-                    vaporwave: "ヴェイパーウェイブ",
-                    vaporwavemax: "ヴェイパーウェイブMax",
-                    vaporwavearc: "ヴェイパーウェイブArc",
-                    synthwave: "シンセウェイブ",
-                    cyberpunk: "サイバーパンク",
-                    miami: "マイアミバイス",
-                    neon: "ネオン",
-                    outrun: "アウトラン",
-                    vintage: "ヴィンテージ",
-                    polaroid: "ポラロイド",
-                    pastel: "パステル",
-                    warm: "暖色",
-                    cold: "寒色",
-                    retro70s: "レトロ70年代",
-                    posterize: "ポスター",
-                    solarize: "ソラリゼーション",
-                    edge: "エッジ",
-                    emboss: "エンボス",
-                    blur: "ぼかし",
-                    painting: "絵画",
-                    cinema: "シネマ",
-                    noir: "フィルムノワール",
-                    technicolor: "テクニカラー",
-                    bleach: "ブリーチバイパス",
-                    western: "西部劇",
-                    scifi: "SF",
-                    redChannel: "赤チャンネル",
-                    greenChannel: "緑チャンネル",
-                    blueChannel: "青チャンネル",
-                    rgbShift: "RGBグリッチ",
-                    swapRB: "赤青入替",
-                    swapGB: "緑青入替",
-                    spring: "春",
-                    summer: "夏",
-                    autumn: "秋",
-                    winter: "冬",
-                    hue45: "色相 +45°",
-                    hue90: "色相 +90°",
-                    hue135: "色相 +135°",
-                    hue180: "色相 +180°",
-                    hue225: "色相 +225°",
-                    hue270: "色相 +270°",
-                    hue315: "色相 +315°",
-                    hueRotate: "色相回転",
-                    silhouette: "シルエット",
-                    binarize: "白黒純粋",
-                    transparentbg: "透明背景",
-                    cartoon: "漫画",
-                    watercolor: "水彩画",
-                    pencil: "鉛筆",
-                    galaxy: "銀河",
-                    nebula: "星雲",
-                    supernova: "超新星",
-                    blackhole: "ブラックホール",
-                    aurora: "オーロラ",
-                    cosmic: "コスミック",
-                    radioactive: "放射性",
-                    acid: "酸",
-                    toxic: "有毒",
-                    uranium: "ウラニウム",
-                    biohazard: "バイオハザード",
-                    plasma: "プラズマ",
-                    zombie: "ゾンビ",
-                    corrupted: "破損",
-                    blood: "血",
-                    demon: "悪魔",
-                    nightmare: "悪夢",
-                    haunted: "幽霊",
-                    psychedelic: "サイケデリック",
-                    infrared: "赤外線",
-                    xray: "X線",
-                    thermal: "サーマル",
-                    matrix: "マトリックス",
-                    deepfry: "ディープフライ",
-                    glitchmax: "グリッチMax",
-                    holographic: "ホログラフィック",
-                    jpegify: "JPEGアーティファクト",
-                    chromatic: "色収差",
-                    datamosh: "データモッシュ",
-                    vhsglitch: "VHSグリッチ",
-                    scanlines: "走査線",
-                    colorbleed: "色にじみ",
-                    nuke: "核",
-                    drunk: "酔っ払い",
-                    rave: "レイブ",
-                    dimensionx: "次元X"
-                }
             }
         };
 
-        const langFlags = {
-            en: '🇬🇧',
-            fr: '🇫🇷',
-            es: '🇪🇸',
-            de: '🇩🇪',
-            pt: '🇵🇹',
-            ru: '🇷🇺',
-            ja: '🇯🇵'
-        };
-
-        const langNames = {
-            en: 'English',
-            fr: 'Français',
-            es: 'Español',
-            de: 'Deutsch',
-            pt: 'Português',
-            ru: 'Русский',
-            ja: '日本語'
-        };
+        const langFlags = { en: '🇬🇧', fr: '🇫🇷', es: '🇪🇸', de: '🇩🇪', pt: '🇵🇹' };
+        const langNames = { en: 'English', fr: 'Français', es: 'Español', de: 'Deutsch', pt: 'Português' };
 
         let currentLang = 'en';
+        let fusionMode = false;
+        let primaryFilter = null;
+        let secondaryFilter = null;
+        let primaryFilterElement = null;
+        let secondaryFilterElement = null;
 
         function detectLanguage() {
             const browserLang = navigator.language || navigator.userLanguage;
             const langCode = browserLang.split('-')[0];
-            
-            if (translations[langCode]) {
-                return langCode;
-            }
-            return 'en';
+            return translations[langCode] ? langCode : 'en';
         }
 
         function changeLanguage(lang) {
@@ -1537,6 +1502,7 @@
             document.getElementById('filtersTitle').textContent = t.filtersTitle;
             document.getElementById('infoBadge').textContent = t.infoBadge;
             
+            document.getElementById('catPixel').textContent = t.catPixel;
             document.getElementById('catBasic').textContent = t.catBasic;
             document.getElementById('catGaming').textContent = t.catGaming;
             document.getElementById('catVaporwave').textContent = t.catVaporwave;
@@ -1555,11 +1521,15 @@
             document.getElementById('currentLangFlag').textContent = langFlags[lang];
             document.getElementById('currentLangText').textContent = langNames[lang];
             
-            // Mettre à jour les noms des filtres
+            updateFusionModeText();
             updateFilterNames();
             
-            // Fermer le dropdown
             document.getElementById('languageDropdown').classList.remove('show');
+        }
+
+        function updateFusionModeText() {
+            const t = translations[currentLang];
+            document.getElementById('fusionModeText').textContent = fusionMode ? t.fusionModeOn : t.fusionModeOff;
         }
 
         function updateFilterNames() {
@@ -1571,6 +1541,54 @@
                         filterNameElement.textContent = t.filters[filterInfo.filter];
                     }
                 });
+            }
+
+            if (primaryFilter || secondaryFilter) {
+                updateCurrentFilterDisplay();
+            }
+        }
+
+        function toggleFusionMode() {
+            fusionMode = !fusionMode;
+            const badge = document.getElementById('fusionModeBadge');
+            
+            if (fusionMode) {
+                badge.classList.add('active');
+            } else {
+                badge.classList.remove('active');
+                if (secondaryFilterElement) {
+                    secondaryFilterElement.classList.remove('active-secondary');
+                    const secondaryBadge = secondaryFilterElement.querySelector('.filter-badge.secondary');
+                    if (secondaryBadge) secondaryBadge.remove();
+                }
+                secondaryFilter = null;
+                secondaryFilterElement = null;
+                
+                if (primaryFilter) {
+                    applyFilters();
+                }
+            }
+            
+            updateFusionModeText();
+            updateCurrentFilterDisplay();
+        }
+
+        function updateCurrentFilterDisplay() {
+            const badge = document.getElementById('currentFilterBadge');
+            const nameElement = document.getElementById('currentFilterName');
+            const t = translations[currentLang];
+            
+            if (primaryFilter && secondaryFilter) {
+                badge.style.display = 'block';
+                const name1 = t.filters[primaryFilter.filter] || primaryFilter.name;
+                const name2 = t.filters[secondaryFilter.filter] || secondaryFilter.name;
+                nameElement.textContent = `${name1} + ${name2}`;
+            } else if (primaryFilter) {
+                badge.style.display = 'block';
+                const name = t.filters[primaryFilter.filter] || primaryFilter.name;
+                nameElement.textContent = name;
+            } else {
+                badge.style.display = 'none';
             }
         }
 
@@ -1595,16 +1613,20 @@
         const fileInput = document.getElementById('fileInput');
         const uploadOverlay = document.getElementById('uploadOverlay');
         const imagesGrid = document.getElementById('imagesGrid');
-        const currentFilterBadge = document.getElementById('currentFilterBadge');
-        const currentFilterName = document.getElementById('currentFilterName');
         
         let loadedImages = [];
-        let currentFilter = null;
-        let activeFilterElement = null;
-
         const MAX_IMAGES = 20;
 
         const filterCategories = {
+            pixelFilters: [
+                { name: 'Pixel 10%', filter: 'pixel10' },
+                { name: 'Pixel 30%', filter: 'pixel30' },
+                { name: 'Pixel 25%', filter: 'pixel25' },
+                { name: 'Pixel 50%', filter: 'pixel50' },
+                { name: 'Pixel 75%', filter: 'pixel75' },
+                { name: 'Pixel 100%', filter: 'pixel100' },
+                { name: 'Pixel 150%', filter: 'pixel150' }
+            ],
             basicFilters: [
                 { name: 'Grayscale', filter: 'grayscale' },
                 { name: 'Sepia', filter: 'sepia' },
@@ -1640,6 +1662,7 @@
                 { name: 'Retro 70s', filter: 'retro70s' }
             ],
             artisticFilters: [
+			    { name: 'Rio de Janeiro', filter: 'rio' },
                 { name: 'Poster', filter: 'posterize' },
                 { name: 'Solarize', filter: 'solarize' },
                 { name: 'Edge', filter: 'edge' },
@@ -1739,7 +1762,7 @@
                 filters.forEach(filterInfo => {
                     const filterItem = document.createElement('div');
                     filterItem.className = 'filter-item';
-                    filterItem.onclick = () => applyFilterToAll(filterInfo.filter, filterInfo.name, filterItem);
+                    filterItem.onclick = () => selectFilter(filterInfo.filter, filterInfo.name, filterItem);
 
                     const preview = document.createElement('div');
                     preview.className = 'filter-preview';
@@ -1762,6 +1785,151 @@
                     filterInfo.element = filterItem;
                 });
             }
+        }
+
+        function selectFilter(filterName, displayName, element) {
+    if (loadedImages.length === 0) return;
+
+    if (!fusionMode) {
+        // Mode normal: réinitialiser d'abord tous les filtres
+        loadedImages.forEach(imgData => {
+            const ctx = imgData.canvas.getContext('2d');
+            ctx.clearRect(0, 0, imgData.canvas.width, imgData.canvas.height);
+            ctx.drawImage(imgData.original, 0, 0);
+        });
+        
+        if (primaryFilterElement) {
+            primaryFilterElement.classList.remove('active-primary');
+            const badge = primaryFilterElement.querySelector('.filter-badge');
+            if (badge) badge.remove();
+        }
+        
+        primaryFilter = { filter: filterName, name: displayName };
+        primaryFilterElement = element;
+        element.classList.add('active-primary');
+        
+        const badge = document.createElement('div');
+        badge.className = 'filter-badge';
+        badge.textContent = '1';
+        element.appendChild(badge);
+
+        if (secondaryFilterElement) {
+            secondaryFilterElement.classList.remove('active-secondary');
+            const secondaryBadge = secondaryFilterElement.querySelector('.filter-badge.secondary');
+            if (secondaryBadge) secondaryBadge.remove();
+        }
+        secondaryFilter = null;
+        secondaryFilterElement = null;
+    } else {
+        // MODE FUSION
+        if (!primaryFilter) {
+            // Réinitialiser les images avant d'appliquer le premier filtre
+            loadedImages.forEach(imgData => {
+                const ctx = imgData.canvas.getContext('2d');
+                ctx.clearRect(0, 0, imgData.canvas.width, imgData.canvas.height);
+                ctx.drawImage(imgData.original, 0, 0);
+            });
+            
+            primaryFilter = { filter: filterName, name: displayName };
+            primaryFilterElement = element;
+            element.classList.add('active-primary');
+            
+            const badge = document.createElement('div');
+            badge.className = 'filter-badge';
+            badge.textContent = '1';
+            element.appendChild(badge);
+        } else if (element === primaryFilterElement) {
+            // DÉSÉLECTIONNER le filtre primaire si on clique dessus
+            primaryFilterElement.classList.remove('active-primary');
+            const badge = primaryFilterElement.querySelector('.filter-badge');
+            if (badge) badge.remove();
+            
+            primaryFilter = null;
+            primaryFilterElement = null;
+            
+            // Réinitialiser les images
+            loadedImages.forEach(imgData => {
+                const ctx = imgData.canvas.getContext('2d');
+                ctx.clearRect(0, 0, imgData.canvas.width, imgData.canvas.height);
+                ctx.drawImage(imgData.original, 0, 0);
+            });
+            
+            updateCurrentFilterDisplay();
+            updateButtons();
+            return; // Sortir de la fonction
+        } else if (!secondaryFilter) {
+            // Sélectionner le deuxième filtre
+            if (element === primaryFilterElement) return;
+            
+            secondaryFilter = { filter: filterName, name: displayName };
+            secondaryFilterElement = element;
+            element.classList.add('active-secondary');
+            
+            const badge = document.createElement('div');
+            badge.className = 'filter-badge secondary';
+            badge.textContent = '2';
+            element.appendChild(badge);
+        } else {
+            // Remplacer le deuxième filtre
+            if (element === primaryFilterElement) return;
+            
+            // Si on clique sur le filtre secondaire actuel, le désélectionner
+            if (element === secondaryFilterElement) {
+                secondaryFilterElement.classList.remove('active-secondary');
+                const badge = secondaryFilterElement.querySelector('.filter-badge.secondary');
+                if (badge) badge.remove();
+                
+                secondaryFilter = null;
+                secondaryFilterElement = null;
+                
+                // Réappliquer seulement le filtre primaire
+                applyFilters();
+                updateCurrentFilterDisplay();
+                updateButtons();
+                return;
+            }
+            
+            secondaryFilterElement.classList.remove('active-secondary');
+            const oldBadge = secondaryFilterElement.querySelector('.filter-badge.secondary');
+            if (oldBadge) oldBadge.remove();
+            
+            secondaryFilter = { filter: filterName, name: displayName };
+            secondaryFilterElement = element;
+            element.classList.add('active-secondary');
+            
+            const badge = document.createElement('div');
+            badge.className = 'filter-badge secondary';
+            badge.textContent = '2';
+            element.appendChild(badge);
+        }
+         }
+
+        applyFilters();
+        updateCurrentFilterDisplay();
+        updateButtons();
+        }
+
+
+        function applyFilters() {
+            if (loadedImages.length === 0) return;
+
+            loadedImages.forEach(imgData => {
+                const ctx = imgData.canvas.getContext('2d');
+                ctx.clearRect(0, 0, imgData.canvas.width, imgData.canvas.height);
+                ctx.drawImage(imgData.original, 0, 0);
+                
+                if (primaryFilter) {
+                    const imageData = ctx.getImageData(0, 0, imgData.canvas.width, imgData.canvas.height);
+                    applyFilterToImageData(imageData, primaryFilter.filter, imgData.canvas);
+                    ctx.putImageData(imageData, 0, 0);
+                }
+
+                if (fusionMode && secondaryFilter) {
+                    const imageData = ctx.getImageData(0, 0, imgData.canvas.width, imgData.canvas.height);
+                    applyFilterToImageData(imageData, secondaryFilter.filter, imgData.canvas);
+                    ctx.putImageData(imageData, 0, 0);
+                }
+            });
         }
 
         fileInput.addEventListener('change', function(e) {
@@ -1800,8 +1968,8 @@
                             generatePreviews();
                         }
 
-                        if (currentFilter) {
-                            applyFilterToAll(currentFilter.filter, currentFilter.name, activeFilterElement, true);
+                        if (primaryFilter) {
+                            applyFilters();
                         }
 
                         updateButtons();
@@ -1816,7 +1984,14 @@
 
         function downloadSingleImage(index) {
             const imgData = loadedImages[index];
-            const filterSuffix = currentFilter ? `_${currentFilter.filter}` : '_original';
+            let filterSuffix = '_original';
+            
+            if (primaryFilter && secondaryFilter) {
+                filterSuffix = `_${primaryFilter.filter}+${secondaryFilter.filter}`;
+            } else if (primaryFilter) {
+                filterSuffix = `_${primaryFilter.filter}`;
+            }
+            
             const filename = imgData.name.replace(/\.[^/.]+$/, '') + filterSuffix + '.png';
             
             imgData.canvas.toBlob(function(blob) {
@@ -1873,9 +2048,7 @@
             
             if (loadedImages.length === 0) {
                 uploadOverlay.style.display = 'flex';
-                currentFilter = null;
-                activeFilterElement = null;
-                currentFilterBadge.style.display = 'none';
+                clearFilter();
             } else {
                 generatePreviews();
             }
@@ -1918,47 +2091,30 @@
             }
         }
 
-        function applyFilterToAll(filterName, displayName, element, skipStateUpdate = false) {
-            if (loadedImages.length === 0) return;
-
-            if (!skipStateUpdate) {
-                currentFilter = { filter: filterName, name: displayName };
-                
-                if (activeFilterElement) {
-                    activeFilterElement.classList.remove('active');
-                }
-                activeFilterElement = element;
-                element.classList.add('active');
-
-                currentFilterBadge.style.display = 'block';
-                // Utiliser la traduction pour le nom du filtre
-                const t = translations[currentLang];
-                currentFilterName.textContent = t.filters[filterName] || displayName;
-            }
-
-            loadedImages.forEach(imgData => {
-                const ctx = imgData.canvas.getContext('2d');
-                ctx.drawImage(imgData.original, 0, 0);
-                
-                const imageData = ctx.getImageData(0, 0, imgData.canvas.width, imgData.canvas.height);
-                applyFilterToImageData(imageData, filterName, imgData.canvas);
-                ctx.putImageData(imageData, 0, 0);
-            });
-
-            updateButtons();
-        }
-
         function clearFilter() {
             if (loadedImages.length === 0) return;
 
-            currentFilter = null;
+            primaryFilter = null;
+            secondaryFilter = null;
+            fusionMode = false;
             
-            if (activeFilterElement) {
-                activeFilterElement.classList.remove('active');
-                activeFilterElement = null;
+            if (primaryFilterElement) {
+                primaryFilterElement.classList.remove('active-primary');
+                const badge = primaryFilterElement.querySelector('.filter-badge');
+                if (badge) badge.remove();
+                primaryFilterElement = null;
             }
 
-            currentFilterBadge.style.display = 'none';
+            if (secondaryFilterElement) {
+                secondaryFilterElement.classList.remove('active-secondary');
+                const badge = secondaryFilterElement.querySelector('.filter-badge.secondary');
+                if (badge) badge.remove();
+                secondaryFilterElement = null;
+            }
+
+            document.getElementById('fusionModeBadge').classList.remove('active');
+            updateFusionModeText();
+            updateCurrentFilterDisplay();
 
             loadedImages.forEach(imgData => {
                 const ctx = imgData.canvas.getContext('2d');
@@ -1973,7 +2129,13 @@
             if (loadedImages.length === 0) return;
 
             const zip = new JSZip();
-            const filterSuffix = currentFilter ? `_${currentFilter.filter}` : '_original';
+            let filterSuffix = '_original';
+            
+            if (primaryFilter && secondaryFilter) {
+                filterSuffix = `_${primaryFilter.filter}+${secondaryFilter.filter}`;
+            } else if (primaryFilter) {
+                filterSuffix = `_${primaryFilter.filter}`;
+            }
 
             for (let i = 0; i < loadedImages.length; i++) {
                 const imgData = loadedImages[i];
@@ -1994,15 +2156,22 @@
 
         function updateButtons() {
             const hasImages = loadedImages.length > 0;
-            const hasFilter = currentFilter !== null;
+            const hasFilter = primaryFilter !== null;
             document.getElementById('downloadAllBtn').disabled = !hasImages;
             document.getElementById('clearFilterBtn').disabled = !hasFilter;
         }
 
-        // ===== FILTRES (Code identique) =====
+        // ===== FILTRES =====
         function applyFilterToImageData(imageData, filterName, targetCanvas) {
             const data = imageData.data;
             switch(filterName) {
+                case 'pixel10': pixelateAdvanced(imageData, targetCanvas, 2); return;
+                case 'pixel30': pixelateAdvanced(imageData, targetCanvas, 6); return;
+                case 'pixel25': pixelateAdvanced(imageData, targetCanvas, 4); return;
+                case 'pixel50': pixelateAdvanced(imageData, targetCanvas, 8); return;
+                case 'pixel75': pixelateAdvanced(imageData, targetCanvas, 12); return;
+                case 'pixel100': pixelateAdvanced(imageData, targetCanvas, 16); return;
+                case 'pixel150': pixelateAdvanced(imageData, targetCanvas, 24); return;
                 case 'grayscale': grayscale(data); break;
                 case 'sepia': sepia(data); break;
                 case 'invert': invert(data); break;
@@ -2035,6 +2204,7 @@
                 case 'emboss': embossData(imageData, targetCanvas); return;
                 case 'blur': blurData(imageData, targetCanvas); return;
                 case 'painting': painting(data); break;
+				case 'rio': rio(data,targetCanvas); break;
                 case 'cinema': cinema(data); break;
                 case 'noir': noir(data); break;
                 case 'technicolor': technicolor(data); break;
@@ -2104,7 +2274,44 @@
             }
         }
 
-        // Tous les filtres (minifiés - code identique au précédent)
+        function pixelateAdvanced(imageData, targetCanvas, pixelSize) {
+            const w = targetCanvas.width;
+            const h = targetCanvas.height;
+            const data = imageData.data;
+            
+            for (let y = 0; y < h; y += pixelSize) {
+                for (let x = 0; x < w; x += pixelSize) {
+                    let r = 0, g = 0, b = 0, a = 0, count = 0;
+                    
+                    for (let dy = 0; dy < pixelSize && y + dy < h; dy++) {
+                        for (let dx = 0; dx < pixelSize && x + dx < w; dx++) {
+                            const idx = ((y + dy) * w + (x + dx)) * 4;
+                            r += data[idx];
+                            g += data[idx + 1];
+                            b += data[idx + 2];
+                            a += data[idx + 3];
+                            count++;
+                        }
+                    }
+                    
+                    r = Math.round(r / count);
+                    g = Math.round(g / count);
+                    b = Math.round(b / count);
+                    a = Math.round(a / count);
+                    
+                    for (let dy = 0; dy < pixelSize && y + dy < h; dy++) {
+                        for (let dx = 0; dx < pixelSize && x + dx < w; dx++) {
+                            const idx = ((y + dy) * w + (x + dx)) * 4;
+                            data[idx] = r;
+                            data[idx + 1] = g;
+                            data[idx + 2] = b;
+                            data[idx + 3] = a;
+                        }
+                    }
+                }
+            }
+        }
+
         function grayscale(data){for(let i=0;i<data.length;i+=4){const avg=(data[i]+data[i+1]+data[i+2])/3;data[i]=data[i+1]=data[i+2]=avg}}
         function sepia(data){for(let i=0;i<data.length;i+=4){const r=data[i],g=data[i+1],b=data[i+2];data[i]=Math.min(255,r*0.393+g*0.769+b*0.189);data[i+1]=Math.min(255,r*0.349+g*0.686+b*0.168);data[i+2]=Math.min(255,r*0.272+g*0.534+b*0.131)}}
         function invert(data){for(let i=0;i<data.length;i+=4){data[i]=255-data[i];data[i+1]=255-data[i+1];data[i+2]=255-data[i+2]}}
@@ -2150,12 +2357,12 @@
         function rgbShiftData(imageData,targetCanvas){const data=imageData.data;const w=targetCanvas.width,h=targetCanvas.height;const shift=5;const output=new Uint8ClampedArray(data);for(let y=0;y<h;y++){for(let x=0;x<w;x++){const idx=(y*w+x)*4;const idxShift=(y*w+Math.min(w-1,x+shift))*4;output[idx]=data[idxShift];output[idx+1]=data[idx+1];output[idx+2]=data[Math.max(0,(y*w+x-shift)*4)+2]}}for(let i=0;i<data.length;i++)data[i]=output[i]}
         function swapRB(data){for(let i=0;i<data.length;i+=4){[data[i],data[i+2]]=[data[i+2],data[i]]}}
         function swapGB(data){for(let i=0;i<data.length;i+=4){[data[i+1],data[i+2]]=[data[i+2],data[i+1]]}}
-        function spring(data){for(let i=0;i<data.length;i+=4){data[i]=Math.min(255,data[i]*1.05+15);data[i+1]=Math.min(255,data[i+1]*1.2+30);data[i+2]=Math.min(255,data[i+2]*0.95+20)}}
-        function summer(data){for(let i=0;i<data.length;i+=4){data[i]=Math.min(255,data[i]*1.3+40);data[i+1]=Math.min(255,data[i+1]*1.2+30);data[i+2]=Math.min(255,data[i+2]*0.9)}brightness(data,20)}
-        function autumn(data){for(let i=0;i<data.length;i+=4){data[i]=Math.min(255,data[i]*1.4+50);data[i+1]=Math.min(255,data[i+1]*1.1+20);data[i+2]=Math.max(0,data[i+2]*0.6-30)}}
-        function winter(data){for(let i=0;i<data.length;i+=4){data[i]=Math.min(255,data[i]*0.9+40);data[i+1]=Math.min(255,data[i+1]*0.95+40);data[i+2]=Math.min(255,data[i+2]*1.3+60)}brightness(data,30)}
-        function rgbToHsl(r,g,b){r/=255;g/=255;b/=255;const max=Math.max(r,g,b),min=Math.min(r,g,b);let h,s,l=(max+min)/2;if(max===min){h=s=0}else{const d=max-min;s=l>0.5?d/(2-max-min):d/(max+min);switch(max){case r:h=((g-b)/d+(g<b?6:0))/6;break;case g:h=((b-r)/d+2)/6;break;case b:h=((r-g)/d+4)/6;break}}return[h*360,s*100,l*100]}
-        function hslToRgb(h,s,l){h/=360;s/=100;l/=100;let r,g,b;if(s===0){r=g=b=l}else{const hue2rgb=(p,q,t)=>{if(t<0)t+=1;if(t>1)t-=1;if(t<1/6)return p+(q-p)*6*t;if(t<1/2)return q;if(t<2/3)return p+(q-p)*(2/3-t)*6;return p};const q=l<0.5?l*(1+s):l+s-l*s;const p=2*l-q;r=hue2rgb(p,q,h+1/3);g=hue2rgb(p,q,h);b=hue2rgb(p,q,h-1/3)}return[Math.round(r*255),Math.round(g*255),Math.round(b*255)]}
+        function spring(data){for(let i=0;i<data.length;i+=4){data[i]=Math.min(255,data[i]*1.05+15);data[i+1]=Math.min(255,data[i+1]*1.2+30);data[i+2]=Math.min(255,data[i+2]*1.1+20)}}
+        function summer(data){for(let i=0;i<data.length;i+=4){data[i]=Math.min(255,data[i]*1.3+40);data[i+1]=Math.min(255,data[i+1]*1.2+20);data[i+2]=Math.max(0,data[i+2]*0.8)}}
+        function autumn(data){for(let i=0;i<data.length;i+=4){data[i]=Math.min(255,data[i]*1.4+50);data[i+1]=Math.min(255,data[i+1]*1.1);data[i+2]=Math.max(0,data[i+2]*0.6)}}
+        function winter(data){for(let i=0;i<data.length;i+=4){data[i]=Math.min(255,data[i]*0.9+40);data[i+1]=Math.min(255,data[i+1]*0.95+50);data[i+2]=Math.min(255,data[i+2]*1.3+60)}}
+        function rgbToHsl(r,g,b){r/=255;g/=255;b/=255;const max=Math.max(r,g,b),min=Math.min(r,g,b);let h,s,l=(max+min)/2;if(max===min){h=s=0}else{const d=max-min;s=l>0.5?d/(2-max-min):d/(max+min);switch(max){case r:h=((g-b)/d+(g<b?6:0))/6;break;case g:h=((b-r)/d+2)/6;break;case b:h=((r-g)/d+4)/6;break}h*=360}return[h,s,l]}
+        function hslToRgb(h,s,l){h/=360;let r,g,b;if(s===0){r=g=b=l}else{const hue2rgb=(p,q,t)=>{if(t<0)t+=1;if(t>1)t-=1;if(t<1/6)return p+(q-p)*6*t;if(t<1/2)return q;if(t<2/3)return p+(q-p)*(2/3-t)*6;return p};const q=l<0.5?l*(1+s):l+s-l*s;const p=2*l-q;r=hue2rgb(p,q,h+1/3);g=hue2rgb(p,q,h);b=hue2rgb(p,q,h-1/3)}return[Math.round(r*255),Math.round(g*255),Math.round(b*255)]}
         function hueShift(data,degrees){for(let i=0;i<data.length;i+=4){const[h,s,l]=rgbToHsl(data[i],data[i+1],data[i+2]);const newH=(h+degrees)%360;const[r,g,b]=hslToRgb(newH,s,l);data[i]=r;data[i+1]=g;data[i+2]=b}}
         function hueRotateGradient(data){for(let i=0;i<data.length;i+=4){const position=i/data.length;const degrees=position*360;const[h,s,l]=rgbToHsl(data[i],data[i+1],data[i+2]);const newH=(h+degrees)%360;const[r,g,b]=hslToRgb(newH,s,l);data[i]=r;data[i+1]=g;data[i+2]=b}}
         function silhouette(data){for(let i=0;i<data.length;i+=4){if(data[i+3]>0){data[i]=0;data[i+1]=0;data[i+2]=0}}}
@@ -2185,13 +2392,15 @@
         function psychedelic(data){for(let i=0;i<data.length;i+=4){const offset=Math.sin(i*0.01)*128;data[i]=Math.min(255,Math.max(0,(data[i]+offset)%256));data[i+1]=Math.min(255,Math.max(0,(data[i+1]+offset+85)%256));data[i+2]=Math.min(255,Math.max(0,(data[i+2]+offset+170)%256))}}
         function infrared(data){for(let i=0;i<data.length;i+=4){const temp=data[i+1];data[i]=Math.min(255,temp*1.5);data[i+1]=Math.max(0,data[i]*0.3);data[i+2]=Math.max(0,data[i+2]*0.3)}}
         function xray(data){invert(data);grayscale(data);contrast(data,60);brightness(data,40)}
+function rio(data,targetCanvas){const w=targetCanvas.width,h=targetCanvas.height,cl=v=>v<0?0:v>1?1:v,ss=(a,b,x)=>{x=cl((x-a)/(b-a));return x*x*(3-2*x)};for(let i=0;i<data.length;i+=4){const p=i>>2,x=(p%w)/w,y=((p/w)|0)/h;const pos=cl(y*0.92+x*0.08);const m=ss(0.00,0.78,pos);let r=125+(200-125)*m,g=40+(70-40)*m,b=215+(165-215)*m;const o=ss(0.965,1.00,pos);r=r+(225-r)*o;g=g+(135-g)*o;b=b+(95-b)*o;const s=0.42;data[i]=Math.min(255,data[i]*(1-s)+(data[i]*r/255)*s);data[i+1]=Math.min(255,data[i+1]*(1-s)+(data[i+1]*g/255)*s);data[i+2]=Math.min(255,data[i+2]*(1-s)+(data[i+2]*b/255)*s)}contrast(data,18)}
+
         function thermal(data){for(let i=0;i<data.length;i+=4){const intensity=(data[i]+data[i+1]+data[i+2])/3;if(intensity<64){data[i]=0;data[i+1]=0;data[i+2]=intensity*4}else if(intensity<128){data[i]=0;data[i+1]=(intensity-64)*4;data[i+2]=255}else if(intensity<192){data[i]=(intensity-128)*4;data[i+1]=255;data[i+2]=255-(intensity-128)*4}else{data[i]=255;data[i+1]=255-(intensity-192)*4;data[i+2]=0}}}
         function matrix(data){for(let i=0;i<data.length;i+=4){const green=(data[i]+data[i+1]+data[i+2])/3;data[i]=0;data[i+1]=Math.min(255,green*1.5);data[i+2]=0}contrast(data,50);brightness(data,-30)}
         function deepfry(data){for(let i=0;i<data.length;i+=4){data[i]=Math.min(255,data[i]*1.8);data[i+1]=Math.min(255,data[i+1]*1.5);data[i+2]=Math.min(255,data[i+2]*0.7)}contrast(data,80);posterize(data,3)}
         function glitchmax(data){for(let i=0;i<data.length;i+=16){if(Math.random()>0.7){const shift=Math.floor(Math.random()*100)*4;const targetIdx=Math.min(data.length-4,i+shift);[data[i],data[targetIdx]]=[data[targetIdx],data[i]];[data[i+1],data[targetIdx+1]]=[data[targetIdx+1],data[i+1]];[data[i+2],data[targetIdx+2]]=[data[targetIdx+2],data[i+2]]}}}
         function holographic(data){for(let i=0;i<data.length;i+=4){const wave=Math.sin(i*0.005)*50;data[i]=Math.min(255,Math.max(0,data[i]+wave));data[i+1]=Math.min(255,Math.max(0,data[i+1]+wave*1.5));data[i+2]=Math.min(255,Math.max(0,data[i+2]+wave*2))}}
         function jpegify(data){posterize(data,5);for(let i=0;i<data.length;i+=4){if(Math.random()>0.95){data[i]=Math.min(255,data[i]+(Math.random()-0.5)*50);data[i+1]=Math.min(255,data[i+1]+(Math.random()-0.5)*50);data[i+2]=Math.min(255,data[i+2]+(Math.random()-0.5)*50)}}}
-        function chromaticAberration(imageData,targetCanvas){const data=imageData.data;const offset=8;const output=new Uint8ClampedArray(data);for(let i=0;i<data.length;i+=4){const leftR=Math.max(0,i-offset*4);const rightB=Math.min(data.length-4,i+offset*4);output[i]=data[leftR];output[i+1]=data[i+1];output[i+2]=data[rightB+2]}for(let i=0;i<data.length;i++)data[i]=output[i]}
+        function chromaticAberration(imageData,targetCanvas){const data=imageData.data;const offset=8;const w=targetCanvas.width;const output=new Uint8ClampedArray(data);for(let i=0;i<data.length;i+=4){const leftR=Math.max(0,i-offset*4);const rightB=Math.min(data.length-4,i+offset*4);output[i]=data[leftR];output[i+1]=data[i+1];output[i+2]=data[rightB+2]}for(let i=0;i<data.length;i++)data[i]=output[i]}
         function datamosh(data){for(let i=0;i<data.length;i+=40){if(Math.random()>0.5){const blockSize=Math.floor(Math.random()*200);for(let j=0;j<blockSize&&i+j<data.length;j+=4){data[i+j]=data[Math.max(0,i-4)];data[i+j+1]=data[Math.max(0,i-3)];data[i+j+2]=data[Math.max(0,i-2)]}}}}
         function vhsglitch(data){for(let i=0;i<data.length;i+=4){if(Math.random()>0.98){const glitchLength=Math.floor(Math.random()*500);for(let j=0;j<glitchLength&&i+j<data.length;j+=4){data[i+j]=data[i];data[i+j+1]=data[i+1];data[i+j+2]=data[i+2]}}}}
         function scanlines(data,targetCanvas){const w=targetCanvas.width;for(let i=0;i<data.length;i+=4){const pixel=i/4;const y=Math.floor(pixel/w);if(y%3===0){data[i]*=0.5;data[i+1]*=0.5;data[i+2]*=0.5}}}
