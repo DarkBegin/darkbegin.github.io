@@ -362,39 +362,25 @@
 
         // Animation ATTACK (une fois)
         function playAttack() {
-            if (!spriteImage) {
-                showStatus('❌ Charge d\'abord une spritesheet !', 'error');
-                return;
-            }
+    // Frame 5: afficher immédiatement
+    drawFrame(FRAMES.ATTACK[0]);
+    
+    // Frame 6: après 300ms
+    setTimeout(() => {
+        drawFrame(FRAMES.ATTACK[1]);
+        
+        // Frame 7: après 300ms supplémentaires
+        setTimeout(() => {
+            drawFrame(FRAMES.ATTACK[2]);
+            
+            // Retour à idle après 1300ms
+            setTimeout(() => {
+                playIdle();
+            }, 1300);
+        }, 300);
+    }, 300);
+}
 
-            stopAnimation();
-            currentAnimation = 'ATTACK';
-            isPaused = false;
-
-            const attackFrames = FRAMES.ATTACK;
-            let frameIdx = 0;
-
-            function animateAttack() {
-                if (frameIdx < attackFrames.length) {
-                    drawFrame(attackFrames[frameIdx]);
-
-                    // Timings: frame 5 -> 300ms -> frame 6 -> 300ms -> frame 7 -> 1300ms -> idle
-                    const delays = frameIdx < 2 ? 300 : 1300;
-
-                    frameIdx++;
-                    animationTimeoutId = setTimeout(() => {
-                        if (frameIdx <= attackFrames.length) {
-                            animateAttack();
-                        } else {
-                            // Retour à idle après l'attaque
-                            playIdle();
-                        }
-                    }, delays);
-                }
-            }
-
-            animateAttack();
-        }
 
         // Animation KNOCK (1 seconde)
         function playKnock() {
