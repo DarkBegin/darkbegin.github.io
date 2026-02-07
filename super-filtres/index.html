@@ -3,2422 +3,526 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title id="pageTitle">Image Editor - Multi-Filters</title>
+    <title>Spritesheet Viewer - Pokémon Roblox</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-
+        
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: url('https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?q=80&w=2000') center center fixed;
-            background-size: cover;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            padding: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
         }
-
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.3);
-            z-index: -1;
-        }
-
+        
         .container {
-            max-width: 1800px;
-            margin: 0 auto;
-            background: rgba(255, 255, 255, 0.98);
+            background: white;
             border-radius: 20px;
-            padding: 25px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 800px;
+            width: 100%;
         }
-
+        
         h1 {
             text-align: center;
             color: #333;
-            margin-bottom: 20px;
-            font-size: 2em;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 15px;
+            margin-bottom: 30px;
+            font-size: 28px;
         }
-
-        .language-selector {
-            position: relative;
+        
+        .upload-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 2px dashed #667eea;
+            border-radius: 10px;
+            text-align: center;
+            background: #f8f9ff;
         }
-
-        .language-btn {
+        
+        .upload-section input {
+            display: none;
+        }
+        
+        .upload-label {
+            display: inline-block;
+            padding: 12px 30px;
             background: #667eea;
             color: white;
-            border: none;
-            padding: 8px 15px;
             border-radius: 8px;
             cursor: pointer;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
             transition: all 0.3s;
+            font-weight: 600;
         }
-
-        .language-btn:hover {
+        
+        .upload-label:hover {
             background: #764ba2;
+            transform: translateY(-2px);
         }
-
-        .language-dropdown {
-            display: none;
-            position: absolute;
-            top: 100%;
-            right: 0;
-            background: white;
-            border: 2px solid #667eea;
-            border-radius: 8px;
-            margin-top: 5px;
-            min-width: 150px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            z-index: 1000;
-        }
-
-        .language-dropdown.show {
-            display: block;
-        }
-
-        .language-option {
-            padding: 10px 15px;
-            cursor: pointer;
-            transition: background 0.2s;
+        
+        .canvas-container {
             display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .language-option:hover {
+            justify-content: center;
+            margin-bottom: 30px;
+            padding: 20px;
             background: #f0f0f0;
-        }
-
-        .language-option.active {
-            background: #667eea;
-            color: white;
-        }
-
-        .main-area {
-            display: grid;
-            grid-template-columns: 1fr 360px;
-            gap: 20px;
-            align-items: start;
-        }
-
-        .canvas-section {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .viewer-container {
-            width: 100%;
-            min-height: 500px;
-            background: #f8f9fa;
-            border-radius: 15px;
-            padding: 15px;
-            position: relative;
-        }
-
-        .images-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            width: 100%;
-        }
-
-        .image-card {
-            background: white;
             border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-            transition: transform 0.3s;
         }
-
-        .image-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+        
+        #spriteCanvas {
+            border: 3px solid #333;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+            background: white;
         }
-
-        .image-card canvas {
-            width: 100%;
-            height: auto;
-            display: block;
-        }
-
-        .image-card-footer {
-            padding: 10px;
-            background: #f8f9fa;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .image-number {
-            background: #667eea;
-            color: white;
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: bold;
-        }
-
-        .image-actions {
-            display: flex;
-            gap: 8px;
-        }
-
-        .download-single-btn {
-            background: #27ae60;
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 32px;
-            height: 32px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .download-single-btn:hover {
-            background: #229954;
-            transform: scale(1.1);
-        }
-
-        .download-single-btn::before {
-            content: '↓';
-            font-weight: bold;
-        }
-
-        .remove-btn {
-            background: #e74c3c;
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 32px;
-            height: 32px;
-            cursor: pointer;
-            font-size: 20px;
-            line-height: 1;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .remove-btn:hover {
-            background: #c0392b;
-            transform: scale(1.1);
-        }
-
-        .upload-overlay {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+        
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
             gap: 15px;
-            color: #999;
+            margin-bottom: 20px;
         }
-
-        .upload-overlay svg {
-            width: 60px;
-            height: 60px;
-            opacity: 0.3;
-        }
-
-        .upload-btn {
-            background: #667eea;
-            color: white;
-            padding: 12px 35px;
+        
+        .btn {
+            padding: 12px 20px;
             border: none;
-            border-radius: 50px;
-            font-size: 15px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            color: white;
         }
-
-        .upload-btn:hover {
-            background: #764ba2;
+        
+        .btn-idle {
+            background: #4CAF50;
+        }
+        
+        .btn-attack {
+            background: #FF5722;
+        }
+        
+        .btn-knock {
+            background: #FFC107;
+        }
+        
+        .btn-sleep {
+            background: #2196F3;
+        }
+        
+        .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
         }
-
-        #fileInput {
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .settings {
+            background: #f8f9ff;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .setting-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+        
+        .setting-row:last-child {
+            margin-bottom: 0;
+        }
+        
+        .setting-row label {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .setting-row input[type="number"] {
+            padding: 8px 12px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            width: 100px;
+            font-size: 14px;
+        }
+        
+        .export-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .btn-export {
+            background: #9C27B0;
+        }
+        
+        .status {
+            text-align: center;
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 6px;
+            font-weight: 600;
             display: none;
         }
-
-        .controls {
-            display: flex;
-            justify-content: center;
-            gap: 12px;
-            margin-top: 15px;
-            flex-wrap: wrap;
+        
+        .status.show {
+            display: block;
         }
-
-        .control-btn {
-            padding: 10px 25px;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
+        
+        .status.success {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .status.error {
+            background: #f44336;
+            color: white;
+        }
+        
+        .frame-info {
+            text-align: center;
+            margin-top: 10px;
             font-size: 14px;
-            transition: all 0.3s;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .add-btn {
-            background: #667eea;
-            color: white;
-        }
-
-        .add-btn:hover {
-            background: #764ba2;
-            transform: translateY(-2px);
-        }
-
-        .download-all-btn {
-            background: #3498db;
-            color: white;
-        }
-
-        .download-all-btn:hover {
-            background: #2980b9;
-            transform: translateY(-2px);
-        }
-
-        .clear-filter-btn {
-            background: #e67e22;
-            color: white;
-        }
-
-        .clear-filter-btn:hover {
-            background: #d35400;
-            transform: translateY(-2px);
-        }
-
-        .control-btn:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .filters-panel {
-        background: rgba(248, 249, 250, 0.98);
-        padding: 15px;
-        border-radius: 15px;
-        height: calc(100vh - 180px);
-        overflow-y: auto;
-        }
-
-
-        .filters-panel h2 {
-            font-size: 1.1em;
-            color: #333;
-            margin-bottom: 15px;
-            text-align: center;
-        }
-
-        .filter-category {
-            margin-bottom: 15px;
-            border: 1px solid #e0e0e0;
-            border-radius: 10px;
-            overflow: hidden;
-        }
-
-        .filter-category-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 15px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            cursor: pointer;
-            user-select: none;
-            transition: all 0.3s;
-        }
-
-        .filter-category-header:hover {
-            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
-        }
-
-        .filter-category-header h3 {
-            font-size: 0.85em;
-            margin: 0;
-        }
-
-        .filter-category-toggle {
-            font-size: 1.2em;
-            transition: transform 0.3s;
-        }
-
-        .filter-category.collapsed .filter-category-toggle {
-            transform: rotate(-90deg);
-        }
-
-        .filter-category-content {
-            max-height: 1000px;
-            overflow: hidden;
-            transition: max-height 0.3s ease;
-        }
-
-        .filter-category.collapsed .filter-category-content {
-            max-height: 0;
-        }
-
-        .filter-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-            padding: 10px;
-            background: white;
-        }
-
-        .filter-item {
-            cursor: pointer;
-            border: 2px solid transparent;
-            border-radius: 8px;
-            overflow: hidden;
-            transition: all 0.3s;
-            background: white;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-            position: relative;
-        }
-
-        .filter-item:hover {
-            border-color: #667eea;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-        }
-
-        .filter-item.active-primary {
-            border-color: #667eea;
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.5);
-        }
-
-        .filter-item.active-secondary {
-            border-color: #e67e22;
-            box-shadow: 0 4px 12px rgba(230, 126, 34, 0.5);
-        }
-
-        .filter-badge {
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            background: #667eea;
-            color: white;
-            padding: 2px 8px;
-            border-radius: 10px;
-            font-size: 9px;
-            font-weight: bold;
-            z-index: 10;
-        }
-
-        .filter-badge.secondary {
-            background: #e67e22;
-        }
-
-        .filter-preview {
-            width: 100%;
-            height: 150px;
-            overflow: hidden;
-            background: #ddd;
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .filter-preview canvas {
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain;
-        }
-
-        .filter-preview .no-image {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(135deg, #e0e0e0 0%, #f5f5f5 100%);
-            font-size: 40px;
-        }
-
-        .filter-name {
-            padding: 8px;
-            text-align: center;
-            font-size: 11px;
+            color: #666;
             font-weight: 600;
-            color: #333;
-            background: white;
-        }
-
-        .filters-panel::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .filters-panel::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 10px;
-        }
-
-        .filters-panel::-webkit-scrollbar-thumb {
-            background: #667eea;
-            border-radius: 10px;
-        }
-
-        .info-badge {
-            background: #3498db;
-            color: white;
-            padding: 6px 12px;
-            border-radius: 15px;
-            font-size: 0.75em;
-            text-align: center;
-            margin-bottom: 12px;
-        }
-
-        .current-filter-badge {
-            background: #27ae60;
-            color: white;
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-size: 0.8em;
-            text-align: center;
-            margin-bottom: 12px;
-            font-weight: 600;
-        }
-
-        .fusion-mode-badge {
-            background: #e67e22;
-            color: white;
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-size: 0.75em;
-            text-align: center;
-            margin-bottom: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .fusion-mode-badge:hover {
-            background: #d35400;
-            transform: scale(1.02);
-        }
-
-        .fusion-mode-badge.active {
-            background: #c0392b;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
-        }
-
-        @media (max-width: 1200px) {
-            .main-area {
-                grid-template-columns: 1fr;
-            }
-            
-            .filter-grid {
-                grid-template-columns: repeat(4, 1fr);
-            }
-        }
-
-        @media (max-width: 768px) {
-            .filter-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
-            
-            .images-grid {
-                grid-template-columns: 1fr;
-            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>
-            <span id="mainTitle">🎨 Image Editor - Multi-Filters</span>
-            <div class="language-selector">
-                <button class="language-btn" onclick="toggleLanguageDropdown()">
-                    <span id="currentLangFlag">🇬🇧</span>
-                    <span id="currentLangText">English</span>
-                    ▼
-                </button>
-                <div class="language-dropdown" id="languageDropdown">
-                    <div class="language-option" onclick="changeLanguage('en')">🇬🇧 English</div>
-                    <div class="language-option" onclick="changeLanguage('fr')">🇫🇷 Français</div>
-                    <div class="language-option" onclick="changeLanguage('es')">🇪🇸 Español</div>
-                    <div class="language-option" onclick="changeLanguage('de')">🇩🇪 Deutsch</div>
-                    <div class="language-option" onclick="changeLanguage('pt')">🇵🇹 Português</div>
-                </div>
-            </div>
-        </h1>
+        <h1>🎮 Spritesheet Viewer - Pokémon</h1>
         
-        <div class="main-area">
-            <div class="canvas-section">
-                <div class="viewer-container">
-                    <div class="images-grid" id="imagesGrid"></div>
-                    <div class="upload-overlay" id="uploadOverlay">
-                        <svg viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/>
-                        </svg>
-                        <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
-                            <span id="uploadBtnText">📁 Load images (max 20)</span>
-                        </button>
-                        <p style="font-size: 13px;" id="uploadSubtext">All images display together!</p>
-                    </div>
-                </div>
-                
-                <div class="controls">
-                    <button class="control-btn add-btn" onclick="document.getElementById('fileInput').click()">
-                        <span id="addBtnText">➕ Add</span>
-                    </button>
-                    <button class="control-btn clear-filter-btn" onclick="clearFilter()" id="clearFilterBtn" disabled>
-                        <span id="clearBtnText">🔄 Clear</span>
-                    </button>
-                    <button class="control-btn download-all-btn" onclick="downloadAllAsZip()" id="downloadAllBtn" disabled>
-                        <span id="downloadBtnText">📦 ZIP</span>
-                    </button>
-                </div>
-            </div>
-
-            <div class="filters-panel">
-                <h2 id="filtersTitle">Available Filters</h2>
-                <div class="info-badge" id="infoBadge">Applied in real-time to all images</div>
-                
-                <div class="fusion-mode-badge" id="fusionModeBadge" onclick="toggleFusionMode()">
-                    <span id="fusionModeText">🎭 Fusion Mode: OFF</span>
-                </div>
-                
-                <div class="current-filter-badge" id="currentFilterBadge" style="display: none;">
-                    <span id="currentFilterName">None</span>
-                </div>
-                
-                <div class="filter-category">
-                    <div class="filter-category-header" onclick="toggleCategory(this)">
-                        <h3 id="catPixel">🔲 Pixelization</h3>
-                        <span class="filter-category-toggle">▼</span>
-                    </div>
-                    <div class="filter-category-content">
-                        <div class="filter-grid" id="pixelFilters"></div>
-                    </div>
-                </div>
-
-                <div class="filter-category">
-                    <div class="filter-category-header" onclick="toggleCategory(this)">
-                        <h3 id="catBasic">🎭 Basics</h3>
-                        <span class="filter-category-toggle">▼</span>
-                    </div>
-                    <div class="filter-category-content">
-                        <div class="filter-grid" id="basicFilters"></div>
-                    </div>
-                </div>
-
-                <div class="filter-category">
-                    <div class="filter-category-header" onclick="toggleCategory(this)">
-                        <h3 id="catGaming">🎮 Retro Gaming</h3>
-                        <span class="filter-category-toggle">▼</span>
-                    </div>
-                    <div class="filter-category-content">
-                        <div class="filter-grid" id="gamingFilters"></div>
-                    </div>
-                </div>
-
-                <div class="filter-category">
-                    <div class="filter-category-header" onclick="toggleCategory(this)">
-                        <h3 id="catVaporwave">🌈 Vaporwave & Synthwave</h3>
-                        <span class="filter-category-toggle">▼</span>
-                    </div>
-                    <div class="filter-category-content">
-                        <div class="filter-grid" id="vaporFilters"></div>
-                    </div>
-                </div>
-
-                <div class="filter-category">
-                    <div class="filter-category-header" onclick="toggleCategory(this)">
-                        <h3 id="catVintage">🌸 Vintage & Pastel</h3>
-                        <span class="filter-category-toggle">▼</span>
-                    </div>
-                    <div class="filter-category-content">
-                        <div class="filter-grid" id="vintageFilters"></div>
-                    </div>
-                </div>
-
-                <div class="filter-category">
-                    <div class="filter-category-header" onclick="toggleCategory(this)">
-                        <h3 id="catArtistic">🎨 Artistic</h3>
-                        <span class="filter-category-toggle">▼</span>
-                    </div>
-                    <div class="filter-category-content">
-                        <div class="filter-grid" id="artisticFilters"></div>
-                    </div>
-                </div>
-
-                <div class="filter-category">
-                    <div class="filter-category-header" onclick="toggleCategory(this)">
-                        <h3 id="catCinema">🎬 Cinema</h3>
-                        <span class="filter-category-toggle">▼</span>
-                    </div>
-                    <div class="filter-category-content">
-                        <div class="filter-grid" id="cinemaFilters"></div>
-                    </div>
-                </div>
-
-                <div class="filter-category">
-                    <div class="filter-category-header" onclick="toggleCategory(this)">
-                        <h3 id="catRGB">🌟 RGB Channels</h3>
-                        <span class="filter-category-toggle">▼</span>
-                    </div>
-                    <div class="filter-category-content">
-                        <div class="filter-grid" id="rgbFilters"></div>
-                    </div>
-                </div>
-
-                <div class="filter-category">
-                    <div class="filter-category-header" onclick="toggleCategory(this)">
-                        <h3 id="catSeasons">🍂 Seasons</h3>
-                        <span class="filter-category-toggle">▼</span>
-                    </div>
-                    <div class="filter-category-content">
-                        <div class="filter-grid" id="seasonFilters"></div>
-                    </div>
-                </div>
-
-                <div class="filter-category">
-                    <div class="filter-category-header" onclick="toggleCategory(this)">
-                        <h3 id="catHue">🎨 Hue Shifts</h3>
-                        <span class="filter-category-toggle">▼</span>
-                    </div>
-                    <div class="filter-category-content">
-                        <div class="filter-grid" id="hueFilters"></div>
-                    </div>
-                </div>
-
-                <div class="filter-category">
-                    <div class="filter-category-header" onclick="toggleCategory(this)">
-                        <h3 id="catSpecial">👻 Special</h3>
-                        <span class="filter-category-toggle">▼</span>
-                    </div>
-                    <div class="filter-category-content">
-                        <div class="filter-grid" id="specialFilters"></div>
-                    </div>
-                </div>
-
-                <div class="filter-category">
-                    <div class="filter-category-header" onclick="toggleCategory(this)">
-                        <h3 id="catCosmic">🌌 Cosmic</h3>
-                        <span class="filter-category-toggle">▼</span>
-                    </div>
-                    <div class="filter-category-content">
-                        <div class="filter-grid" id="cosmicFilters"></div>
-                    </div>
-                </div>
-
-                <div class="filter-category">
-                    <div class="filter-category-header" onclick="toggleCategory(this)">
-                        <h3 id="catChemical">🧪 Chemical</h3>
-                        <span class="filter-category-toggle">▼</span>
-                    </div>
-                    <div class="filter-category-content">
-                        <div class="filter-grid" id="chemicalFilters"></div>
-                    </div>
-                </div>
-
-                <div class="filter-category">
-                    <div class="filter-category-header" onclick="toggleCategory(this)">
-                        <h3 id="catHorror">🎃 Horror</h3>
-                        <span class="filter-category-toggle">▼</span>
-                    </div>
-                    <div class="filter-category-content">
-                        <div class="filter-grid" id="horrorFilters"></div>
-                    </div>
-                </div>
-
-                <div class="filter-category">
-                    <div class="filter-category-header" onclick="toggleCategory(this)">
-                        <h3 id="catWTF">🤪 WTF & Experimental</h3>
-                        <span class="filter-category-toggle">▼</span>
-                    </div>
-                    <div class="filter-category-content">
-                        <div class="filter-grid" id="wtfFilters"></div>
-                    </div>
-                </div>
+        <div class="upload-section">
+            <input type="file" id="fileInput" accept="image/*">
+            <label for="fileInput" class="upload-label">📁 Charger une Spritesheet</label>
+            <p style="margin-top: 10px; color: #666;">Format: 600x600px, grille 3x3</p>
+        </div>
+        
+        <div class="canvas-container">
+            <canvas id="spriteCanvas" width="200" height="200"></canvas>
+        </div>
+        
+        <div class="frame-info" id="frameInfo">Frame: 1 (IDLE)</div>
+        
+        <div class="settings">
+            <div class="setting-row">
+                <label>⏱️ Délai Idle (secondes):</label>
+                <input type="number" id="idleSpeed" value="0.25" min="0.05" max="2" step="0.05">
             </div>
         </div>
-
-        <input type="file" id="fileInput" accept="image/*" multiple>
+        
+        <div class="controls">
+            <button class="btn btn-idle" onclick="playIdle()">▶️ IDLE (Loop)</button>
+            <button class="btn btn-attack" onclick="playAttack()">⚔️ ATTACK (Once)</button>
+            <button class="btn btn-knock" onclick="playKnock()">💥 KNOCK (1s)</button>
+            <button class="btn btn-sleep" onclick="playSleep()">😴 SLEEP (1s)</button>
+        </div>
+        
+        <div class="export-section">
+            <button class="btn btn-export" onclick="exportIdleGif()">💾 Export IDLE (GIF)</button>
+            <button class="btn btn-export" onclick="exportAttackGif()">💾 Export ATTACK (GIF)</button>
+        </div>
+        
+        <div class="status" id="status"></div>
     </div>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-
+    
+    <script src="https://cdn.jsdelivr.net/npm/gif.js@0.2.0/dist/gif.js"></script>
     <script>
-        // ===== FONCTION ACCORDION =====
-        function toggleCategory(header) {
-            const category = header.parentElement;
-            category.classList.toggle('collapsed');
-        }
-
-        // ===== SYSTÈME DE TRADUCTION (identique) =====
-        const translations = {
-            en: {
-                pageTitle: "Image Editor - Multi-Filters",
-                mainTitle: "🎨 Image Editor - Multi-Filters",
-                uploadBtn: "📁 Load images (max 20)",
-                uploadSubtext: "All images display together!",
-                addBtn: "➕ Add",
-                clearBtn: "🔄 Clear",
-                downloadBtn: "📦 ZIP",
-				nuitamericaine: "America Night",
-                filtersTitle: "Available Filters",
-                infoBadge: "Applied in real-time to all images",
-                fusionModeOff: "🎭 Fusion Mode: OFF",
-                fusionModeOn: "🎭 Fusion Mode: ON - Select 2nd filter",
-                catPixel: "🔲 Pixelization",
-                catBasic: "🎭 Basics",
-                catGaming: "🎮 Retro Gaming",
-                catVaporwave: "🌈 Vaporwave & Synthwave",
-                catVintage: "🌸 Vintage & Pastel",
-                catArtistic: "🎨 Artistic",
-                catCinema: "🎬 Cinema",
-                catRGB: "🌟 RGB Channels",
-                catSeasons: "🍂 Seasons",
-                catHue: "🎨 Hue Shifts",
-                catSpecial: "👻 Special",
-                catCosmic: "🌌 Cosmic",
-                catChemical: "🧪 Chemical",
-                catHorror: "🎃 Horror",
-                catWTF: "🤪 WTF & Experimental",
-                alertMax: "You can only load {0} more image(s). Maximum 20 images.",
-                filters: {
-                    pixel10: "Pixel 10%",
-                    pixel30: "Pixel 30%",
-                    pixel25: "Pixel 25%",
-                    pixel50: "Pixel 50%",
-                    pixel75: "Pixel 75%",
-                    pixel100: "Pixel 100%",
-                    pixel150: "Pixel 150%",
-                    grayscale: "Grayscale",
-                    sepia: "Sepia",
-                    invert: "Negative",
-                    brightness: "Brightness++",
-                    darkness: "Darkness",
-                    contrast: "Contrast++",
-                    gameboy: "Game Boy",
-                    gameboyGreen: "Game Boy Green",
-                    nes: "NES 8-bit",
-                    cga: "CGA PC",
-                    atari: "Atari 2600",
-                    pixelate: "Pixelated",
-                    vaporwave: "Vaporwave",
-                    vaporwavemax: "Vaporwave Max",
-                    vaporwavearc: "Vaporwave Arc",
-                    synthwave: "Synthwave",
-                    cyberpunk: "Cyberpunk",
-                    miami: "Miami Vice",
-                    neon: "Neon",
-                    outrun: "Outrun",
-                    vintage: "Vintage",
-                    polaroid: "Polaroid",
-                    pastel: "Pastel",
-                    warm: "Warm",
-                    cold: "Cold",
-                    retro70s: "Retro 70s",
-                    posterize: "Poster",
-                    solarize: "Solarize",
-                    edge: "Edge",
-                    emboss: "Emboss",
-                    blur: "Blur",
-                    painting: "Painting",
-                    cinema: "Cinema",
-                    noir: "Film Noir",
-                    technicolor: "Technicolor",
-                    bleach: "Bleach Bypass",
-                    western: "Western",
-                    scifi: "Sci-Fi",
-                    redChannel: "Red Channel",
-                    greenChannel: "Green Channel",
-                    blueChannel: "Blue Channel",
-                    rgbShift: "RGB Glitch",
-                    swapRB: "Swap RB",
-                    swapGB: "Swap GB",
-                    spring: "Spring",
-                    summer: "Summer",
-                    autumn: "Autumn",
-                    winter: "Winter",
-                    hue45: "Hue +45°",
-                    hue90: "Hue +90°",
-                    hue135: "Hue +135°",
-                    hue180: "Hue +180°",
-                    hue225: "Hue +225°",
-                    hue270: "Hue +270°",
-                    hue315: "Hue +315°",
-                    hueRotate: "Hue Rotate",
-                    silhouette: "Silhouette",
-                    binarize: "B&W Pure",
-                    transparentbg: "Transparent BG",
-                    cartoon: "Cartoon",
-                    watercolor: "Watercolor",
-                    pencil: "Pencil",
-                    galaxy: "Galaxy",
-                    nebula: "Nebula",
-                    supernova: "Supernova",
-                    blackhole: "Black Hole",
-                    aurora: "Aurora",
-                    cosmic: "Cosmic",
-                    radioactive: "Radioactive",
-                    acid: "Acid",
-                    toxic: "Toxic",
-                    uranium: "Uranium",
-                    biohazard: "Biohazard",
-                    plasma: "Plasma",
-                    zombie: "Zombie",
-                    corrupted: "Corrupted",
-                    blood: "Blood",
-                    demon: "Demon",
-                    nightmare: "Nightmare",
-                    haunted: "Haunted",
-                    psychedelic: "Psychedelic",
-                    infrared: "Infrared",
-                    xray: "X-Ray",
-                    thermal: "Thermal",
-                    matrix: "Matrix",
-					rio: "Rio de Janeiro",
-                    deepfry: "Deep Fry",
-                    glitchmax: "Glitch Max",
-                    holographic: "Holographic",
-                    jpegify: "JPEG Artifacts",
-                    chromatic: "Chromatic",
-                    datamosh: "Datamosh",
-                    vhsglitch: "VHS Glitch",
-                    scanlines: "Scanlines",
-                    colorbleed: "Color Bleed",
-                    nuke: "Nuke",
-                    drunk: "Drunk",
-                    rave: "Rave",
-                    dimensionx: "Dimension X"
-                }
-            },
-            fr: {
-                pageTitle: "Éditeur d'Images - Multi-Filtres",
-                mainTitle: "🎨 Éditeur d'Images - Multi-Filtres",
-                uploadBtn: "📁 Charger des images (max 20)",
-                uploadSubtext: "Toutes les images s'affichent ensemble !",
-                addBtn: "➕ Ajouter",
-                clearBtn: "🔄 Effacer",
-				nuitamericaine: "Nuit américaine",
-                downloadBtn: "📦 ZIP",
-                filtersTitle: "Filtres disponibles",
-                infoBadge: "Appliqué en temps réel sur toutes les images",
-                fusionModeOff: "🎭 Mode Fusion: OFF",
-                fusionModeOn: "🎭 Mode Fusion: ON - Sélectionnez 2ème filtre",
-                catPixel: "🔲 Pixellisation",
-                catBasic: "🎭 Basiques",
-                catGaming: "🎮 Rétro Gaming",
-                catVaporwave: "🌈 Vaporwave & Synthwave",
-                catVintage: "🌸 Vintage & Pastel",
-                catArtistic: "🎨 Artistique",
-                catCinema: "🎬 Cinéma",
-                catRGB: "🌟 Canaux RGB",
-                catSeasons: "🍂 Saisons",
-                catHue: "🎨 Teintes",
-                catSpecial: "👻 Spéciaux",
-                catCosmic: "🌌 Cosmique",
-                catChemical: "🧪 Chimique",
-                catHorror: "🎃 Horror",
-                catWTF: "🤪 WTF & Expérimental",
-                alertMax: "Vous ne pouvez charger que {0} image(s) supplémentaire(s). Maximum 20 images.",
-                filters: {
-                    pixel10: "Pixel 10%",
-                    pixel30: "Pixel 30%",
-                    pixel25: "Pixel 25%",
-                    pixel50: "Pixel 50%",
-                    pixel75: "Pixel 75%",
-                    pixel100: "Pixel 100%",
-                    pixel150: "Pixel 150%",
-                    grayscale: "Noir et Blanc",
-                    sepia: "Sépia",
-                    invert: "Négatif",
-                    brightness: "Luminosité++",
-                    darkness: "Obscurité",
-                    contrast: "Contraste++",
-                    gameboy: "Game Boy",
-                    gameboyGreen: "Game Boy Vert",
-                    nes: "NES 8-bit",
-                    cga: "CGA PC",
-                    atari: "Atari 2600",
-                    pixelate: "Pixellisé",
-                    vaporwave: "Vaporwave",
-                    vaporwavemax: "Vaporwave Max",
-                    vaporwavearc: "Vaporwave Arc",
-                    synthwave: "Synthwave",
-                    cyberpunk: "Cyberpunk",
-                    miami: "Miami Vice",
-                    neon: "Néon",
-                    outrun: "Outrun",
-                    vintage: "Vintage",
-                    polaroid: "Polaroid",
-                    pastel: "Pastel",
-                    warm: "Chaleureux",
-                    cold: "Froid",
-                    retro70s: "Rétro 70s",
-                    posterize: "Poster",
-                    solarize: "Solarisation",
-                    edge: "Contours",
-                    emboss: "Relief",
-                    blur: "Flou",
-                    painting: "Peinture",
-                    cinema: "Cinéma",
-                    noir: "Film Noir",
-                    technicolor: "Technicolor",
-                    bleach: "Bleach Bypass",
-                    western: "Western",
-                    scifi: "Sci-Fi",
-                    redChannel: "Canal Rouge",
-                    greenChannel: "Canal Vert",
-                    blueChannel: "Canal Bleu",
-                    rgbShift: "Glitch RGB",
-                    swapRB: "Swap RV",
-                    swapGB: "Swap VB",
-                    spring: "Printemps",
-                    summer: "Été",
-                    autumn: "Automne",
-                    winter: "Hiver",
-                    hue45: "Teinte +45°",
-                    hue90: "Teinte +90°",
-                    hue135: "Teinte +135°",
-                    hue180: "Teinte +180°",
-                    hue225: "Teinte +225°",
-                    hue270: "Teinte +270°",
-                    hue315: "Teinte +315°",
-                    hueRotate: "Teinte Rotatif",
-                    silhouette: "Silhouette",
-                    binarize: "N&B Pur",
-                    transparentbg: "Fond Transparent",
-                    cartoon: "Cartoon",
-                    watercolor: "Aquarelle",
-                    pencil: "Crayon",
-                    galaxy: "Galaxie",
-                    nebula: "Nébuleuse",
-                    supernova: "Supernova",
-                    blackhole: "Trou Noir",
-                    aurora: "Aurore",
-                    cosmic: "Cosmique",
-                    radioactive: "Radioactif",
-                    acid: "Acide",
-                    toxic: "Toxique",
-                    uranium: "Uranium",
-                    biohazard: "Biohazard",
-                    plasma: "Plasma",
-                    zombie: "Zombie",
-                    corrupted: "Corrompu",
-                    blood: "Sang",
-                    demon: "Démon",
-                    nightmare: "Cauchemar",
-                    haunted: "Hanté",
-                    psychedelic: "Psychédélique",
-                    infrared: "Infrarouge",
-                    xray: "Rayon X",
-                    thermal: "Thermique",
-                    matrix: "Matrix",
-                    deepfry: "Deep Fry",
-                    glitchmax: "Glitch Max",
-                    holographic: "Holographique",
-                    jpegify: "Artifacts JPEG",
-                    chromatic: "Chromatique",
-                    datamosh: "Datamosh",
-					rio: "Rio de Janeiro",
-                    vhsglitch: "Glitch VHS",
-                    scanlines: "Scanlines",
-                    colorbleed: "Bavure Couleur",
-                    nuke: "Nucléaire",
-                    drunk: "Ivre",
-                    rave: "Rave",
-                    dimensionx: "Dimension X"
-                }
-            },
-            es: {
-                pageTitle: "Editor de Imágenes - Multi-Filtros",
-                mainTitle: "🎨 Editor de Imágenes - Multi-Filtros",
-                uploadBtn: "📁 Cargar imágenes (máx 20)",
-                uploadSubtext: "¡Todas las imágenes se muestran juntas!",
-                addBtn: "➕ Añadir",
-                clearBtn: "🔄 Borrar",
-				rio: "Rio de Janeiro",
-				nuitamericaine: "Noche americana",
-                downloadBtn: "📦 ZIP",
-                filtersTitle: "Filtros Disponibles",
-                infoBadge: "Aplicado en tiempo real a todas las imágenes",
-                fusionModeOff: "🎭 Modo Fusión: OFF",
-                fusionModeOn: "🎭 Modo Fusión: ON - Selecciona 2º filtro",
-                catPixel: "🔲 Pixelización",
-                catBasic: "🎭 Básicos",
-                catGaming: "🎮 Retro Gaming",
-                catVaporwave: "🌈 Vaporwave & Synthwave",
-                catVintage: "🌸 Vintage & Pastel",
-                catArtistic: "🎨 Artístico",
-                catCinema: "🎬 Cine",
-                catRGB: "🌟 Canales RGB",
-                catSeasons: "🍂 Estaciones",
-                catHue: "🎨 Cambios de Tono",
-                catSpecial: "👻 Especial",
-                catCosmic: "🌌 Cósmico",
-                catChemical: "🧪 Químico",
-                catHorror: "🎃 Horror",
-                catWTF: "🤪 WTF & Experimental",
-                alertMax: "Solo puedes cargar {0} imagen(es) más. Máximo 20 imágenes.",
-                filters: {
-                    pixel10: "Píxel 10%",
-                    pixel30: "Píxel 30%",
-                    pixel25: "Píxel 25%",
-                    pixel50: "Píxel 50%",
-                    pixel75: "Píxel 75%",
-                    pixel100: "Píxel 100%",
-                    pixel150: "Píxel 150%",
-                    grayscale: "Escala de Grises",
-                    sepia: "Sepia",
-                    invert: "Negativo",
-                    brightness: "Brillo++",
-                    darkness: "Oscuridad",
-                    contrast: "Contraste++",
-                    gameboy: "Game Boy",
-                    gameboyGreen: "Game Boy Verde",
-                    nes: "NES 8-bit",
-                    cga: "CGA PC",
-                    atari: "Atari 2600",
-                    pixelate: "Pixelado",
-                    vaporwave: "Vaporwave",
-                    vaporwavemax: "Vaporwave Max",
-                    vaporwavearc: "Vaporwave Arc",
-                    synthwave: "Synthwave",
-                    cyberpunk: "Cyberpunk",
-                    miami: "Miami Vice",
-                    neon: "Neón",
-                    outrun: "Outrun",
-                    vintage: "Vintage",
-                    polaroid: "Polaroid",
-                    pastel: "Pastel",
-                    warm: "Cálido",
-                    cold: "Frío",
-                    retro70s: "Retro 70s",
-                    posterize: "Póster",
-                    solarize: "Solarizar",
-                    edge: "Bordes",
-                    emboss: "Relieve",
-                    blur: "Desenfoque",
-                    painting: "Pintura",
-                    cinema: "Cine",
-                    noir: "Film Noir",
-                    technicolor: "Technicolor",
-                    bleach: "Bleach Bypass",
-                    western: "Western",
-                    scifi: "Sci-Fi",
-                    redChannel: "Canal Rojo",
-                    greenChannel: "Canal Verde",
-                    blueChannel: "Canal Azul",
-                    rgbShift: "Glitch RGB",
-                    swapRB: "Swap RA",
-                    swapGB: "Swap VA",
-                    spring: "Primavera",
-                    summer: "Verano",
-                    autumn: "Otoño",
-                    winter: "Invierno",
-                    hue45: "Tono +45°",
-                    hue90: "Tono +90°",
-                    hue135: "Tono +135°",
-                    hue180: "Tono +180°",
-                    hue225: "Tono +225°",
-                    hue270: "Tono +270°",
-                    hue315: "Tono +315°",
-                    hueRotate: "Tono Rotativo",
-                    silhouette: "Silueta",
-                    binarize: "B&N Puro",
-                    transparentbg: "Fondo Transparente",
-                    cartoon: "Dibujos",
-                    watercolor: "Acuarela",
-                    pencil: "Lápiz",
-                    galaxy: "Galaxia",
-                    nebula: "Nebulosa",
-                    supernova: "Supernova",
-                    blackhole: "Agujero Negro",
-                    aurora: "Aurora",
-                    cosmic: "Cósmico",
-                    radioactive: "Radiactivo",
-                    acid: "Ácido",
-                    toxic: "Tóxico",
-                    uranium: "Uranio",
-                    biohazard: "Biohazard",
-                    plasma: "Plasma",
-                    zombie: "Zombie",
-                    corrupted: "Corrupto",
-                    blood: "Sangre",
-                    demon: "Demonio",
-                    nightmare: "Pesadilla",
-                    haunted: "Embrujado",
-                    psychedelic: "Psicodélico",
-                    infrared: "Infrarrojo",
-                    xray: "Rayos X",
-                    thermal: "Térmico",
-                    matrix: "Matrix",
-                    deepfry: "Deep Fry",
-                    glitchmax: "Glitch Max",
-                    holographic: "Holográfico",
-                    jpegify: "Artefactos JPEG",
-                    chromatic: "Cromático",
-                    datamosh: "Datamosh",
-                    vhsglitch: "Glitch VHS",
-                    scanlines: "Líneas",
-                    colorbleed: "Sangrado Color",
-                    nuke: "Nuclear",
-                    drunk: "Borracho",
-                    rave: "Rave",
-                    dimensionx: "Dimensión X"
-                }
-            },
-            de: {
-                pageTitle: "Bildbearbeitung - Multi-Filter",
-                mainTitle: "🎨 Bildbearbeitung - Multi-Filter",
-                uploadBtn: "📁 Bilder laden (max 20)",
-                uploadSubtext: "Alle Bilder werden zusammen angezeigt!",
-                addBtn: "➕ Hinzufügen",
-                clearBtn: "🔄 Löschen",
-                downloadBtn: "📦 ZIP",
-                filtersTitle: "Verfügbare Filter",
-                infoBadge: "In Echtzeit auf alle Bilder angewendet",
-                fusionModeOff: "🎭 Fusion-Modus: AUS",
-                fusionModeOn: "🎭 Fusion-Modus: AN - Wähle 2. Filter",
-                catPixel: "🔲 Pixelierung",
-                catBasic: "🎭 Grundlagen",
-				rio: "Rio de Janeiro",
-				nuitamericaine: "Amerikanische Nacht",
-                catGaming: "🎮 Retro Gaming",
-                catVaporwave: "🌈 Vaporwave & Synthwave",
-                catVintage: "🌸 Vintage & Pastel",
-                catArtistic: "🎨 Künstlerisch",
-                catCinema: "🎬 Kino",
-                catRGB: "🌟 RGB-Kanäle",
-                catSeasons: "🍂 Jahreszeiten",
-                catHue: "🎨 Farbtonverschiebungen",
-                catSpecial: "👻 Spezial",
-                catCosmic: "🌌 Kosmisch",
-                catChemical: "🧪 Chemisch",
-                catHorror: "🎃 Horror",
-                catWTF: "🤪 WTF & Experimentell",
-                alertMax: "Sie können nur noch {0} Bild(er) laden. Maximum 20 Bilder.",
-                filters: {
-                    pixel10: "Pixel 10%",
-                    pixel30: "Pixel 30%",
-                    pixel25: "Pixel 25%",
-                    pixel50: "Pixel 50%",
-                    pixel75: "Pixel 75%",
-                    pixel100: "Pixel 100%",
-                    pixel150: "Pixel 150%",
-                    grayscale: "Graustufen",
-                    sepia: "Sepia",
-                    invert: "Negativ",
-                    brightness: "Helligkeit++",
-                    darkness: "Dunkelheit",
-                    contrast: "Kontrast++",
-                    gameboy: "Game Boy",
-                    gameboyGreen: "Game Boy Grün",
-                    nes: "NES 8-bit",
-                    cga: "CGA PC",
-                    atari: "Atari 2600",
-                    pixelate: "Verpixelt",
-                    vaporwave: "Vaporwave",
-                    vaporwavemax: "Vaporwave Max",
-                    vaporwavearc: "Vaporwave Arc",
-                    synthwave: "Synthwave",
-                    cyberpunk: "Cyberpunk",
-                    miami: "Miami Vice",
-                    neon: "Neon",
-                    outrun: "Outrun",
-                    vintage: "Vintage",
-                    polaroid: "Polaroid",
-                    pastel: "Pastell",
-                    warm: "Warm",
-                    cold: "Kalt",
-                    retro70s: "Retro 70er",
-                    posterize: "Poster",
-                    solarize: "Solarisation",
-                    edge: "Kanten",
-                    emboss: "Prägung",
-                    blur: "Unschärfe",
-                    painting: "Gemälde",
-                    cinema: "Kino",
-                    noir: "Film Noir",
-                    technicolor: "Technicolor",
-                    bleach: "Bleach Bypass",
-                    western: "Western",
-                    scifi: "Sci-Fi",
-                    redChannel: "Rotkanal",
-                    greenChannel: "Grünkanal",
-                    blueChannel: "Blaukanal",
-                    rgbShift: "RGB-Glitch",
-                    swapRB: "Swap RB",
-                    swapGB: "Swap GB",
-                    spring: "Frühling",
-                    summer: "Sommer",
-                    autumn: "Herbst",
-                    winter: "Winter",
-                    hue45: "Farbton +45°",
-                    hue90: "Farbton +90°",
-                    hue135: "Farbton +135°",
-                    hue180: "Farbton +180°",
-                    hue225: "Farbton +225°",
-                    hue270: "Farbton +270°",
-                    hue315: "Farbton +315°",
-                    hueRotate: "Farbton Rotieren",
-                    silhouette: "Silhouette",
-                    binarize: "S&W Pur",
-                    transparentbg: "Transparenter BG",
-                    cartoon: "Cartoon",
-                    watercolor: "Aquarell",
-                    pencil: "Bleistift",
-                    galaxy: "Galaxie",
-                    nebula: "Nebel",
-                    supernova: "Supernova",
-                    blackhole: "Schwarzes Loch",
-                    aurora: "Aurora",
-                    cosmic: "Kosmisch",
-                    radioactive: "Radioaktiv",
-                    acid: "Säure",
-                    toxic: "Giftig",
-                    uranium: "Uran",
-                    biohazard: "Biohazard",
-                    plasma: "Plasma",
-                    zombie: "Zombie",
-                    corrupted: "Beschädigt",
-                    blood: "Blut",
-                    demon: "Dämon",
-                    nightmare: "Albtraum",
-                    haunted: "Heimgesucht",
-                    psychedelic: "Psychedelisch",
-                    infrared: "Infrarot",
-                    xray: "Röntgen",
-                    thermal: "Thermisch",
-                    matrix: "Matrix",
-                    deepfry: "Deep Fry",
-                    glitchmax: "Glitch Max",
-                    holographic: "Holografisch",
-                    jpegify: "JPEG-Artefakte",
-                    chromatic: "Chromatisch",
-                    datamosh: "Datamosh",
-                    vhsglitch: "VHS-Glitch",
-                    scanlines: "Scanlines",
-                    colorbleed: "Farbausbluten",
-                    nuke: "Atomar",
-                    drunk: "Betrunken",
-                    rave: "Rave",
-                    dimensionx: "Dimension X"
-                }
-            },
-            pt: {
-                pageTitle: "Editor de Imagens - Multi-Filtros",
-                mainTitle: "🎨 Editor de Imagens - Multi-Filtros",
-                uploadBtn: "📁 Carregar imagens (máx 20)",
-                uploadSubtext: "Todas as imagens são exibidas juntas!",
-                addBtn: "➕ Adicionar",
-                clearBtn: "🔄 Limpar",
-                downloadBtn: "📦 ZIP",
-				nuitamericaine: "Noite americana",
-				rio: "Rio de Janeiro",
-                filtersTitle: "Filtros Disponíveis",
-                infoBadge: "Aplicado em tempo real a todas as imagens",
-                fusionModeOff: "🎭 Modo Fusão: OFF",
-                fusionModeOn: "🎭 Modo Fusão: ON - Selecione 2º filtro",
-                catPixel: "🔲 Pixelização",
-                catBasic: "🎭 Básicos",
-                catGaming: "🎮 Retro Gaming",
-                catVaporwave: "🌈 Vaporwave & Synthwave",
-                catVintage: "🌸 Vintage & Pastel",
-                catArtistic: "🎨 Artístico",
-                catCinema: "🎬 Cinema",
-                catRGB: "🌟 Canais RGB",
-                catSeasons: "🍂 Estações",
-                catHue: "🎨 Mudanças de Matiz",
-                catSpecial: "👻 Especial",
-                catCosmic: "🌌 Cósmico",
-                catChemical: "🧪 Químico",
-                catHorror: "🎃 Horror",
-                catWTF: "🤪 WTF & Experimental",
-                alertMax: "Você só pode carregar mais {0} imagem(ns). Máximo 20 imagens.",
-                filters: {
-                    pixel10: "Pixel 10%",
-                    pixel30: "Pixel 30%",
-                    pixel25: "Pixel 25%",
-                    pixel50: "Pixel 50%",
-                    pixel75: "Pixel 75%",
-                    pixel100: "Pixel 100%",
-                    pixel150: "Pixel 150%",
-                    grayscale: "Escala de Cinza",
-                    sepia: "Sépia",
-                    invert: "Negativo",
-                    brightness: "Brilho++",
-                    darkness: "Escuridão",
-                    contrast: "Contraste++",
-                    gameboy: "Game Boy",
-                    gameboyGreen: "Game Boy Verde",
-                    nes: "NES 8-bit",
-                    cga: "CGA PC",
-                    atari: "Atari 2600",
-                    pixelate: "Pixelizado",
-                    vaporwave: "Vaporwave",
-                    vaporwavemax: "Vaporwave Max",
-                    vaporwavearc: "Vaporwave Arc",
-                    synthwave: "Synthwave",
-                    cyberpunk: "Cyberpunk",
-                    miami: "Miami Vice",
-                    neon: "Neon",
-                    outrun: "Outrun",
-                    vintage: "Vintage",
-                    polaroid: "Polaroid",
-                    pastel: "Pastel",
-                    warm: "Quente",
-                    cold: "Frio",
-                    retro70s: "Retro 70s",
-                    posterize: "Pôster",
-                    solarize: "Solarizar",
-                    edge: "Bordas",
-                    emboss: "Relevo",
-                    blur: "Desfoque",
-                    painting: "Pintura",
-                    cinema: "Cinema",
-                    noir: "Film Noir",
-                    technicolor: "Technicolor",
-                    bleach: "Bleach Bypass",
-                    western: "Western",
-                    scifi: "Sci-Fi",
-                    redChannel: "Canal Vermelho",
-                    greenChannel: "Canal Verde",
-                    blueChannel: "Canal Azul",
-                    rgbShift: "Glitch RGB",
-                    swapRB: "Swap VB",
-                    swapGB: "Swap VA",
-                    spring: "Primavera",
-                    summer: "Verão",
-                    autumn: "Outono",
-                    winter: "Inverno",
-                    hue45: "Matiz +45°",
-                    hue90: "Matiz +90°",
-                    hue135: "Matiz +135°",
-                    hue180: "Matiz +180°",
-                    hue225: "Matiz +225°",
-                    hue270: "Matiz +270°",
-                    hue315: "Matiz +315°",
-                    hueRotate: "Matiz Rotativo",
-                    silhouette: "Silhueta",
-                    binarize: "P&B Puro",
-                    transparentbg: "Fundo Transparente",
-                    cartoon: "Desenho",
-                    watercolor: "Aquarela",
-                    pencil: "Lápis",
-                    galaxy: "Galáxia",
-                    nebula: "Nebulosa",
-                    supernova: "Supernova",
-                    blackhole: "Buraco Negro",
-                    aurora: "Aurora",
-                    cosmic: "Cósmico",
-                    radioactive: "Radioativo",
-                    acid: "Ácido",
-                    toxic: "Tóxico",
-                    uranium: "Urânio",
-                    biohazard: "Biohazard",
-                    plasma: "Plasma",
-                    zombie: "Zumbi",
-                    corrupted: "Corrompido",
-                    blood: "Sangue",
-                    demon: "Demônio",
-                    nightmare: "Pesadelo",
-                    haunted: "Assombrado",
-                    psychedelic: "Psicodélico",
-                    infrared: "Infravermelho",
-                    xray: "Raio-X",
-                    thermal: "Térmico",
-                    matrix: "Matrix",
-                    deepfry: "Deep Fry",
-                    glitchmax: "Glitch Max",
-                    holographic: "Holográfico",
-                    jpegify: "Artefatos JPEG",
-                    chromatic: "Cromático",
-                    datamosh: "Datamosh",
-                    vhsglitch: "Glitch VHS",
-                    scanlines: "Scanlines",
-                    colorbleed: "Sangramento Cor",
-                    nuke: "Nuclear",
-                    drunk: "Bêbado",
-                    rave: "Rave",
-                    dimensionx: "Dimensão X"
-                }
-            }
-        };
-
-        const langFlags = { en: '🇬🇧', fr: '🇫🇷', es: '🇪🇸', de: '🇩🇪', pt: '🇵🇹' };
-        const langNames = { en: 'English', fr: 'Français', es: 'Español', de: 'Deutsch', pt: 'Português' };
-
-        let currentLang = 'en';
-        let fusionMode = false;
-        let primaryFilter = null;
-        let secondaryFilter = null;
-        let primaryFilterElement = null;
-        let secondaryFilterElement = null;
-
-        function detectLanguage() {
-            const browserLang = navigator.language || navigator.userLanguage;
-            const langCode = browserLang.split('-')[0];
-            return translations[langCode] ? langCode : 'en';
-        }
-
-        function changeLanguage(lang) {
-            currentLang = lang;
-            localStorage.setItem('preferredLanguage', lang);
-            
-            const t = translations[lang];
-            
-            document.getElementById('pageTitle').textContent = t.pageTitle;
-            document.getElementById('mainTitle').textContent = t.mainTitle;
-            document.getElementById('uploadBtnText').textContent = t.uploadBtn;
-            document.getElementById('uploadSubtext').textContent = t.uploadSubtext;
-            document.getElementById('addBtnText').textContent = t.addBtn;
-            document.getElementById('clearBtnText').textContent = t.clearBtn;
-            document.getElementById('downloadBtnText').textContent = t.downloadBtn;
-            document.getElementById('filtersTitle').textContent = t.filtersTitle;
-            document.getElementById('infoBadge').textContent = t.infoBadge;
-            
-            document.getElementById('catPixel').textContent = t.catPixel;
-            document.getElementById('catBasic').textContent = t.catBasic;
-            document.getElementById('catGaming').textContent = t.catGaming;
-            document.getElementById('catVaporwave').textContent = t.catVaporwave;
-            document.getElementById('catVintage').textContent = t.catVintage;
-            document.getElementById('catArtistic').textContent = t.catArtistic;
-            document.getElementById('catCinema').textContent = t.catCinema;
-            document.getElementById('catRGB').textContent = t.catRGB;
-            document.getElementById('catSeasons').textContent = t.catSeasons;
-            document.getElementById('catHue').textContent = t.catHue;
-            document.getElementById('catSpecial').textContent = t.catSpecial;
-            document.getElementById('catCosmic').textContent = t.catCosmic;
-            document.getElementById('catChemical').textContent = t.catChemical;
-            document.getElementById('catHorror').textContent = t.catHorror;
-            document.getElementById('catWTF').textContent = t.catWTF;
-            
-            document.getElementById('currentLangFlag').textContent = langFlags[lang];
-            document.getElementById('currentLangText').textContent = langNames[lang];
-            
-            updateFusionModeText();
-            updateFilterNames();
-            
-            document.getElementById('languageDropdown').classList.remove('show');
-        }
-
-        function updateFusionModeText() {
-            const t = translations[currentLang];
-            document.getElementById('fusionModeText').textContent = fusionMode ? t.fusionModeOn : t.fusionModeOff;
-        }
-
-        function updateFilterNames() {
-            const t = translations[currentLang];
-            for (const filters of Object.values(filterCategories)) {
-                filters.forEach(filterInfo => {
-                    const filterNameElement = filterInfo.element.querySelector('.filter-name');
-                    if (filterNameElement && t.filters[filterInfo.filter]) {
-                        filterNameElement.textContent = t.filters[filterInfo.filter];
-                    }
-                });
-            }
-
-            if (primaryFilter || secondaryFilter) {
-                updateCurrentFilterDisplay();
-            }
-        }
-
-        function toggleFusionMode() {
-            fusionMode = !fusionMode;
-            const badge = document.getElementById('fusionModeBadge');
-            
-            if (fusionMode) {
-                badge.classList.add('active');
-            } else {
-                badge.classList.remove('active');
-                if (secondaryFilterElement) {
-                    secondaryFilterElement.classList.remove('active-secondary');
-                    const secondaryBadge = secondaryFilterElement.querySelector('.filter-badge.secondary');
-                    if (secondaryBadge) secondaryBadge.remove();
-                }
-                secondaryFilter = null;
-                secondaryFilterElement = null;
-                
-                if (primaryFilter) {
-                    applyFilters();
-                }
-            }
-            
-            updateFusionModeText();
-            updateCurrentFilterDisplay();
-        }
-
-        function updateCurrentFilterDisplay() {
-            const badge = document.getElementById('currentFilterBadge');
-            const nameElement = document.getElementById('currentFilterName');
-            const t = translations[currentLang];
-            
-            if (primaryFilter && secondaryFilter) {
-                badge.style.display = 'block';
-                const name1 = t.filters[primaryFilter.filter] || primaryFilter.name;
-                const name2 = t.filters[secondaryFilter.filter] || secondaryFilter.name;
-                nameElement.textContent = `${name1} + ${name2}`;
-            } else if (primaryFilter) {
-                badge.style.display = 'block';
-                const name = t.filters[primaryFilter.filter] || primaryFilter.name;
-                nameElement.textContent = name;
-            } else {
-                badge.style.display = 'none';
-            }
-        }
-
-        function toggleLanguageDropdown() {
-            const dropdown = document.getElementById('languageDropdown');
-            dropdown.classList.toggle('show');
-        }
-
-        document.addEventListener('click', function(e) {
-            if (!e.target.closest('.language-selector')) {
-                document.getElementById('languageDropdown').classList.remove('show');
-            }
-        });
-
-        window.addEventListener('DOMContentLoaded', function() {
-            const savedLang = localStorage.getItem('preferredLanguage');
-            const detectedLang = savedLang || detectLanguage();
-            changeLanguage(detectedLang);
-        });
-
-        // ===== CODE PRINCIPAL =====
+        const canvas = document.getElementById('spriteCanvas');
+        const ctx = canvas.getContext('2d');
         const fileInput = document.getElementById('fileInput');
-        const uploadOverlay = document.getElementById('uploadOverlay');
-        const imagesGrid = document.getElementById('imagesGrid');
+        const frameInfo = document.getElementById('frameInfo');
+        const idleSpeedInput = document.getElementById('idleSpeed');
         
-        let loadedImages = [];
-        const MAX_IMAGES = 20;
-
-        const filterCategories = {
-            pixelFilters: [
-                { name: 'Pixel 10%', filter: 'pixel10' },
-                { name: 'Pixel 30%', filter: 'pixel30' },
-                { name: 'Pixel 25%', filter: 'pixel25' },
-                { name: 'Pixel 50%', filter: 'pixel50' },
-                { name: 'Pixel 75%', filter: 'pixel75' },
-                { name: 'Pixel 100%', filter: 'pixel100' },
-                { name: 'Pixel 150%', filter: 'pixel150' }
-            ],
-            basicFilters: [
-                { name: 'Grayscale', filter: 'grayscale' },
-                { name: 'Sepia', filter: 'sepia' },
-                { name: 'Negative', filter: 'invert' },
-                { name: 'Brightness++', filter: 'brightness' },
-                { name: 'Darkness', filter: 'darkness' },
-                { name: 'Contrast++', filter: 'contrast' }
-            ],
-            gamingFilters: [
-                { name: 'Game Boy', filter: 'gameboy' },
-                { name: 'Game Boy Green', filter: 'gameboyGreen' },
-                { name: 'NES 8-bit', filter: 'nes' },
-                { name: 'CGA PC', filter: 'cga' },
-                { name: 'Atari 2600', filter: 'atari' },
-                { name: 'Pixelated', filter: 'pixelate' }
-            ],
-            vaporFilters: [
-                { name: 'Vaporwave', filter: 'vaporwave' },
-                { name: 'Vaporwave Max', filter: 'vaporwavemax' },
-                { name: 'Vaporwave Arc', filter: 'vaporwavearc' },
-                { name: 'Synthwave', filter: 'synthwave' },
-                { name: 'Cyberpunk', filter: 'cyberpunk' },
-                { name: 'Miami Vice', filter: 'miami' },
-                { name: 'Neon', filter: 'neon' },
-                { name: 'Outrun', filter: 'outrun' }
-            ],
-            vintageFilters: [
-                { name: 'Vintage', filter: 'vintage' },
-                { name: 'Polaroid', filter: 'polaroid' },
-                { name: 'Pastel', filter: 'pastel' },
-                { name: 'Warm', filter: 'warm' },
-                { name: 'Cold', filter: 'cold' },
-                { name: 'Retro 70s', filter: 'retro70s' }
-            ],
-            artisticFilters: [
-			    { name: 'Rio de Janeiro', filter: 'rio' },
-                { name: 'Poster', filter: 'posterize' },
-                { name: 'Solarize', filter: 'solarize' },
-                { name: 'Edge', filter: 'edge' },
-                { name: 'Emboss', filter: 'emboss' },
-                { name: 'Blur', filter: 'blur' },
-                { name: 'Painting', filter: 'painting' }
-            ],
-            cinemaFilters: [
-                { name: 'Cinema', filter: 'cinema' },
-                { name: 'Film Noir', filter: 'noir' },
-				{ name: 'Nuit américaine', filter: 'nuitamericaine' },
-                { name: 'Technicolor', filter: 'technicolor' },
-                { name: 'Bleach Bypass', filter: 'bleach' },
-                { name: 'Western', filter: 'western' },
-                { name: 'Sci-Fi', filter: 'scifi' }
-            ],
-            rgbFilters: [
-                { name: 'Red Channel', filter: 'redChannel' },
-                { name: 'Green Channel', filter: 'greenChannel' },
-                { name: 'Blue Channel', filter: 'blueChannel' },
-                { name: 'RGB Glitch', filter: 'rgbShift' },
-                { name: 'Swap RB', filter: 'swapRB' },
-                { name: 'Swap GB', filter: 'swapGB' }
-            ],
-            seasonFilters: [
-                { name: 'Spring', filter: 'spring' },
-                { name: 'Summer', filter: 'summer' },
-                { name: 'Autumn', filter: 'autumn' },
-                { name: 'Winter', filter: 'winter' }
-            ],
-            hueFilters: [
-                { name: 'Hue +45°', filter: 'hue45' },
-                { name: 'Hue +90°', filter: 'hue90' },
-                { name: 'Hue +135°', filter: 'hue135' },
-                { name: 'Hue +180°', filter: 'hue180' },
-                { name: 'Hue +225°', filter: 'hue225' },
-                { name: 'Hue +270°', filter: 'hue270' },
-                { name: 'Hue +315°', filter: 'hue315' },
-                { name: 'Hue Rotate', filter: 'hueRotate' }
-            ],
-            specialFilters: [
-                { name: 'Silhouette', filter: 'silhouette' },
-                { name: 'B&W Pure', filter: 'binarize' },
-                { name: 'Transparent BG', filter: 'transparentbg' },
-                { name: 'Cartoon', filter: 'cartoon' },
-                { name: 'Watercolor', filter: 'watercolor' },
-                { name: 'Pencil', filter: 'pencil' }
-            ],
-            cosmicFilters: [
-                { name: 'Galaxy', filter: 'galaxy' },
-                { name: 'Nebula', filter: 'nebula' },
-                { name: 'Supernova', filter: 'supernova' },
-                { name: 'Black Hole', filter: 'blackhole' },
-                { name: 'Aurora', filter: 'aurora' },
-                { name: 'Cosmic', filter: 'cosmic' }
-            ],
-            chemicalFilters: [
-                { name: 'Radioactive', filter: 'radioactive' },
-                { name: 'Acid', filter: 'acid' },
-                { name: 'Toxic', filter: 'toxic' },
-                { name: 'Uranium', filter: 'uranium' },
-                { name: 'Biohazard', filter: 'biohazard' },
-                { name: 'Plasma', filter: 'plasma' }
-            ],
-            horrorFilters: [
-                { name: 'Zombie', filter: 'zombie' },
-                { name: 'Corrupted', filter: 'corrupted' },
-                { name: 'Blood', filter: 'blood' },
-                { name: 'Demon', filter: 'demon' },
-                { name: 'Nightmare', filter: 'nightmare' },
-                { name: 'Haunted', filter: 'haunted' }
-            ],
-            wtfFilters: [
-                { name: 'Psychedelic', filter: 'psychedelic' },
-                { name: 'Infrared', filter: 'infrared' },
-                { name: 'X-Ray', filter: 'xray' },
-                { name: 'Thermal', filter: 'thermal' },
-                { name: 'Matrix', filter: 'matrix' },
-                { name: 'Deep Fry', filter: 'deepfry' },
-                { name: 'Glitch Max', filter: 'glitchmax' },
-                { name: 'Holographic', filter: 'holographic' },
-                { name: 'JPEG Artifacts', filter: 'jpegify' },
-                { name: 'Chromatic', filter: 'chromatic' },
-                { name: 'Datamosh', filter: 'datamosh' },
-                { name: 'VHS Glitch', filter: 'vhsglitch' },
-                { name: 'Scanlines', filter: 'scanlines' },
-                { name: 'Color Bleed', filter: 'colorbleed' },
-                { name: 'Nuke', filter: 'nuke' },
-                { name: 'Drunk', filter: 'drunk' },
-                { name: 'Rave', filter: 'rave' },
-                { name: 'Dimension X', filter: 'dimensionx' }
-            ]
+        let spriteImage = null;
+        let currentAnimation = null;
+        let animationFrame = null;
+        
+        const FRAME_SIZE = 200;
+        const GRID_SIZE = 3;
+        
+        // Frames mapping
+        const FRAMES = {
+            IDLE: [0, 1, 2, 3],      // Frames 1-4
+            ATTACK: [4, 5, 6],        // Frames 5-7
+            KNOCK: [7],               // Frame 8
+            SLEEP: [8]                // Frame 9
         };
-
-        function createFilterPreviews() {
-            for (const [containerId, filters] of Object.entries(filterCategories)) {
-                const container = document.getElementById(containerId);
-                filters.forEach(filterInfo => {
-                    const filterItem = document.createElement('div');
-                    filterItem.className = 'filter-item';
-                    filterItem.onclick = () => selectFilter(filterInfo.filter, filterInfo.name, filterItem);
-
-                    const preview = document.createElement('div');
-                    preview.className = 'filter-preview';
-                    preview.innerHTML = '<div class="no-image">🎨</div>';
-
-                    const previewCanvas = document.createElement('canvas');
-                    previewCanvas.style.display = 'none';
-                    preview.appendChild(previewCanvas);
-
-                    const name = document.createElement('div');
-                    name.className = 'filter-name';
-                    name.textContent = filterInfo.name;
-
-                    filterItem.appendChild(preview);
-                    filterItem.appendChild(name);
-                    container.appendChild(filterItem);
-
-                    filterInfo.previewCanvas = previewCanvas;
-                    filterInfo.previewContainer = preview;
-                    filterInfo.element = filterItem;
-                });
-            }
-        }
-
-        function selectFilter(filterName, displayName, element) {
-    if (loadedImages.length === 0) return;
-
-    if (!fusionMode) {
-        // Mode normal: réinitialiser d'abord tous les filtres
-        loadedImages.forEach(imgData => {
-            const ctx = imgData.canvas.getContext('2d');
-            ctx.clearRect(0, 0, imgData.canvas.width, imgData.canvas.height);
-            ctx.drawImage(imgData.original, 0, 0);
-        });
         
-        if (primaryFilterElement) {
-            primaryFilterElement.classList.remove('active-primary');
-            const badge = primaryFilterElement.querySelector('.filter-badge');
-            if (badge) badge.remove();
-        }
+        const FRAME_NAMES = [
+            'IDLE 1', 'IDLE 2', 'IDLE 3', 'IDLE 4',
+            'ATTACK 1', 'ATTACK 2', 'ATTACK 3',
+            'KNOCK', 'SLEEP'
+        ];
         
-        primaryFilter = { filter: filterName, name: displayName };
-        primaryFilterElement = element;
-        element.classList.add('active-primary');
-        
-        const badge = document.createElement('div');
-        badge.className = 'filter-badge';
-        badge.textContent = '1';
-        element.appendChild(badge);
-
-        if (secondaryFilterElement) {
-            secondaryFilterElement.classList.remove('active-secondary');
-            const secondaryBadge = secondaryFilterElement.querySelector('.filter-badge.secondary');
-            if (secondaryBadge) secondaryBadge.remove();
-        }
-        secondaryFilter = null;
-        secondaryFilterElement = null;
-    } else {
-        // MODE FUSION
-        if (!primaryFilter) {
-            // Réinitialiser les images avant d'appliquer le premier filtre
-            loadedImages.forEach(imgData => {
-                const ctx = imgData.canvas.getContext('2d');
-                ctx.clearRect(0, 0, imgData.canvas.width, imgData.canvas.height);
-                ctx.drawImage(imgData.original, 0, 0);
-            });
+        // Charger l'image
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
             
-            primaryFilter = { filter: filterName, name: displayName };
-            primaryFilterElement = element;
-            element.classList.add('active-primary');
-            
-            const badge = document.createElement('div');
-            badge.className = 'filter-badge';
-            badge.textContent = '1';
-            element.appendChild(badge);
-        } else if (element === primaryFilterElement) {
-            // DÉSÉLECTIONNER le filtre primaire si on clique dessus
-            primaryFilterElement.classList.remove('active-primary');
-            const badge = primaryFilterElement.querySelector('.filter-badge');
-            if (badge) badge.remove();
-            
-            primaryFilter = null;
-            primaryFilterElement = null;
-            
-            // Réinitialiser les images
-            loadedImages.forEach(imgData => {
-                const ctx = imgData.canvas.getContext('2d');
-                ctx.clearRect(0, 0, imgData.canvas.width, imgData.canvas.height);
-                ctx.drawImage(imgData.original, 0, 0);
-            });
-            
-            updateCurrentFilterDisplay();
-            updateButtons();
-            return; // Sortir de la fonction
-        } else if (!secondaryFilter) {
-            // Sélectionner le deuxième filtre
-            if (element === primaryFilterElement) return;
-            
-            secondaryFilter = { filter: filterName, name: displayName };
-            secondaryFilterElement = element;
-            element.classList.add('active-secondary');
-            
-            const badge = document.createElement('div');
-            badge.className = 'filter-badge secondary';
-            badge.textContent = '2';
-            element.appendChild(badge);
-        } else {
-            // Remplacer le deuxième filtre
-            if (element === primaryFilterElement) return;
-            
-            // Si on clique sur le filtre secondaire actuel, le désélectionner
-            if (element === secondaryFilterElement) {
-                secondaryFilterElement.classList.remove('active-secondary');
-                const badge = secondaryFilterElement.querySelector('.filter-badge.secondary');
-                if (badge) badge.remove();
-                
-                secondaryFilter = null;
-                secondaryFilterElement = null;
-                
-                // Réappliquer seulement le filtre primaire
-                applyFilters();
-                updateCurrentFilterDisplay();
-                updateButtons();
-                return;
-            }
-            
-            secondaryFilterElement.classList.remove('active-secondary');
-            const oldBadge = secondaryFilterElement.querySelector('.filter-badge.secondary');
-            if (oldBadge) oldBadge.remove();
-            
-            secondaryFilter = { filter: filterName, name: displayName };
-            secondaryFilterElement = element;
-            element.classList.add('active-secondary');
-            
-            const badge = document.createElement('div');
-            badge.className = 'filter-badge secondary';
-            badge.textContent = '2';
-            element.appendChild(badge);
-        }
-         }
-
-        applyFilters();
-        updateCurrentFilterDisplay();
-        updateButtons();
-        }
-
-
-        function applyFilters() {
-            if (loadedImages.length === 0) return;
-
-            loadedImages.forEach(imgData => {
-                const ctx = imgData.canvas.getContext('2d');
-                ctx.clearRect(0, 0, imgData.canvas.width, imgData.canvas.height);
-                ctx.drawImage(imgData.original, 0, 0);
-                
-                if (primaryFilter) {
-                    const imageData = ctx.getImageData(0, 0, imgData.canvas.width, imgData.canvas.height);
-                    applyFilterToImageData(imageData, primaryFilter.filter, imgData.canvas);
-                    ctx.putImageData(imageData, 0, 0);
-                }
-
-                if (fusionMode && secondaryFilter) {
-                    const imageData = ctx.getImageData(0, 0, imgData.canvas.width, imgData.canvas.height);
-                    applyFilterToImageData(imageData, secondaryFilter.filter, imgData.canvas);
-                    ctx.putImageData(imageData, 0, 0);
-                }
-            });
-        }
-
-        fileInput.addEventListener('change', function(e) {
-            const files = Array.from(e.target.files);
-            const remainingSlots = MAX_IMAGES - loadedImages.length;
-            
-            if (files.length > remainingSlots) {
-                const alertMsg = translations[currentLang].alertMax.replace('{0}', remainingSlots);
-                alert(alertMsg);
-                return;
-            }
-
-            files.forEach(file => {
-                if (loadedImages.length >= MAX_IMAGES) return;
-                
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    const img = new Image();
-                    img.onload = function() {
-                        const canvas = document.createElement('canvas');
-                        canvas.width = img.width;
-                        canvas.height = img.height;
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0);
-
-                        loadedImages.push({
-                            original: img,
-                            canvas: canvas,
-                            name: file.name
-                        });
-
-                        updateViewer();
-                        
-                        if (loadedImages.length === 1) {
-                            uploadOverlay.style.display = 'none';
-                            generatePreviews();
-                        }
-
-                        if (primaryFilter) {
-                            applyFilters();
-                        }
-
-                        updateButtons();
-                    };
-                    img.src = event.target.result;
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                spriteImage = new Image();
+                spriteImage.onload = () => {
+                    showStatus('✅ Spritesheet chargée !', 'success');
+                    playIdle();
                 };
-                reader.readAsDataURL(file);
-            });
-
-            e.target.value = '';
+                spriteImage.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
         });
-
-        function downloadSingleImage(index) {
-            const imgData = loadedImages[index];
-            let filterSuffix = '_original';
+        
+        // Dessiner une frame spécifique
+        function drawFrame(frameIndex) {
+            if (!spriteImage) return;
             
-            if (primaryFilter && secondaryFilter) {
-                filterSuffix = `_${primaryFilter.filter}+${secondaryFilter.filter}`;
-            } else if (primaryFilter) {
-                filterSuffix = `_${primaryFilter.filter}`;
+            const col = frameIndex % GRID_SIZE;
+            const row = Math.floor(frameIndex / GRID_SIZE);
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.imageSmoothingEnabled = false;
+            
+            ctx.drawImage(
+                spriteImage,
+                col * FRAME_SIZE, row * FRAME_SIZE,
+                FRAME_SIZE, FRAME_SIZE,
+                0, 0,
+                FRAME_SIZE, FRAME_SIZE
+            );
+            
+            frameInfo.textContent = `Frame: ${frameIndex + 1} (${FRAME_NAMES[frameIndex]})`;
+        }
+        
+        // Arrêter l'animation en cours
+        function stopAnimation() {
+            if (animationFrame) {
+                cancelAnimationFrame(animationFrame);
+                animationFrame = null;
+            }
+            currentAnimation = null;
+        }
+        
+        // Animation IDLE (boucle)
+        function playIdle() {
+            if (!spriteImage) {
+                showStatus('❌ Charge d\'abord une spritesheet !', 'error');
+                return;
             }
             
-            const filename = imgData.name.replace(/\.[^/.]+$/, '') + filterSuffix + '.png';
+            stopAnimation();
+            currentAnimation = 'IDLE';
             
-            imgData.canvas.toBlob(function(blob) {
-                const link = document.createElement('a');
-                link.href = URL.createObjectURL(blob);
-                link.download = filename;
-                link.click();
-            }, 'image/png');
-        }
-
-        function updateViewer() {
-            imagesGrid.innerHTML = '';
-
-            loadedImages.forEach((imgData, index) => {
-                const card = document.createElement('div');
-                card.className = 'image-card';
-
-                const canvas = imgData.canvas;
-                card.appendChild(canvas);
-
-                const footer = document.createElement('div');
-                footer.className = 'image-card-footer';
-
-                const number = document.createElement('span');
-                number.className = 'image-number';
-                number.textContent = `#${index + 1}`;
-
-                const actions = document.createElement('div');
-                actions.className = 'image-actions';
-
-                const downloadBtn = document.createElement('button');
-                downloadBtn.className = 'download-single-btn';
-                downloadBtn.title = 'Download';
-                downloadBtn.onclick = () => downloadSingleImage(index);
-
-                const removeBtn = document.createElement('button');
-                removeBtn.className = 'remove-btn';
-                removeBtn.textContent = '×';
-                removeBtn.onclick = () => removeImage(index);
-
-                actions.appendChild(downloadBtn);
-                actions.appendChild(removeBtn);
-
-                footer.appendChild(number);
-                footer.appendChild(actions);
-                card.appendChild(footer);
-
-                imagesGrid.appendChild(card);
-            });
-        }
-
-        function removeImage(index) {
-            loadedImages.splice(index, 1);
+            let frameIdx = 0;
+            const delay = parseFloat(idleSpeedInput.value) * 1000;
             
-            if (loadedImages.length === 0) {
-                uploadOverlay.style.display = 'flex';
-                clearFilter();
-            } else {
-                generatePreviews();
-            }
-            
-            updateViewer();
-            updateButtons();
-        }
-
-        function generatePreviews() {
-            if (loadedImages.length === 0) return;
-
-            const previewMaxSize = 140;
-            const imgData = loadedImages[0];
-            
-            for (const filters of Object.values(filterCategories)) {
-                filters.forEach(filterInfo => {
-                    const previewCanvas = filterInfo.previewCanvas;
-                    const container = filterInfo.previewContainer;
-                    
-                    const aspectRatio = imgData.original.width / imgData.original.height;
-                    
-                    if (aspectRatio > 1) {
-                        previewCanvas.width = previewMaxSize;
-                        previewCanvas.height = previewMaxSize / aspectRatio;
-                    } else {
-                        previewCanvas.height = previewMaxSize;
-                        previewCanvas.width = previewMaxSize * aspectRatio;
+            function animate() {
+                drawFrame(FRAMES.IDLE[frameIdx]);
+                frameIdx = (frameIdx + 1) % FRAMES.IDLE.length;
+                
+                setTimeout(() => {
+                    if (currentAnimation === 'IDLE') {
+                        animationFrame = requestAnimationFrame(animate);
                     }
-
-                    const previewCtx = previewCanvas.getContext('2d');
-                    previewCtx.drawImage(imgData.original, 0, 0, previewCanvas.width, previewCanvas.height);
-
-                    const imageData = previewCtx.getImageData(0, 0, previewCanvas.width, previewCanvas.height);
-                    applyFilterToImageData(imageData, filterInfo.filter, previewCanvas);
-                    previewCtx.putImageData(imageData, 0, 0);
-
-                    container.querySelector('.no-image').style.display = 'none';
-                    previewCanvas.style.display = 'block';
-                });
+                }, delay);
             }
-        }
-
-        function clearFilter() {
-            if (loadedImages.length === 0) return;
-
-            primaryFilter = null;
-            secondaryFilter = null;
-            fusionMode = false;
             
-            if (primaryFilterElement) {
-                primaryFilterElement.classList.remove('active-primary');
-                const badge = primaryFilterElement.querySelector('.filter-badge');
-                if (badge) badge.remove();
-                primaryFilterElement = null;
-            }
-
-            if (secondaryFilterElement) {
-                secondaryFilterElement.classList.remove('active-secondary');
-                const badge = secondaryFilterElement.querySelector('.filter-badge.secondary');
-                if (badge) badge.remove();
-                secondaryFilterElement = null;
-            }
-
-            document.getElementById('fusionModeBadge').classList.remove('active');
-            updateFusionModeText();
-            updateCurrentFilterDisplay();
-
-            loadedImages.forEach(imgData => {
-                const ctx = imgData.canvas.getContext('2d');
-                ctx.clearRect(0, 0, imgData.canvas.width, imgData.canvas.height);
-                ctx.drawImage(imgData.original, 0, 0);
-            });
-
-            updateButtons();
+            animate();
         }
-
-        async function downloadAllAsZip() {
-            if (loadedImages.length === 0) return;
-
-            const zip = new JSZip();
-            let filterSuffix = '_original';
+        
+        // Animation ATTACK (une fois)
+        function playAttack() {
+            if (!spriteImage) {
+                showStatus('❌ Charge d\'abord une spritesheet !', 'error');
+                return;
+            }
             
-            if (primaryFilter && secondaryFilter) {
-                filterSuffix = `_${primaryFilter.filter}+${secondaryFilter.filter}`;
-            } else if (primaryFilter) {
-                filterSuffix = `_${primaryFilter.filter}`;
-            }
-
-            for (let i = 0; i < loadedImages.length; i++) {
-                const imgData = loadedImages[i];
-                const blob = await new Promise(resolve => {
-                    imgData.canvas.toBlob(resolve, 'image/png');
-                });
-
-                const filename = imgData.name.replace(/\.[^/.]+$/, '') + filterSuffix + '.png';
-                zip.file(filename, blob);
-            }
-
-            const content = await zip.generateAsync({ type: 'blob' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(content);
-            link.download = `images${filterSuffix}_${Date.now()}.zip`;
-            link.click();
-        }
-
-        function updateButtons() {
-            const hasImages = loadedImages.length > 0;
-            const hasFilter = primaryFilter !== null;
-            document.getElementById('downloadAllBtn').disabled = !hasImages;
-            document.getElementById('clearFilterBtn').disabled = !hasFilter;
-        }
-
-        // ===== FILTRES =====
-        function applyFilterToImageData(imageData, filterName, targetCanvas) {
-            const data = imageData.data;
-            switch(filterName) {
-                case 'pixel10': pixelateAdvanced(imageData, targetCanvas, 2); return;
-                case 'pixel30': pixelateAdvanced(imageData, targetCanvas, 6); return;
-                case 'pixel25': pixelateAdvanced(imageData, targetCanvas, 4); return;
-                case 'pixel50': pixelateAdvanced(imageData, targetCanvas, 8); return;
-                case 'pixel75': pixelateAdvanced(imageData, targetCanvas, 12); return;
-                case 'pixel100': pixelateAdvanced(imageData, targetCanvas, 16); return;
-                case 'pixel150': pixelateAdvanced(imageData, targetCanvas, 24); return;
-                case 'grayscale': grayscale(data); break;
-				case 'nuitamericaine': nuitamericaine(data,targetCanvas); break;
-                case 'sepia': sepia(data); break;
-                case 'invert': invert(data); break;
-                case 'brightness': brightness(data, 50); break;
-                case 'darkness': brightness(data, -50); break;
-                case 'contrast': contrast(data, 40); break;
-                case 'gameboy': gameboy(data); break;
-                case 'gameboyGreen': gameboyGreen(data); break;
-                case 'nes': nes(data); break;
-                case 'cga': cga(data); break;
-                case 'atari': atari(data); break;
-                case 'pixelate': pixelateData(imageData, targetCanvas); return;
-                case 'vaporwave': vaporwave(data); break;
-                case 'vaporwavemax': vaporwavemax(data); break;
-                case 'vaporwavearc': vaporwavearc(data); break;
-                case 'synthwave': synthwave(data); break;
-                case 'cyberpunk': cyberpunk(data); break;
-                case 'miami': miami(data); break;
-                case 'neon': neon(data); break;
-                case 'outrun': outrun(data); break;
-                case 'vintage': vintage(data); break;
-                case 'polaroid': polaroid(data); break;
-                case 'pastel': pastel(data); break;
-                case 'warm': warm(data); break;
-                case 'cold': cold(data); break;
-                case 'retro70s': retro70s(data); break;
-                case 'posterize': posterize(data, 4); break;
-                case 'solarize': solarize(data); break;
-                case 'edge': edgeData(imageData, targetCanvas); return;
-                case 'emboss': embossData(imageData, targetCanvas); return;
-                case 'blur': blurData(imageData, targetCanvas); return;
-                case 'painting': painting(data); break;
-				case 'rio': rio(data,targetCanvas); break;
-                case 'cinema': cinema(data); break;
-                case 'noir': noir(data); break;
-                case 'technicolor': technicolor(data); break;
-                case 'bleach': bleach(data); break;
-                case 'western': western(data); break;
-                case 'scifi': scifi(data); break;
-                case 'redChannel': redChannel(data); break;
-                case 'greenChannel': greenChannel(data); break;
-                case 'blueChannel': blueChannel(data); break;
-                case 'rgbShift': rgbShiftData(imageData, targetCanvas); return;
-                case 'swapRB': swapRB(data); break;
-                case 'swapGB': swapGB(data); break;
-                case 'spring': spring(data); break;
-                case 'summer': summer(data); break;
-                case 'autumn': autumn(data); break;
-                case 'winter': winter(data); break;
-                case 'hue45': hueShift(data, 45); break;
-                case 'hue90': hueShift(data, 90); break;
-                case 'hue135': hueShift(data, 135); break;
-                case 'hue180': hueShift(data, 180); break;
-                case 'hue225': hueShift(data, 225); break;
-                case 'hue270': hueShift(data, 270); break;
-                case 'hue315': hueShift(data, 315); break;
-                case 'hueRotate': hueRotateGradient(data); break;
-                case 'silhouette': silhouette(data); break;
-                case 'binarize': binarize(data); break;
-                case 'transparentbg': transparentbg(data); break;
-                case 'cartoon': cartoon(data); break;
-                case 'watercolor': watercolor(data); break;
-                case 'pencil': pencil(data); break;
-                case 'galaxy': galaxy(data); break;
-                case 'nebula': nebula(data); break;
-                case 'supernova': supernova(data); break;
-                case 'blackhole': blackhole(data); break;
-                case 'aurora': aurora(data); break;
-                case 'cosmic': cosmic(data); break;
-                case 'radioactive': radioactive(data); break;
-                case 'acid': acid(data); break;
-                case 'toxic': toxic(data); break;
-                case 'uranium': uranium(data); break;
-                case 'biohazard': biohazard(data); break;
-                case 'plasma': plasma(data); break;
-                case 'zombie': zombie(data); break;
-                case 'corrupted': corrupted(data); break;
-                case 'blood': blood(data); break;
-                case 'demon': demon(data); break;
-                case 'nightmare': nightmare(data); break;
-                case 'haunted': haunted(data); break;
-                case 'psychedelic': psychedelic(data); break;
-                case 'infrared': infrared(data); break;
-                case 'xray': xray(data); break;
-                case 'thermal': thermal(data); break;
-                case 'matrix': matrix(data); break;
-                case 'deepfry': deepfry(data); break;
-                case 'glitchmax': glitchmax(data); break;
-                case 'holographic': holographic(data); break;
-                case 'jpegify': jpegify(data); break;
-                case 'chromatic': chromaticAberration(imageData, targetCanvas); return;
-                case 'datamosh': datamosh(data); break;
-                case 'vhsglitch': vhsglitch(data); break;
-                case 'scanlines': scanlines(data, targetCanvas); break;
-                case 'colorbleed': colorbleed(data); break;
-                case 'nuke': nuke(data); break;
-                case 'drunk': drunk(data); break;
-                case 'rave': rave(data); break;
-                case 'dimensionx': dimensionx(data); break;
-            }
-        }
-
-        function pixelateAdvanced(imageData, targetCanvas, pixelSize) {
-            const w = targetCanvas.width;
-            const h = targetCanvas.height;
-            const data = imageData.data;
+            stopAnimation();
+            currentAnimation = 'ATTACK';
             
-            for (let y = 0; y < h; y += pixelSize) {
-                for (let x = 0; x < w; x += pixelSize) {
-                    let r = 0, g = 0, b = 0, a = 0, count = 0;
+            const attackTiming = [0, 300, 300]; // 0ms, puis 300ms, puis 300ms
+            let frameIdx = 0;
+            
+            function animate() {
+                if (frameIdx < FRAMES.ATTACK.length) {
+                    drawFrame(FRAMES.ATTACK[frameIdx]);
                     
-                    for (let dy = 0; dy < pixelSize && y + dy < h; dy++) {
-                        for (let dx = 0; dx < pixelSize && x + dx < w; dx++) {
-                            const idx = ((y + dy) * w + (x + dx)) * 4;
-                            r += data[idx];
-                            g += data[idx + 1];
-                            b += data[idx + 2];
-                            a += data[idx + 3];
-                            count++;
+                    setTimeout(() => {
+                        frameIdx++;
+                        if (frameIdx < FRAMES.ATTACK.length && currentAnimation === 'ATTACK') {
+                            animate();
+                        } else if (currentAnimation === 'ATTACK') {
+                            // Retour à idle après l'attaque
+                            setTimeout(() => playIdle(), 1300);
                         }
-                    }
-                    
-                    r = Math.round(r / count);
-                    g = Math.round(g / count);
-                    b = Math.round(b / count);
-                    a = Math.round(a / count);
-                    
-                    for (let dy = 0; dy < pixelSize && y + dy < h; dy++) {
-                        for (let dx = 0; dx < pixelSize && x + dx < w; dx++) {
-                            const idx = ((y + dy) * w + (x + dx)) * 4;
-                            data[idx] = r;
-                            data[idx + 1] = g;
-                            data[idx + 2] = b;
-                            data[idx + 3] = a;
-                        }
-                    }
+                    }, attackTiming[frameIdx]);
                 }
             }
+            
+            animate();
         }
-
-        function grayscale(data){for(let i=0;i<data.length;i+=4){const avg=(data[i]+data[i+1]+data[i+2])/3;data[i]=data[i+1]=data[i+2]=avg}}
-        function sepia(data){for(let i=0;i<data.length;i+=4){const r=data[i],g=data[i+1],b=data[i+2];data[i]=Math.min(255,r*0.393+g*0.769+b*0.189);data[i+1]=Math.min(255,r*0.349+g*0.686+b*0.168);data[i+2]=Math.min(255,r*0.272+g*0.534+b*0.131)}}
-        function invert(data){for(let i=0;i<data.length;i+=4){data[i]=255-data[i];data[i+1]=255-data[i+1];data[i+2]=255-data[i+2]}}
-        function brightness(data,value){for(let i=0;i<data.length;i+=4){data[i]=Math.min(255,Math.max(0,data[i]+value));data[i+1]=Math.min(255,Math.max(0,data[i+1]+value));data[i+2]=Math.min(255,Math.max(0,data[i+2]+value))}}
-        function contrast(data,value){const factor=(259*(value+255))/(255*(259-value));for(let i=0;i<data.length;i+=4){data[i]=Math.min(255,Math.max(0,factor*(data[i]-128)+128));data[i+1]=Math.min(255,Math.max(0,factor*(data[i+1]-128)+128));data[i+2]=Math.min(255,Math.max(0,factor*(data[i+2]-128)+128))}}
-        function gameboy(data){const palette=[[15,56,15],[48,98,48],[139,172,15],[155,188,15]];for(let i=0;i<data.length;i+=4){const gray=(data[i]+data[i+1]+data[i+2])/3;const color=palette[Math.min(Math.floor(gray/64),3)];data[i]=color[0];data[i+1]=color[1];data[i+2]=color[2]}}
-        function gameboyGreen(data){grayscale(data);for(let i=0;i<data.length;i+=4){const gray=data[i];data[i]=gray*0.3;data[i+1]=gray*0.8;data[i+2]=gray*0.3}}
-        function nes(data){const palette=[[0,0,0],[252,252,252],[188,188,188],[0,88,248],[0,168,0],[216,0,204],[228,92,16],[248,56,0]];applyPalette(data,palette)}
-        function cga(data){const palette=[[0,0,0],[0,170,170],[170,0,170],[170,170,170],[255,85,255],[85,255,255],[255,255,85],[255,255,255]];applyPalette(data,palette)}
-        function atari(data){const palette=[[0,0,0],[68,68,0],[112,40,0],[132,24,0],[136,0,0],[120,0,92],[72,0,120],[20,0,132]];applyPalette(data,palette)}
-        function applyPalette(data,palette){for(let i=0;i<data.length;i+=4){let closest=0,minDist=Infinity;for(let j=0;j<palette.length;j++){const dist=Math.sqrt(Math.pow(data[i]-palette[j][0],2)+Math.pow(data[i+1]-palette[j][1],2)+Math.pow(data[i+2]-palette[j][2],2));if(dist<minDist){minDist=dist;closest=j}}data[i]=palette[closest][0];data[i+1]=palette[closest][1];data[i+2]=palette[closest][2]}}
-        function pixelateData(imageData,targetCanvas){const size=10;const w=targetCanvas.width,h=targetCanvas.height;const tempCtx=targetCanvas.getContext('2d');tempCtx.imageSmoothingEnabled=false;const tempCanvas=document.createElement('canvas');tempCanvas.width=w/size;tempCanvas.height=h/size;const tempContext=tempCanvas.getContext('2d');tempContext.drawImage(targetCanvas,0,0,w,h,0,0,w/size,h/size);tempCtx.drawImage(tempCanvas,0,0,w/size,h/size,0,0,w,h)}
-        function vaporwave(data){for(let i=0;i<data.length;i+=4){data[i]=Math.min(255,data[i]*1.2+50);data[i+1]=Math.min(255,data[i+1]*0.8);data[i+2]=Math.min(255,data[i+2]*1.3+60)}}
-        function vaporwavemax(data){hueShift(data,300);for(let i=0;i<data.length;i+=4){data[i]=Math.min(255,data[i]*1.5+80);data[i+1]=Math.min(255,data[i+1]*0.7);data[i+2]=Math.min(255,data[i+2]*1.8+100)}contrast(data,50)}
-        function vaporwavearc(data){for(let i=0;i<data.length;i+=4){const position=(i/data.length)*6.28;const wave=Math.sin(position)*0.5+0.5;data[i]=Math.min(255,data[i]*(0.3+wave*0.7)+80);data[i+1]=Math.min(255,data[i+1]*0.6+40);data[i+2]=Math.min(255,data[i+2]*(1.2+wave*0.8)+100)}contrast(data,40)}
-        function synthwave(data){for(let i=0;i<data.length;i+=4){data[i]=Math.min(255,data[i]*1.4);data[i+1]=Math.min(255,data[i+1]*0.5);data[i+2]=Math.min(255,data[i+2]*1.5)}}
-        function cyberpunk(data){for(let i=0;i<data.length;i+=4){const avg=(data[i]+data[i+1]+data[i+2])/3;if(avg>128){data[i]=Math.min(255,data[i]*1.3);data[i+1]=Math.min(255,data[i+1]*0.7);data[i+2]=Math.min(255,data[i+2]*1.5)}else{data[i]*=0.5;data[i+1]=Math.min(255,data[i+1]*1.3);data[i+2]=Math.min(255,data[i+2]*1.3)}}}
-        function miami(data){for(let i=0;i<data.length;i+=4){data[i]=Math.min(255,data[i]*1.3+20);data[i+1]=Math.min(255,data[i+1]*0.9+30);data[i+2]=Math.min(255,data[i+2]*1.4)}}
-        function neon(data){contrast(data,60);for(let i=0;i<data.length;i+=4){data[i]=Math.min(255,data[i]*1.5);data[i+1]=Math.min(255,data[i+1]*1.3);data[i+2]=Math.min(255,data[i+2]*1.6)}}
-        function outrun(data){for(let i=0;i<data.length;i+=4){data[i]=Math.min(255,data[i]*1.6+100);data[i+1]=Math.min(255,data[i+1]*0.4);data[i+2]=Math.min(255,data[i+2]*1.7+80)}contrast(data,50)}
-        function vintage(data){sepia(data);for(let i=0;i<data.length;i+=4){data[i]=Math.max(0,data[i]-20);data[i+1]=Math.max(0,data[i+1]-10);data[i+2]=Math.max(0,data[i+2]-30)}}
-        function polaroid(data){for(let i=0;i<data.length;i+=4){data[i]=Math.min(255,data[i]*1.1+20);data[i+1]=Math.min(255,data[i+1]*1.05+15);data[i+2]=Math.min(255,data[i+2]*0.95)}}
-        function pastel(data){for(let i=0;i<data.length;i+=4){data[i]=(data[i]+255)/2;data[i+1]=(data[i+1]+255)/2;data[i+2]=(data[i+2]+255)/2}}
-        function warm(data){for(let i=0;i<data.length;i+=4){data[i]=Math.min(255,data[i]+30);data[i+1]=Math.min(255,data[i+1]+10);data[i+2]=Math.max(0,data[i+2]-20)}}
-        function cold(data){for(let i=0;i<data.length;i+=4){data[i]=Math.max(0,data[i]-20);data[i+1]=Math.min(255,data[i+1]+10);data[i+2]=Math.min(255,data[i+2]+30)}}
-        function retro70s(data){const clamp=v=>v<0?0:v>255?255:v;for(let i=0;i<data.length;i+=4){let r=data[i],g=data[i+1],b=data[i+2];let l=(0.2126*r+0.7152*g+0.0722*b)/255;const roll=0.96-0.22*l*l;const fade=18*(1-l);r=r*roll+fade;g=g*roll+fade;b=b*roll+fade;const avg=(r+g+b)/3;const sat=0.88;r=avg+(r-avg)*sat;g=avg+(g-avg)*sat;b=avg+(b-avg)*sat;r+=10*l;g+=4*l;b-=2*l;r-=3*(1-l);g+=5*(1-l);b+=10*(1-l);data[i]=clamp(r);data[i+1]=clamp(g);data[i+2]=clamp(b)}}
-        function posterize(data,levels){const step=255/levels;for(let i=0;i<data.length;i+=4){data[i]=Math.floor(data[i]/step)*step;data[i+1]=Math.floor(data[i+1]/step)*step;data[i+2]=Math.floor(data[i+2]/step)*step}}
-        function solarize(data){for(let i=0;i<data.length;i+=4){data[i]=data[i]<128?data[i]:255-data[i];data[i+1]=data[i+1]<128?data[i+1]:255-data[i+1];data[i+2]=data[i+2]<128?data[i+2]:255-data[i+2]}}
-        function edgeData(imageData,targetCanvas){applyKernel(imageData,targetCanvas,[-1,-1,-1,-1,8,-1,-1,-1,-1],0)}
-        function embossData(imageData,targetCanvas){applyKernel(imageData,targetCanvas,[-2,-1,0,-1,1,1,0,1,2],128)}
-        function applyKernel(imageData,targetCanvas,kernel,offset){const data=imageData.data;const w=targetCanvas.width,h=targetCanvas.height;const output=new Uint8ClampedArray(data);for(let y=1;y<h-1;y++){for(let x=1;x<w-1;x++){let r=0,g=0,b=0;for(let ky=-1;ky<=1;ky++){for(let kx=-1;kx<=1;kx++){const idx=((y+ky)*w+(x+kx))*4;const k=kernel[(ky+1)*3+(kx+1)];r+=data[idx]*k;g+=data[idx+1]*k;b+=data[idx+2]*k}}const idx=(y*w+x)*4;output[idx]=Math.min(255,Math.max(0,r+offset));output[idx+1]=Math.min(255,Math.max(0,g+offset));output[idx+2]=Math.min(255,Math.max(0,b+offset))}}for(let i=0;i<data.length;i++)data[i]=output[i]}
-        function blurData(imageData,targetCanvas){const data=imageData.data;const w=targetCanvas.width,h=targetCanvas.height;const output=new Uint8ClampedArray(data);for(let y=1;y<h-1;y++){for(let x=1;x<w-1;x++){let r=0,g=0,b=0,count=0;for(let ky=-1;ky<=1;ky++){for(let kx=-1;kx<=1;kx++){const idx=((y+ky)*w+(x+kx))*4;r+=data[idx];g+=data[idx+1];b+=data[idx+2];count++}}const idx=(y*w+x)*4;output[idx]=r/count;output[idx+1]=g/count;output[idx+2]=b/count}}for(let i=0;i<data.length;i++)data[i]=output[i]}
-        function painting(data){posterize(data,6);for(let i=0;i<data.length;i+=4){data[i]=Math.min(255,data[i]*1.2);data[i+1]=Math.min(255,data[i+1]*1.2);data[i+2]=Math.min(255,data[i+2]*1.2)}}
-        function cinema(data){for(let i=0;i<data.length;i+=4){const avg=data[i]*0.3+data[i+1]*0.59+data[i+2]*0.11;data[i]=Math.min(255,avg*1.2-10);data[i+1]=Math.min(255,avg*1.1-20);data[i+2]=Math.min(255,avg*0.9)}}
-        function noir(data){grayscale(data);contrast(data,50);brightness(data,-20)}
-        function technicolor(data){for(let i=0;i<data.length;i+=4){data[i]=Math.min(255,data[i]*1.3);data[i+1]=Math.min(255,data[i+1]*1.1);data[i+2]=Math.min(255,data[i+2]*1.2)}contrast(data,30)}
-        function bleach(data){grayscale(data);for(let i=0;i<data.length;i+=4){const gray=data[i];data[i]=Math.min(255,gray*0.9+30);data[i+1]=Math.min(255,gray*0.95+20);data[i+2]=Math.min(255,gray*0.85+40)}contrast(data,50)}
-        function western(data){sepia(data);for(let i=0;i<data.length;i+=4){data[i]=Math.min(255,data[i]*1.3);data[i+1]=Math.min(255,data[i+1]*1.1);data[i+2]=Math.max(0,data[i+2]*0.7)}contrast(data,40);brightness(data,-15)}
-        function scifi(data){for(let i=0;i<data.length;i+=4){data[i]=Math.min(255,data[i]*0.8);data[i+1]=Math.min(255,data[i+1]*1.1+20);data[i+2]=Math.min(255,data[i+2]*1.4+40)}contrast(data,45)}
-        function redChannel(data){for(let i=0;i<data.length;i+=4){data[i+1]=0;data[i+2]=0}}
-        function greenChannel(data){for(let i=0;i<data.length;i+=4){data[i]=0;data[i+2]=0}}
-        function blueChannel(data){for(let i=0;i<data.length;i+=4){data[i]=0;data[i+1]=0}}
-        function rgbShiftData(imageData,targetCanvas){const data=imageData.data;const w=targetCanvas.width,h=targetCanvas.height;const shift=5;const output=new Uint8ClampedArray(data);for(let y=0;y<h;y++){for(let x=0;x<w;x++){const idx=(y*w+x)*4;const idxShift=(y*w+Math.min(w-1,x+shift))*4;output[idx]=data[idxShift];output[idx+1]=data[idx+1];output[idx+2]=data[Math.max(0,(y*w+x-shift)*4)+2]}}for(let i=0;i<data.length;i++)data[i]=output[i]}
-        function swapRB(data){for(let i=0;i<data.length;i+=4){[data[i],data[i+2]]=[data[i+2],data[i]]}}
-        function swapGB(data){for(let i=0;i<data.length;i+=4){[data[i+1],data[i+2]]=[data[i+2],data[i+1]]}}
-        function spring(data){for(let i=0;i<data.length;i+=4){data[i]=Math.min(255,data[i]*1.05+15);data[i+1]=Math.min(255,data[i+1]*1.2+30);data[i+2]=Math.min(255,data[i+2]*1.1+20)}}
-        function summer(data){for(let i=0;i<data.length;i+=4){data[i]=Math.min(255,data[i]*1.3+40);data[i+1]=Math.min(255,data[i+1]*1.2+20);data[i+2]=Math.max(0,data[i+2]*0.8)}}
-        function autumn(data){for(let i=0;i<data.length;i+=4){data[i]=Math.min(255,data[i]*1.4+50);data[i+1]=Math.min(255,data[i+1]*1.1);data[i+2]=Math.max(0,data[i+2]*0.6)}}
-        function winter(data){for(let i=0;i<data.length;i+=4){data[i]=Math.min(255,data[i]*0.9+40);data[i+1]=Math.min(255,data[i+1]*0.95+50);data[i+2]=Math.min(255,data[i+2]*1.3+60)}}
-        function rgbToHsl(r,g,b){r/=255;g/=255;b/=255;const max=Math.max(r,g,b),min=Math.min(r,g,b);let h,s,l=(max+min)/2;if(max===min){h=s=0}else{const d=max-min;s=l>0.5?d/(2-max-min):d/(max+min);switch(max){case r:h=((g-b)/d+(g<b?6:0))/6;break;case g:h=((b-r)/d+2)/6;break;case b:h=((r-g)/d+4)/6;break}h*=360}return[h,s,l]}
-        function hslToRgb(h,s,l){h/=360;let r,g,b;if(s===0){r=g=b=l}else{const hue2rgb=(p,q,t)=>{if(t<0)t+=1;if(t>1)t-=1;if(t<1/6)return p+(q-p)*6*t;if(t<1/2)return q;if(t<2/3)return p+(q-p)*(2/3-t)*6;return p};const q=l<0.5?l*(1+s):l+s-l*s;const p=2*l-q;r=hue2rgb(p,q,h+1/3);g=hue2rgb(p,q,h);b=hue2rgb(p,q,h-1/3)}return[Math.round(r*255),Math.round(g*255),Math.round(b*255)]}
-        function hueShift(data,degrees){for(let i=0;i<data.length;i+=4){const[h,s,l]=rgbToHsl(data[i],data[i+1],data[i+2]);const newH=(h+degrees)%360;const[r,g,b]=hslToRgb(newH,s,l);data[i]=r;data[i+1]=g;data[i+2]=b}}
-        function hueRotateGradient(data){for(let i=0;i<data.length;i+=4){const position=i/data.length;const degrees=position*360;const[h,s,l]=rgbToHsl(data[i],data[i+1],data[i+2]);const newH=(h+degrees)%360;const[r,g,b]=hslToRgb(newH,s,l);data[i]=r;data[i+1]=g;data[i+2]=b}}
-        function silhouette(data){for(let i=0;i<data.length;i+=4){if(data[i+3]>0){data[i]=0;data[i+1]=0;data[i+2]=0}}}
-        function binarize(data){for(let i=0;i<data.length;i+=4){const avg=(data[i]+data[i+1]+data[i+2])/3;const val=avg>127?255:0;data[i]=data[i+1]=data[i+2]=val}}
-        function transparentbg(data){for(let i=0;i<data.length;i+=4){const brightness=(data[i]+data[i+1]+data[i+2])/3;if(brightness>200){data[i+3]=0}}}
-        function cartoon(data){posterize(data,5);contrast(data,50);for(let i=0;i<data.length;i+=4){data[i]=Math.min(255,data[i]*1.3);data[i+1]=Math.min(255,data[i+1]*1.3);data[i+2]=Math.min(255,data[i+2]*1.3)}}
-        function watercolor(data){for(let i=0;i<data.length;i+=4){data[i]=(data[i]+200)/2;data[i+1]=(data[i+1]+200)/2;data[i+2]=(data[i+2]+200)/2}posterize(data,8)}
-        function pencil(data){grayscale(data);invert(data);for(let i=0;i<data.length;i+=4){data[i]=Math.min(255,data[i]*0.8+40);data[i+1]=Math.min(255,data[i+1]*0.8+40);data[i+2]=Math.min(255,data[i+2]*0.8+40)}}
-        function galaxy(data){for(let i=0;i<data.length;i+=4){const wave=Math.sin(i*0.003)*100;data[i]=Math.min(255,data[i]*0.5+wave+100);data[i+1]=Math.min(255,data[i+1]*0.3+wave*0.5);data[i+2]=Math.min(255,data[i+2]*1.5+wave+150)}}
-        function nebula(data){for(let i=0;i<data.length;i+=4){const wave1=Math.sin(i*0.002)*80;const wave2=Math.cos(i*0.003)*60;data[i]=Math.min(255,data[i]*1.2+wave1+100);data[i+1]=Math.min(255,data[i+1]*0.6+wave2);data[i+2]=Math.min(255,data[i+2]*1.4+wave1+120)}}
-        function supernova(data){for(let i=0;i<data.length;i+=4){const intensity=(data[i]+data[i+1]+data[i+2])/3;const boost=Math.pow(intensity/255,0.4)*300;data[i]=Math.min(255,boost);data[i+1]=Math.min(255,boost*0.8);data[i+2]=Math.min(255,boost*0.6)}}
-        function blackhole(data){grayscale(data);invert(data);for(let i=0;i<data.length;i+=4){const intensity=data[i];data[i]=Math.max(0,intensity*0.3);data[i+1]=Math.max(0,intensity*0.2);data[i+2]=Math.max(0,intensity*0.5)}contrast(data,80)}
-        function aurora(data){for(let i=0;i<data.length;i+=4){const wave=Math.sin(i*0.001)*100;data[i]=Math.min(255,data[i]*0.4+wave*0.3);data[i+1]=Math.min(255,data[i+1]*1.3+wave+80);data[i+2]=Math.min(255,data[i+2]*1.2+wave*0.8+60)}}
-        function cosmic(data){hueRotateGradient(data);for(let i=0;i<data.length;i+=4){data[i]=Math.min(255,data[i]*1.5);data[i+1]=Math.min(255,data[i+1]*1.5);data[i+2]=Math.min(255,data[i+2]*1.8)}contrast(data,60)}
-        function radioactive(data){for(let i=0;i<data.length;i+=4){const intensity=(data[i]+data[i+1]+data[i+2])/3;data[i]=Math.min(255,intensity*0.3);data[i+1]=Math.min(255,intensity*2);data[i+2]=Math.min(255,intensity*0.3)}contrast(data,70)}
-        function acid(data){for(let i=0;i<data.length;i+=4){data[i]=(data[i]+data[i+2])%256;data[i+1]=(data[i+1]+data[i])%256;data[i+2]=(data[i+2]+data[i+1])%256}contrast(data,80)}
-        function toxic(data){for(let i=0;i<data.length;i+=4){data[i]=Math.min(255,data[i]*0.5+50);data[i+1]=Math.min(255,data[i+1]*1.8+100);data[i+2]=Math.min(255,data[i+2]*0.3)}}
-        function uranium(data){for(let i=0;i<data.length;i+=4){const wave=Math.sin(i*0.005)*50;data[i]=Math.min(255,data[i]*0.4+wave);data[i+1]=Math.min(255,data[i+1]*2+80);data[i+2]=Math.min(255,data[i+2]*0.2)}}
-        function biohazard(data){for(let i=0;i<data.length;i+=4){data[i]=Math.min(255,data[i]*1.1+60);data[i+1]=Math.min(255,data[i+1]*1.5+80);data[i+2]=Math.min(255,data[i+2]*0.3)}contrast(data,50)}
-        function plasma(data){for(let i=0;i<data.length;i+=4){const wave1=Math.sin(i*0.004)*128;const wave2=Math.cos(i*0.003)*128;data[i]=Math.min(255,Math.abs(wave1+wave2)+100);data[i+1]=Math.min(255,Math.abs(wave1*0.5)+50);data[i+2]=Math.min(255,Math.abs(wave2)+150)}}
-        function zombie(data){for(let i=0;i<data.length;i+=4){data[i]=Math.min(255,data[i]*0.8+40);data[i+1]=Math.min(255,data[i+1]*1.1+30);data[i+2]=Math.max(0,data[i+2]*0.5-20)}contrast(data,30);brightness(data,-10)}
-        function corrupted(data){for(let i=0;i<data.length;i+=20){if(Math.random()>0.7){const corruption=Math.floor(Math.random()*150);for(let j=0;j<corruption&&i+j<data.length;j+=4){data[i+j]=Math.random()*255;data[i+j+1]=Math.random()*255;data[i+j+2]=Math.random()*255}}}}
-        function blood(data){for(let i=0;i<data.length;i+=4){data[i]=Math.min(255,data[i]*1.6+80);data[i+1]=Math.max(0,data[i+1]*0.3-30);data[i+2]=Math.max(0,data[i+2]*0.3-30)}contrast(data,50)}
-        function demon(data){for(let i=0;i<data.length;i+=4){data[i]=Math.min(255,data[i]*1.8+100);data[i+1]=Math.max(0,data[i+1]*0.2);data[i+2]=Math.max(0,data[i+2]*0.2)}invert(data);contrast(data,70)}
-        function nightmare(data){for(let i=0;i<data.length;i+=4){const wave=Math.sin(i*0.01)*100;data[i]=Math.min(255,data[i]*0.5+wave);data[i+1]=Math.max(0,data[i+1]*0.3-50);data[i+2]=Math.min(255,data[i+2]*0.8+wave*0.5)}contrast(data,60)}
-        function haunted(data){grayscale(data);for(let i=0;i<data.length;i+=4){const gray=data[i];data[i]=Math.min(255,gray*0.7+30);data[i+1]=Math.min(255,gray*0.8+50);data[i+2]=Math.min(255,gray*0.9+70)}contrast(data,40);brightness(data,-30)}
-        function psychedelic(data){for(let i=0;i<data.length;i+=4){const offset=Math.sin(i*0.01)*128;data[i]=Math.min(255,Math.max(0,(data[i]+offset)%256));data[i+1]=Math.min(255,Math.max(0,(data[i+1]+offset+85)%256));data[i+2]=Math.min(255,Math.max(0,(data[i+2]+offset+170)%256))}}
-        function infrared(data){for(let i=0;i<data.length;i+=4){const temp=data[i+1];data[i]=Math.min(255,temp*1.5);data[i+1]=Math.max(0,data[i]*0.3);data[i+2]=Math.max(0,data[i+2]*0.3)}}
-        function xray(data){invert(data);grayscale(data);contrast(data,60);brightness(data,40)}
-        function rio(data,targetCanvas){const w=targetCanvas.width,h=targetCanvas.height,cl=v=>v<0?0:v>1?1:v,ss=(a,b,x)=>{x=cl((x-a)/(b-a));return x*x*(3-2*x)};for(let i=0;i<data.length;i+=4){const p=i>>2,x=(p%w)/w,y=((p/w)|0)/h;const pos=cl(y*0.92+x*0.08);const m=ss(0.00,0.78,pos);let r=125+(200-125)*m,g=40+(70-40)*m,b=215+(165-215)*m;const o=ss(0.965,1.00,pos);r=r+(225-r)*o;g=g+(135-g)*o;b=b+(95-b)*o;const s=0.42;data[i]=Math.min(255,data[i]*(1-s)+(data[i]*r/255)*s);data[i+1]=Math.min(255,data[i+1]*(1-s)+(data[i+1]*g/255)*s);data[i+2]=Math.min(255,data[i+2]*(1-s)+(data[i+2]*b/255)*s)}contrast(data,18)}
-        function nuitamericaine(data,targetCanvas){const w=targetCanvas.width,h=targetCanvas.height,cl=v=>v<0?0:v>255?255:v;for(let i=0;i<data.length;i+=4){const p=i>>2,x=p%w,y=(p/w)|0;let r=data[i],g=data[i+1],b=data[i+2];const l=(0.2126*r+0.7152*g+0.0722*b)/255;const exp=0.42+0.38*(1-l);r*=exp;g*=exp;b*=exp;const avg=(r+g+b)/3;const sat=0.45;r=avg+(r-avg)*sat;g=avg+(g-avg)*sat;b=avg+(b-avg)*sat;const t=1-l;b=b+70*t;g=g+12*t;r=r-18*t;const k=avg/255;const damp=k<0.22?(k/0.22):1;r=avg+(r-avg)*damp;g=avg+(g-avg)*damp;b=avg+(b-avg)*damp;const dx=(x/w-0.5),dy=(y/h-0.5),d=Math.min(1,Math.sqrt(dx*dx+dy*dy)*1.7),vig=1-0.33*d*d;r*=vig;g*=vig;b*=vig;data[i]=cl(r);data[i+1]=cl(g);data[i+2]=cl(b)}contrast(data,22)}
-        function thermal(data){for(let i=0;i<data.length;i+=4){const intensity=(data[i]+data[i+1]+data[i+2])/3;if(intensity<64){data[i]=0;data[i+1]=0;data[i+2]=intensity*4}else if(intensity<128){data[i]=0;data[i+1]=(intensity-64)*4;data[i+2]=255}else if(intensity<192){data[i]=(intensity-128)*4;data[i+1]=255;data[i+2]=255-(intensity-128)*4}else{data[i]=255;data[i+1]=255-(intensity-192)*4;data[i+2]=0}}}
-        function matrix(data){for(let i=0;i<data.length;i+=4){const green=(data[i]+data[i+1]+data[i+2])/3;data[i]=0;data[i+1]=Math.min(255,green*1.5);data[i+2]=0}contrast(data,50);brightness(data,-30)}
-        function deepfry(data){for(let i=0;i<data.length;i+=4){data[i]=Math.min(255,data[i]*1.8);data[i+1]=Math.min(255,data[i+1]*1.5);data[i+2]=Math.min(255,data[i+2]*0.7)}contrast(data,80);posterize(data,3)}
-        function glitchmax(data){for(let i=0;i<data.length;i+=16){if(Math.random()>0.7){const shift=Math.floor(Math.random()*100)*4;const targetIdx=Math.min(data.length-4,i+shift);[data[i],data[targetIdx]]=[data[targetIdx],data[i]];[data[i+1],data[targetIdx+1]]=[data[targetIdx+1],data[i+1]];[data[i+2],data[targetIdx+2]]=[data[targetIdx+2],data[i+2]]}}}
-        function holographic(data){for(let i=0;i<data.length;i+=4){const wave=Math.sin(i*0.005)*50;data[i]=Math.min(255,Math.max(0,data[i]+wave));data[i+1]=Math.min(255,Math.max(0,data[i+1]+wave*1.5));data[i+2]=Math.min(255,Math.max(0,data[i+2]+wave*2))}}
-        function jpegify(data){posterize(data,5);for(let i=0;i<data.length;i+=4){if(Math.random()>0.95){data[i]=Math.min(255,data[i]+(Math.random()-0.5)*50);data[i+1]=Math.min(255,data[i+1]+(Math.random()-0.5)*50);data[i+2]=Math.min(255,data[i+2]+(Math.random()-0.5)*50)}}}
-        function chromaticAberration(imageData,targetCanvas){const data=imageData.data;const offset=8;const w=targetCanvas.width;const output=new Uint8ClampedArray(data);for(let i=0;i<data.length;i+=4){const leftR=Math.max(0,i-offset*4);const rightB=Math.min(data.length-4,i+offset*4);output[i]=data[leftR];output[i+1]=data[i+1];output[i+2]=data[rightB+2]}for(let i=0;i<data.length;i++)data[i]=output[i]}
-        function datamosh(data){for(let i=0;i<data.length;i+=40){if(Math.random()>0.5){const blockSize=Math.floor(Math.random()*200);for(let j=0;j<blockSize&&i+j<data.length;j+=4){data[i+j]=data[Math.max(0,i-4)];data[i+j+1]=data[Math.max(0,i-3)];data[i+j+2]=data[Math.max(0,i-2)]}}}}
-        function vhsglitch(data){for(let i=0;i<data.length;i+=4){if(Math.random()>0.98){const glitchLength=Math.floor(Math.random()*500);for(let j=0;j<glitchLength&&i+j<data.length;j+=4){data[i+j]=data[i];data[i+j+1]=data[i+1];data[i+j+2]=data[i+2]}}}}
-        function scanlines(data,targetCanvas){const w=targetCanvas.width;for(let i=0;i<data.length;i+=4){const pixel=i/4;const y=Math.floor(pixel/w);if(y%3===0){data[i]*=0.5;data[i+1]*=0.5;data[i+2]*=0.5}}}
-        function colorbleed(data){const output=new Uint8ClampedArray(data);for(let i=4;i<data.length-4;i+=4){output[i]=(data[i-4]+data[i]+data[i+4])/3;output[i+1]=(data[i-3]+data[i+1]+data[i+5])/3;output[i+2]=(data[i-2]+data[i+2]+data[i+6])/3}for(let i=0;i<data.length;i++)data[i]=output[i]}
-        function nuke(data){for(let i=0;i<data.length;i+=4){const intensity=(data[i]+data[i+1]+data[i+2])/3;const boost=Math.pow(intensity/255,0.3)*255;data[i]=Math.min(255,boost*1.5);data[i+1]=Math.min(255,boost*1.3);data[i+2]=Math.min(255,boost*0.8)}contrast(data,100);brightness(data,80)}
-        function drunk(data){for(let i=0;i<data.length;i+=4){const wave=Math.sin(i*0.002)*50+Math.cos(i*0.003)*30;data[i]=Math.min(255,Math.max(0,data[i]+wave));data[i+1]=Math.min(255,Math.max(0,data[i+1]+wave*0.8));data[i+2]=Math.min(255,Math.max(0,data[i+2]+wave*1.2))}}
-        function rave(data){for(let i=0;i<data.length;i+=4){const multi=Math.sin(i*0.001)*2+Math.cos(i*0.002)*2;data[i]=Math.min(255,Math.abs(data[i]*multi));data[i+1]=Math.min(255,Math.abs(data[i+1]*multi*1.3));data[i+2]=Math.min(255,Math.abs(data[i+2]*multi*1.5))}contrast(data,90)}
-        function dimensionx(data){for(let i=0;i<data.length;i+=4){const twist=Math.sin(i*0.0008)*200;data[i]=Math.min(255,Math.abs((data[i]+twist)%256));data[i+1]=Math.min(255,Math.abs((data[i+1]-twist*0.7)%256));data[i+2]=Math.min(255,Math.abs((data[i+2]+twist*1.3)%256))}}
-
-        createFilterPreviews();
+        
+        // Animation KNOCK (1 seconde)
+        function playKnock() {
+            if (!spriteImage) {
+                showStatus('❌ Charge d\'abord une spritesheet !', 'error');
+                return;
+            }
+            
+            stopAnimation();
+            currentAnimation = 'KNOCK';
+            
+            drawFrame(FRAMES.KNOCK[0]);
+            
+            setTimeout(() => {
+                if (currentAnimation === 'KNOCK') {
+                    playIdle();
+                }
+            }, 1000);
+        }
+        
+        // Animation SLEEP (1 seconde)
+        function playSleep() {
+            if (!spriteImage) {
+                showStatus('❌ Charge d\'abord une spritesheet !', 'error');
+                return;
+            }
+            
+            stopAnimation();
+            currentAnimation = 'SLEEP';
+            
+            drawFrame(FRAMES.SLEEP[0]);
+            
+            setTimeout(() => {
+                if (currentAnimation === 'SLEEP') {
+                    playIdle();
+                }
+            }, 1000);
+        }
+        
+        // Export GIF - IDLE
+        function exportIdleGif() {
+            if (!spriteImage) {
+                showStatus('❌ Charge d\'abord une spritesheet !', 'error');
+                return;
+            }
+            
+            showStatus('⏳ Création du GIF IDLE...', 'success');
+            
+            const delay = parseFloat(idleSpeedInput.value) * 1000;
+            const gif = new GIF({
+                workers: 2,
+                quality: 10,
+                width: FRAME_SIZE,
+                height: FRAME_SIZE,
+                workerScript: 'https://cdn.jsdelivr.net/npm/gif.js@0.2.0/dist/gif.worker.js'
+            });
+            
+            FRAMES.IDLE.forEach(frameIdx => {
+                const tempCanvas = document.createElement('canvas');
+                tempCanvas.width = FRAME_SIZE;
+                tempCanvas.height = FRAME_SIZE;
+                const tempCtx = tempCanvas.getContext('2d');
+                tempCtx.imageSmoothingEnabled = false;
+                
+                const col = frameIdx % GRID_SIZE;
+                const row = Math.floor(frameIdx / GRID_SIZE);
+                
+                tempCtx.drawImage(
+                    spriteImage,
+                    col * FRAME_SIZE, row * FRAME_SIZE,
+                    FRAME_SIZE, FRAME_SIZE,
+                    0, 0,
+                    FRAME_SIZE, FRAME_SIZE
+                );
+                
+                gif.addFrame(tempCanvas, { delay: delay });
+            });
+            
+            gif.on('finished', (blob) => {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'pokemon_idle.gif';
+                a.click();
+                showStatus('✅ GIF IDLE exporté !', 'success');
+            });
+            
+            gif.render();
+        }
+        
+        // Export GIF - ATTACK
+        function exportAttackGif() {
+            if (!spriteImage) {
+                showStatus('❌ Charge d\'abord une spritesheet !', 'error');
+                return;
+            }
+            
+            showStatus('⏳ Création du GIF ATTACK...', 'success');
+            
+            const gif = new GIF({
+                workers: 2,
+                quality: 10,
+                width: FRAME_SIZE,
+                height: FRAME_SIZE,
+                workerScript: 'https://cdn.jsdelivr.net/npm/gif.js@0.2.0/dist/gif.worker.js'
+            });
+            
+            const delays = [300, 300, 1300]; // Timing d'attaque
+            
+            FRAMES.ATTACK.forEach((frameIdx, i) => {
+                const tempCanvas = document.createElement('canvas');
+                tempCanvas.width = FRAME_SIZE;
+                tempCanvas.height = FRAME_SIZE;
+                const tempCtx = tempCanvas.getContext('2d');
+                tempCtx.imageSmoothingEnabled = false;
+                
+                const col = frameIdx % GRID_SIZE;
+                const row = Math.floor(frameIdx / GRID_SIZE);
+                
+                tempCtx.drawImage(
+                    spriteImage,
+                    col * FRAME_SIZE, row * FRAME_SIZE,
+                    FRAME_SIZE, FRAME_SIZE,
+                    0, 0,
+                    FRAME_SIZE, FRAME_SIZE
+                );
+                
+                gif.addFrame(tempCanvas, { delay: delays[i] });
+            });
+            
+            gif.on('finished', (blob) => {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'pokemon_attack.gif';
+                a.click();
+                showStatus('✅ GIF ATTACK exporté !', 'success');
+            });
+            
+            gif.render();
+        }
+        
+        // Afficher un message de statut
+        function showStatus(message, type) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = `status ${type} show`;
+            
+            setTimeout(() => {
+                status.classList.remove('show');
+            }, 3000);
+        }
     </script>
 </body>
 </html>
-
