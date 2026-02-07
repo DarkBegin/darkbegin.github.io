@@ -10,7 +10,7 @@
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -20,7 +20,7 @@
             align-items: center;
             padding: 20px;
         }
-        
+
         .container {
             background: white;
             border-radius: 20px;
@@ -29,14 +29,14 @@
             max-width: 800px;
             width: 100%;
         }
-        
+
         h1 {
             text-align: center;
             color: #333;
             margin-bottom: 30px;
             font-size: 28px;
         }
-        
+
         .upload-section {
             margin-bottom: 30px;
             padding: 20px;
@@ -45,11 +45,11 @@
             text-align: center;
             background: #f8f9ff;
         }
-        
+
         .upload-section input {
             display: none;
         }
-        
+
         .upload-label {
             display: inline-block;
             padding: 12px 30px;
@@ -60,12 +60,12 @@
             transition: all 0.3s;
             font-weight: 600;
         }
-        
+
         .upload-label:hover {
             background: #764ba2;
             transform: translateY(-2px);
         }
-        
+
         .canvas-container {
             display: flex;
             justify-content: center;
@@ -74,7 +74,7 @@
             background: #f0f0f0;
             border-radius: 10px;
         }
-        
+
         #spriteCanvas {
             border: 3px solid #333;
             image-rendering: pixelated;
@@ -82,14 +82,14 @@
             image-rendering: crisp-edges;
             background: white;
         }
-        
+
         .controls {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
             gap: 15px;
             margin-bottom: 20px;
         }
-        
+
         .btn {
             padding: 12px 20px;
             border: none;
@@ -100,55 +100,55 @@
             transition: all 0.3s;
             color: white;
         }
-        
-        .btn-idle {
-            background: #4CAF50;
+
+        .btn-pause {
+            background: #9E9E9E;
         }
-        
+
         .btn-attack {
             background: #FF5722;
         }
-        
+
         .btn-knock {
             background: #FFC107;
         }
-        
+
         .btn-sleep {
             background: #2196F3;
         }
-        
+
         .btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(0,0,0,0.3);
         }
-        
+
         .btn:active {
             transform: translateY(0);
         }
-        
+
         .settings {
             background: #f8f9ff;
             padding: 20px;
             border-radius: 10px;
             margin-bottom: 20px;
         }
-        
+
         .setting-row {
             display: flex;
             align-items: center;
             justify-content: space-between;
             margin-bottom: 15px;
         }
-        
+
         .setting-row:last-child {
             margin-bottom: 0;
         }
-        
+
         .setting-row label {
             font-weight: 600;
             color: #333;
         }
-        
+
         .setting-row input[type="number"] {
             padding: 8px 12px;
             border: 2px solid #ddd;
@@ -156,17 +156,17 @@
             width: 100px;
             font-size: 14px;
         }
-        
+
         .export-section {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 15px;
         }
-        
+
         .btn-export {
             background: #9C27B0;
         }
-        
+
         .status {
             text-align: center;
             margin-top: 15px;
@@ -175,21 +175,21 @@
             font-weight: 600;
             display: none;
         }
-        
+
         .status.show {
             display: block;
         }
-        
+
         .status.success {
             background: #4CAF50;
             color: white;
         }
-        
+
         .status.error {
             background: #f44336;
             color: white;
         }
-        
+
         .frame-info {
             text-align: center;
             margin-top: 10px;
@@ -202,41 +202,41 @@
 <body>
     <div class="container">
         <h1>🎮 Spritesheet Viewer - Pokémon</h1>
-        
+
         <div class="upload-section">
             <input type="file" id="fileInput" accept="image/*">
             <label for="fileInput" class="upload-label">📁 Charger une Spritesheet</label>
             <p style="margin-top: 10px; color: #666;">Format: 600x600px, grille 3x3</p>
         </div>
-        
+
         <div class="canvas-container">
             <canvas id="spriteCanvas" width="200" height="200"></canvas>
         </div>
-        
+
         <div class="frame-info" id="frameInfo">Frame: 1 (IDLE)</div>
-        
+
         <div class="settings">
             <div class="setting-row">
                 <label>⏱️ Délai Idle (secondes):</label>
                 <input type="number" id="idleSpeed" value="0.25" min="0.05" max="2" step="0.05">
             </div>
         </div>
-        
+
         <div class="controls">
-            <button class="btn btn-idle" onclick="playIdle()">▶️ IDLE (Loop)</button>
+            <button class="btn btn-pause" onclick="pauseAnimation()">⏸️ PAUSE</button>
             <button class="btn btn-attack" onclick="playAttack()">⚔️ ATTACK (Once)</button>
             <button class="btn btn-knock" onclick="playKnock()">💥 KNOCK (1s)</button>
             <button class="btn btn-sleep" onclick="playSleep()">😴 SLEEP (1s)</button>
         </div>
-        
+
         <div class="export-section">
             <button class="btn btn-export" onclick="exportIdleGif()">💾 Export IDLE (GIF)</button>
             <button class="btn btn-export" onclick="exportAttackGif()">💾 Export ATTACK (GIF)</button>
         </div>
-        
+
         <div class="status" id="status"></div>
     </div>
-    
+
     <script src="https://cdn.jsdelivr.net/npm/gif.js@0.2.0/dist/gif.js"></script>
     <script>
         const canvas = document.getElementById('spriteCanvas');
@@ -244,14 +244,15 @@
         const fileInput = document.getElementById('fileInput');
         const frameInfo = document.getElementById('frameInfo');
         const idleSpeedInput = document.getElementById('idleSpeed');
-        
+
         let spriteImage = null;
         let currentAnimation = null;
-        let animationFrame = null;
-        
+        let animationTimeoutId = null;
+        let isPaused = false;
+
         const FRAME_SIZE = 200;
         const GRID_SIZE = 3;
-        
+
         // Frames mapping
         const FRAMES = {
             IDLE: [0, 1, 2, 3],      // Frames 1-4
@@ -259,18 +260,18 @@
             KNOCK: [7],               // Frame 8
             SLEEP: [8]                // Frame 9
         };
-        
+
         const FRAME_NAMES = [
             'IDLE 1', 'IDLE 2', 'IDLE 3', 'IDLE 4',
             'ATTACK 1', 'ATTACK 2', 'ATTACK 3',
             'KNOCK', 'SLEEP'
         ];
-        
+
         // Charger l'image
         fileInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (!file) return;
-            
+
             const reader = new FileReader();
             reader.onload = (event) => {
                 spriteImage = new Image();
@@ -282,17 +283,25 @@
             };
             reader.readAsDataURL(file);
         });
-        
+
+        // Écouter les changements de vitesse idle en temps réel
+        idleSpeedInput.addEventListener('input', () => {
+            if (currentAnimation === 'IDLE' && !isPaused) {
+                // Relancer l'idle avec la nouvelle vitesse
+                playIdle();
+            }
+        });
+
         // Dessiner une frame spécifique
         function drawFrame(frameIndex) {
             if (!spriteImage) return;
-            
+
             const col = frameIndex % GRID_SIZE;
             const row = Math.floor(frameIndex / GRID_SIZE);
-            
+
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.imageSmoothingEnabled = false;
-            
+
             ctx.drawImage(
                 spriteImage,
                 col * FRAME_SIZE, row * FRAME_SIZE,
@@ -300,125 +309,142 @@
                 0, 0,
                 FRAME_SIZE, FRAME_SIZE
             );
-            
+
             frameInfo.textContent = `Frame: ${frameIndex + 1} (${FRAME_NAMES[frameIndex]})`;
         }
-        
+
         // Arrêter l'animation en cours
         function stopAnimation() {
-            if (animationFrame) {
-                cancelAnimationFrame(animationFrame);
-                animationFrame = null;
+            if (animationTimeoutId) {
+                clearTimeout(animationTimeoutId);
+                animationTimeoutId = null;
             }
-            currentAnimation = null;
         }
-        
+
+        // Mettre en pause
+        function pauseAnimation() {
+            if (!spriteImage) {
+                showStatus('❌ Charge d\'abord une spritesheet !', 'error');
+                return;
+            }
+
+            isPaused = true;
+            stopAnimation();
+            currentAnimation = null;
+            showStatus('⏸️ Animation en pause', 'success');
+        }
+
         // Animation IDLE (boucle)
         function playIdle() {
             if (!spriteImage) {
                 showStatus('❌ Charge d\'abord une spritesheet !', 'error');
                 return;
             }
-            
+
             stopAnimation();
             currentAnimation = 'IDLE';
-            
+            isPaused = false;
+
             let frameIdx = 0;
-            const delay = parseFloat(idleSpeedInput.value) * 1000;
-            
+
             function animate() {
+                if (currentAnimation !== 'IDLE' || isPaused) return;
+
                 drawFrame(FRAMES.IDLE[frameIdx]);
                 frameIdx = (frameIdx + 1) % FRAMES.IDLE.length;
-                
-                setTimeout(() => {
-                    if (currentAnimation === 'IDLE') {
-                        animationFrame = requestAnimationFrame(animate);
-                    }
-                }, delay);
+
+                const delay = parseFloat(idleSpeedInput.value) * 1000;
+                animationTimeoutId = setTimeout(animate, delay);
             }
-            
+
             animate();
         }
-        
+
         // Animation ATTACK (une fois)
         function playAttack() {
             if (!spriteImage) {
                 showStatus('❌ Charge d\'abord une spritesheet !', 'error');
                 return;
             }
-            
+
             stopAnimation();
             currentAnimation = 'ATTACK';
-            
-            const attackTiming = [0, 300, 300]; // 0ms, puis 300ms, puis 300ms
+            isPaused = false;
+
+            const attackFrames = FRAMES.ATTACK;
             let frameIdx = 0;
-            
-            function animate() {
-                if (frameIdx < FRAMES.ATTACK.length) {
-                    drawFrame(FRAMES.ATTACK[frameIdx]);
-                    
-                    setTimeout(() => {
-                        frameIdx++;
-                        if (frameIdx < FRAMES.ATTACK.length && currentAnimation === 'ATTACK') {
-                            animate();
-                        } else if (currentAnimation === 'ATTACK') {
+
+            function animateAttack() {
+                if (frameIdx < attackFrames.length) {
+                    drawFrame(attackFrames[frameIdx]);
+
+                    // Timings: frame 5 -> 300ms -> frame 6 -> 300ms -> frame 7 -> 1300ms -> idle
+                    const delays = frameIdx < 2 ? 300 : 1300;
+
+                    frameIdx++;
+                    animationTimeoutId = setTimeout(() => {
+                        if (frameIdx <= attackFrames.length) {
+                            animateAttack();
+                        } else {
                             // Retour à idle après l'attaque
-                            setTimeout(() => playIdle(), 1300);
+                            playIdle();
                         }
-                    }, attackTiming[frameIdx]);
+                    }, delays);
                 }
             }
-            
-            animate();
+
+            animateAttack();
         }
-        
+
         // Animation KNOCK (1 seconde)
         function playKnock() {
             if (!spriteImage) {
                 showStatus('❌ Charge d\'abord une spritesheet !', 'error');
                 return;
             }
-            
+
             stopAnimation();
             currentAnimation = 'KNOCK';
-            
+            isPaused = false;
+
             drawFrame(FRAMES.KNOCK[0]);
-            
-            setTimeout(() => {
+
+            animationTimeoutId = setTimeout(() => {
                 if (currentAnimation === 'KNOCK') {
                     playIdle();
                 }
             }, 1000);
         }
-        
+
         // Animation SLEEP (1 seconde)
         function playSleep() {
             if (!spriteImage) {
                 showStatus('❌ Charge d\'abord une spritesheet !', 'error');
                 return;
             }
-            
+
             stopAnimation();
             currentAnimation = 'SLEEP';
-            
+            isPaused = false;
+
             drawFrame(FRAMES.SLEEP[0]);
-            
-            setTimeout(() => {
+
+            animationTimeoutId = setTimeout(() => {
                 if (currentAnimation === 'SLEEP') {
                     playIdle();
                 }
             }, 1000);
         }
-        
+
         // Export GIF - IDLE
         function exportIdleGif() {
             if (!spriteImage) {
                 showStatus('❌ Charge d\'abord une spritesheet !', 'error');
                 return;
             }
-            
+
             showStatus('⏳ Création du GIF IDLE...', 'success');
-            
+
             const delay = parseFloat(idleSpeedInput.value) * 1000;
             const gif = new GIF({
                 workers: 2,
@@ -427,17 +453,17 @@
                 height: FRAME_SIZE,
                 workerScript: 'https://cdn.jsdelivr.net/npm/gif.js@0.2.0/dist/gif.worker.js'
             });
-            
+
             FRAMES.IDLE.forEach(frameIdx => {
                 const tempCanvas = document.createElement('canvas');
                 tempCanvas.width = FRAME_SIZE;
                 tempCanvas.height = FRAME_SIZE;
                 const tempCtx = tempCanvas.getContext('2d');
                 tempCtx.imageSmoothingEnabled = false;
-                
+
                 const col = frameIdx % GRID_SIZE;
                 const row = Math.floor(frameIdx / GRID_SIZE);
-                
+
                 tempCtx.drawImage(
                     spriteImage,
                     col * FRAME_SIZE, row * FRAME_SIZE,
@@ -445,10 +471,10 @@
                     0, 0,
                     FRAME_SIZE, FRAME_SIZE
                 );
-                
+
                 gif.addFrame(tempCanvas, { delay: delay });
             });
-            
+
             gif.on('finished', (blob) => {
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
@@ -457,19 +483,19 @@
                 a.click();
                 showStatus('✅ GIF IDLE exporté !', 'success');
             });
-            
+
             gif.render();
         }
-        
+
         // Export GIF - ATTACK
         function exportAttackGif() {
             if (!spriteImage) {
                 showStatus('❌ Charge d\'abord une spritesheet !', 'error');
                 return;
             }
-            
+
             showStatus('⏳ Création du GIF ATTACK...', 'success');
-            
+
             const gif = new GIF({
                 workers: 2,
                 quality: 10,
@@ -477,19 +503,19 @@
                 height: FRAME_SIZE,
                 workerScript: 'https://cdn.jsdelivr.net/npm/gif.js@0.2.0/dist/gif.worker.js'
             });
-            
+
             const delays = [300, 300, 1300]; // Timing d'attaque
-            
+
             FRAMES.ATTACK.forEach((frameIdx, i) => {
                 const tempCanvas = document.createElement('canvas');
                 tempCanvas.width = FRAME_SIZE;
                 tempCanvas.height = FRAME_SIZE;
                 const tempCtx = tempCanvas.getContext('2d');
                 tempCtx.imageSmoothingEnabled = false;
-                
+
                 const col = frameIdx % GRID_SIZE;
                 const row = Math.floor(frameIdx / GRID_SIZE);
-                
+
                 tempCtx.drawImage(
                     spriteImage,
                     col * FRAME_SIZE, row * FRAME_SIZE,
@@ -497,10 +523,10 @@
                     0, 0,
                     FRAME_SIZE, FRAME_SIZE
                 );
-                
+
                 gif.addFrame(tempCanvas, { delay: delays[i] });
             });
-            
+
             gif.on('finished', (blob) => {
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
@@ -509,16 +535,16 @@
                 a.click();
                 showStatus('✅ GIF ATTACK exporté !', 'success');
             });
-            
+
             gif.render();
         }
-        
+
         // Afficher un message de statut
         function showStatus(message, type) {
             const status = document.getElementById('status');
             status.textContent = message;
             status.className = `status ${type} show`;
-            
+
             setTimeout(() => {
                 status.classList.remove('show');
             }, 3000);
